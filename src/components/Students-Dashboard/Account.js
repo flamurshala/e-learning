@@ -21,7 +21,9 @@ function Account() {
   useEffect(() => {
     if (!studentId) return;
 
-    fetch(`http://localhost/backend/get_single_student.php?id=${studentId}`)
+    fetch(
+      `http://localhost/e-learning/backend/get_single_student.php?id=${studentId}`
+    )
       .then((res) => res.json())
       .then((data) => {
         if (data.success === false) {

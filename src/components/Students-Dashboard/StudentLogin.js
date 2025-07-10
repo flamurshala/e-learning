@@ -13,11 +13,14 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    const res = await fetch("http://localhost/backend/studentLogin.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    const res = await fetch(
+      "http://localhost/e-learning/backend/studentLogin.php",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      }
+    );
 
     const data = await res.json();
     console.log("Login response:", data);
@@ -39,11 +42,11 @@ export default function Login() {
             Login
           </h2>
           {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-          
+
           <form
             onSubmit={(e) => {
-              e.preventDefault(); 
-              handleLogin();    
+              e.preventDefault();
+              handleLogin();
             }}
           >
             <input

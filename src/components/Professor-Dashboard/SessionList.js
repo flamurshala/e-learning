@@ -12,7 +12,7 @@ function SessionList({ professorId }) {
   useEffect(() => {
     if (!professorId) return;
     fetch(
-      `http://localhost/backend/get_professor_courses.php?professor_id=${professorId}`
+      `http://localhost/e-learning/backend/get_professor_courses.php?professor_id=${professorId}`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -26,7 +26,9 @@ function SessionList({ professorId }) {
       setSessions([]);
       return;
     }
-    fetch(`http://localhost/backend/sessions.php?course_id=${selectedCourseId}`)
+    fetch(
+      `http://localhost/e-learning/backend/sessions.php?course_id=${selectedCourseId}`
+    )
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setSessions(data);

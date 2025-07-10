@@ -24,7 +24,7 @@ function ProfessorDashboard() {
     }
 
     fetch(
-      `http://localhost/backend/get_professor_courses.php?professor_id=${professorId}`
+      `http://localhost/e-learning/backend/get_professor_courses.php?professor_id=${professorId}`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -65,7 +65,7 @@ function ProfessorDashboard() {
 
     try {
       const response = await fetch(
-        "http://localhost/backend/create_assignments.php",
+        "http://localhost/e-learning/backend/create_assignments.php",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

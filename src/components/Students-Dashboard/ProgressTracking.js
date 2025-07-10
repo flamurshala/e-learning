@@ -19,7 +19,7 @@ function ProgressTracking() {
     }
 
     fetch(
-      `http://localhost/backend/get_student_progress.php?student_id=${studentId}`
+      `http://localhost/e-learning/backend/get_student_progress.php?student_id=${studentId}`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -117,7 +117,7 @@ function ProgressTracking() {
                     {percent >= 70 && (
                       <a
                         className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-800 text-sm"
-                        href={`http://localhost/backend/generate_certificate.php?student_id=${localStorage.getItem(
+                        href={`http://localhost/e-learning/backend/generate_certificate.php?student_id=${localStorage.getItem(
                           "studentId"
                         )}&course_id=${course.course_id}`}
                         download
@@ -128,16 +128,12 @@ function ProgressTracking() {
                   </div>
                 );
               })}
-              
             </div>
-            
           )}
           <div className="mt-[30%]">
             <Footer />
           </div>
-          
         </div>
-        
       </div>
     </div>
   );

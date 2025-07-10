@@ -35,7 +35,9 @@ function DiscussionForum() {
 
   const fetchQuestions = async () => {
     try {
-      const res = await fetch("http://localhost/backend/get_questions.php");
+      const res = await fetch(
+        "http://localhost/e-learning/backend/get_questions.php"
+      );
       const data = await res.json();
 
       const formatted = data.map((item) => ({
@@ -55,7 +57,7 @@ function DiscussionForum() {
   const fetchReplies = async (questionId) => {
     try {
       const res = await fetch(
-        `http://localhost/backend/get_replies.php?question_id=${questionId}`
+        `http://localhost/e-learning/backend/get_replies.php?question_id=${questionId}`
       );
       const data = await res.json();
 
@@ -74,7 +76,7 @@ function DiscussionForum() {
     if (questionText.trim() === "" || !userName) return;
 
     try {
-      await fetch("http://localhost/backend/add_question.php", {
+      await fetch("http://localhost/e-learning/backend/add_question.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user: userName, question: questionText }),
@@ -96,7 +98,7 @@ function DiscussionForum() {
     if (!replyText || !userName) return;
 
     try {
-      await fetch("http://localhost/backend/add_reply.php", {
+      await fetch("http://localhost/e-learning/backend/add_reply.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -200,7 +202,9 @@ function DiscussionForum() {
               <div className="flex flex-col items-center justify-center">
                 <button
                   onClick={() =>
-                    setActiveReplyIndex(activeReplyIndex === index ? null : index)
+                    setActiveReplyIndex(
+                      activeReplyIndex === index ? null : index
+                    )
                   }
                   className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-4 rounded transition"
                 >
@@ -211,7 +215,9 @@ function DiscussionForum() {
                   <div className="mt-3 w-full">
                     <textarea
                       value={replyInputs[topic.id] || ""}
-                      onChange={(e) => handleReplyChange(topic.id, e.target.value)}
+                      onChange={(e) =>
+                        handleReplyChange(topic.id, e.target.value)
+                      }
                       className="w-full border border-gray-300 rounded p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Write your reply..."
                       rows={3}
@@ -229,7 +235,7 @@ function DiscussionForum() {
           ))}
         </section>
         <div className="mt-[10%]">
-        <Footer />
+          <Footer />
         </div>
       </main>
     </div>

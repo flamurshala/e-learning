@@ -19,7 +19,7 @@ function StudentDashboard() {
     }
 
     fetch(
-      `http://localhost/backend/get_student_courses.php?student_id=${studentId}`
+      `http://localhost/e-learning/backend/get_student_courses.php?student_id=${studentId}`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -46,7 +46,7 @@ function StudentDashboard() {
     if (!assignments[courseId]) {
       try {
         const res = await fetch(
-          `http://localhost/backend/get_student_assignments.php?course_id=${courseId}`
+          `http://localhost/e-learning/backend/get_student_assignments.php?course_id=${courseId}`
         );
         const data = await res.json();
         if (Array.isArray(data)) {

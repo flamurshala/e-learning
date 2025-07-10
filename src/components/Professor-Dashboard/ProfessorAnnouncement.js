@@ -13,7 +13,7 @@ function StudentAnnouncements() {
 
   useEffect(() => {
     fetch(
-      `http://localhost/backend/get_announcements.php?audience=professorss&user_id=${professor_id}`
+      `http://localhost/e-learning/backend/get_announcements.php?audience=professorss&user_id=${professor_id}`
     )
       .then((res) => res.json())
       .then(setAnnouncements);
@@ -23,7 +23,7 @@ function StudentAnnouncements() {
     if (!window.confirm("Are you sure you want to clear all announcements?"))
       return;
 
-    fetch("http://localhost/backend/clear_announcements.php", {
+    fetch("http://localhost/e-learning/backend/clear_announcements.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -52,7 +52,10 @@ function StudentAnnouncements() {
             <FaBullhorn className="text-yellow-400 animate-pulse" />
             Announcements from{" "}
             <span>
-              <a href="https://tectigonllc.com/" className="text-[#0e6cff]"> Tectigon Academy</a>
+              <a href="https://tectigonllc.com/" className="text-[#0e6cff]">
+                {" "}
+                Tectigon Academy
+              </a>
             </span>
           </h1>
           <button

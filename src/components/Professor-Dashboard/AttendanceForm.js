@@ -9,7 +9,7 @@ function AttendanceForm({ session, professorId, courseId }) {
   const [students, setStudents] = useState([]);
   const [attendance, setAttendance] = useState({});
   const [locked, setLocked] = useState(false);
-  const [seconds, setSeconds] = useState(0); 
+  const [seconds, setSeconds] = useState(0);
   const [autoMarkedStudents, setAutoMarkedStudents] = useState([]);
 
   const [canComplete, setCanComplete] = useState(false);
@@ -18,7 +18,7 @@ function AttendanceForm({ session, professorId, courseId }) {
     if (!courseId) return;
 
     fetch(
-      `http://localhost/backend/enrolled_students.php?course_id=${courseId}`
+      `http://localhost/e-learning/backend/enrolled_students.php?course_id=${courseId}`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -38,9 +38,11 @@ function AttendanceForm({ session, professorId, courseId }) {
   // ✅ Hook to check if course can be completed
   useEffect(() => {
     if (!courseId) return;
-    fetch(`http://localhost/backend/can_complete_course.php?course_id=${courseId}`)
-      .then(res => res.json())
-      .then(data => {
+    fetch(
+      `http://localhost/e-learning/backend/can_complete_course.php?course_id=${courseId}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
         setCanComplete(data.canComplete);
       });
   }, [courseId]);
@@ -92,11 +94,14 @@ function AttendanceForm({ session, professorId, courseId }) {
       })),
     };
 
-    const res = await fetch("http://localhost/backend/attendance.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
+    const res = await fetch(
+      "http://localhost/e-learning/backend/attendance.php",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }
+    );
 
     const result = await res.json();
     if (res.ok && result.success) {
@@ -107,12 +112,16 @@ function AttendanceForm({ session, professorId, courseId }) {
   };
 
   const completeCourse = async () => {
-    if (!window.confirm("Are you sure you want to complete this course?")) return;
-    const res = await fetch("http://localhost/backend/complete_course.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ course_id: courseId }),
-    });
+    if (!window.confirm("Are you sure you want to complete this course?"))
+      return;
+    const res = await fetch(
+      "http://localhost/e-learning/backend/complete_course.php",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ course_id: courseId }),
+      }
+    );
     const result = await res.json();
     if (result.success) {
       alert("Course marked as completed!");
