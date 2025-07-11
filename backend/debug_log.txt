@@ -382,3 +382,20 @@ Notification condition NOT met.
 Total sessions: 6
 Submitted sessions before: 3
 Notification condition NOT met.
+Total sessions: 5
+Submitted sessions before: 3
+Triggering notification for course_id: 46
+Notification inserted: 📝 Make the certificates ready for course "testim". Only one session remains.
+Total sessions: 5
+Submitted sessions before: 0
+Notification condition NOT met.
+Total sessions: 5
+Submitted sessions before: 1
+Notification condition NOT met.
+Total sessions: 5
+Submitted sessions before: 0
+Notification condition NOT met.
+Total sessions: 5
+Submitted sessions before: 1
+Triggering notification for course_id: 50
+Notification inserted: 📝 Make the certificates ready for course "test notifi 2". Only two session remains.

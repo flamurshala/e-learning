@@ -67,14 +67,14 @@ try {
     $stmtUpdate->execute([$submitted_after_seconds, $session_id]);
 
     // Notify admin ONLY if this was the second-to-last submission
-    if ($course_id && $submittedSessionsBefore === $totalSessions - 2) {
+    if ($course_id && $submittedSessionsBefore === $totalSessions - 4) {
         file_put_contents("debug_log.txt", "Triggering notification for course_id: $course_id\n", FILE_APPEND);
 
         $stmtTitle = $conn->prepare("SELECT title FROM courses WHERE id = ?");
         $stmtTitle->execute([$course_id]);
         $courseTitle = $stmtTitle->fetchColumn();
 
-        $note = "📝 Make the certificates ready for course \"$courseTitle\". Only one session remains.";
+        $note = "📝 Make the certificates ready for course \"$courseTitle\". Only two session remains.";
         $stmtNotify = $conn->prepare("INSERT INTO admin_notifications (message, created_at) VALUES (?, NOW())");
         $stmtNotify->execute([$note]);
 
