@@ -352,3 +352,67 @@ Notification condition NOT met.
 Total sessions: 5
 Submitted sessions before: 4
 Notification condition NOT met.
+Total sessions: 5
+Submitted sessions before: 4
+Notification condition NOT met.
+Total sessions: 5
+Submitted sessions before: 4
+Notification condition NOT met.
+Total sessions: 22
+Submitted sessions before: 0
+Notification condition NOT met.
+Total sessions: 22
+Submitted sessions before: 1
+Notification condition NOT met.
+Total sessions: 22
+Submitted sessions before: 2
+Notification condition NOT met.
+Total sessions: 22
+Submitted sessions before: 3
+Notification condition NOT met.
+Total sessions: 22
+Submitted sessions before: 4
+Notification condition NOT met.
+Total sessions: 22
+Submitted sessions before: 4
+Notification condition NOT met.
+Total sessions: 22
+Submitted sessions before: 5
+Notification condition NOT met.
+Total sessions: 22
+Submitted sessions before: 6
+Notification condition NOT met.
+Total sessions: 22
+Submitted sessions before: 6
+Notification condition NOT met.
+Total sessions: 22
+Submitted sessions before: 7
+Notification condition NOT met.
+Total sessions: 22
+Submitted sessions before: 8
+Notification condition NOT met.
+Total sessions: 25
+Submitted sessions before: 0
+Notification condition NOT met.
+Total sessions: 22
+Submitted sessions before: 9
+Notification condition NOT met.
+Total sessions: 7
+Submitted sessions before: 0
+Notification condition NOT met.
+Total sessions: 7
+Submitted sessions before: 1
+Notification condition NOT met.
+Total sessions: 7
+Submitted sessions before: 2
+Notification condition NOT met.
+Total sessions: 7
+Submitted sessions before: 3
+Notification condition NOT met.
+Total sessions: 7
+Submitted sessions before: 4
+Notification condition NOT met.
+Total sessions: 7
+Submitted sessions before: 5
+Triggering notification for course_id: 50
+Notification inserted: 📝 Make the certificates ready for course "test1". Only one session remains.

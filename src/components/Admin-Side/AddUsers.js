@@ -7,21 +7,22 @@ function AddUsers() {
   }, []);
 
   const [studentName, setStudentName] = useState("");
+  const [studentSurname, setStudentSurname] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [payments, setPayments] = useState("");
+  const [personalNumber, setPersonalNumber] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
-  const [studentPassword, setStudentPassword] = useState("");
+  const [extraNotes, setExtraNotes] = useState("");
 
   const [courses, setCourses] = useState([]);
-  const [selectedCourses, setSelectedCourses] = useState([]);
+  const [selectedCourses, setSelectedCourses] = useState([""]);
 
   const [professorName, setProfessorName] = useState("");
   const [professorEmail, setProfessorEmail] = useState("");
-  const [professorPassword, setProfessorPassword] = useState("");
 
-  const [amountPaidAll, setAmountPaidAll] = useState("");
-  const [amountPaidMonth1, setAmountPaidMonth1] = useState("");
-  const [amountPaidMonth2, setAmountPaidMonth2] = useState("");
+  const [payments, setPayments] = useState([""]);
+  const [amountPaidAll, setAmountPaidAll] = useState([""]);
+  const [amountPaidMonth1, setAmountPaidMonth1] = useState([""]);
+  const [amountPaidMonth2, setAmountPaidMonth2] = useState([""]);
 
   const isEmpty = (val) => !val.trim();
 
@@ -35,21 +36,12 @@ function AddUsers() {
       .catch(() => setCourses([]));
   }, []);
 
-  const handleCourseChange = (e) => {
-    const courseId = parseInt(e.target.value);
-    if (e.target.checked) {
-      setSelectedCourses((prev) => [...prev, courseId]);
-    } else {
-      setSelectedCourses((prev) => prev.filter((id) => id !== courseId));
-    }
-  };
-
   const handleStudentSubmit = (e) => {
     e.preventDefault();
 
     if (
-      [studentName, phoneNumber, studentEmail, studentPassword].some(isEmpty) ||
-      selectedCourses.length === 0
+      [studentName, studentSurname, phoneNumber, personalNumber, studentEmail].some(isEmpty) ||
+      selectedCourses.some((course) => !course)
     ) {
       alert("Please fill all student fields and select at least one course.");
       return;
@@ -57,13 +49,15 @@ function AddUsers() {
 
     const payload = {
       name: studentName,
+      surname: studentSurname,
       phoneNumber,
+      personalNumber,
       payments,
       amountPaidAll,
       amountPaidMonth1,
       amountPaidMonth2,
       email: studentEmail,
-      password: studentPassword,
+      notes: extraNotes,
       courses: selectedCourses,
     };
 
@@ -77,14 +71,16 @@ function AddUsers() {
         if (data.success) {
           alert("Student added successfully!");
           setStudentName("");
+          setStudentSurname("");
           setPhoneNumber("");
-          setPayments("");
-          setAmountPaidAll("");
-          setAmountPaidMonth1("");
-          setAmountPaidMonth2("");
+          setPersonalNumber("");
+          setPayments([""]);
+          setAmountPaidAll([""]);
+          setAmountPaidMonth1([""]);
+          setAmountPaidMonth2([""]);
           setStudentEmail("");
-          setStudentPassword("");
-          setSelectedCourses([]);
+          setExtraNotes("");
+          setSelectedCourses([""]);
         } else {
           alert("Error adding student: " + (data.error || "Unknown error"));
         }
@@ -95,10 +91,48 @@ function AddUsers() {
       });
   };
 
+  const handleAddCourseField = () => {
+    setSelectedCourses([...selectedCourses, ""]);
+    setPayments([...payments, ""]);
+    setAmountPaidAll([...amountPaidAll, ""]);
+    setAmountPaidMonth1([...amountPaidMonth1, ""]);
+    setAmountPaidMonth2([...amountPaidMonth2, ""]);
+  };
+
+  const handleCourseChange = (index, value) => {
+    const newCourses = [...selectedCourses];
+    newCourses[index] = value;
+    setSelectedCourses(newCourses);
+  };
+
+  const handlePaymentChange = (index, value) => {
+    const newPayments = [...payments];
+    newPayments[index] = value;
+    setPayments(newPayments);
+  };
+
+  const handleAmountPaidAllChange = (index, value) => {
+    const newAmounts = [...amountPaidAll];
+    newAmounts[index] = value;
+    setAmountPaidAll(newAmounts);
+  };
+
+  const handleAmountPaidMonth1Change = (index, value) => {
+    const newAmounts = [...amountPaidMonth1];
+    newAmounts[index] = value;
+    setAmountPaidMonth1(newAmounts);
+  };
+
+  const handleAmountPaidMonth2Change = (index, value) => {
+    const newAmounts = [...amountPaidMonth2];
+    newAmounts[index] = value;
+    setAmountPaidMonth2(newAmounts);
+  };
+
   const handleProfessorSubmit = (e) => {
     e.preventDefault();
 
-    if ([professorName, professorEmail, professorPassword].some(isEmpty)) {
+    if ([professorName, professorEmail].some(isEmpty)) {
       alert("Please enter all professor fields.");
       return;
     }
@@ -106,7 +140,6 @@ function AddUsers() {
     const payload = {
       name: professorName,
       email: professorEmail,
-      password: professorPassword,
     };
 
     fetch("http://localhost/e-learning/backend/add_professors.php", {
@@ -120,7 +153,6 @@ function AddUsers() {
           alert("Professor added successfully!");
           setProfessorName("");
           setProfessorEmail("");
-          setProfessorPassword("");
         } else {
           alert("Error adding professor: " + (data.error || "Unknown error"));
         }
@@ -135,186 +167,58 @@ function AddUsers() {
     <div className="flex gap-4">
       <AdminNav />
       <div className="mt-4 ml-[22%] w-[75%]">
-        <h1 className="text-2xl font-semibold border-b-2 border-[#c2c2c2] w-[95%]">
-          Add a new User
-        </h1>
+        <h1 className="text-2xl font-semibold border-b-2 border-[#c2c2c2] w-[95%]">Add a new User</h1>
         <div className="cards mt-6 items-center flex flex-wrap gap-4">
           <div className="card border shadow-xl border-black p-5 w-[45%]">
             <form onSubmit={handleStudentSubmit}>
-              <h3 className="text-2xl mb-8 font-semibold border-b-2 border-[#c2c2c2]">
-                Add a new student
-              </h3>
+              <h3 className="text-2xl mb-8 font-semibold border-b-2 border-[#c2c2c2]">Add a new student</h3>
+              <input className="mb-4 w-full border border-black p-2" type="text" placeholder="Name" value={studentName} onChange={(e) => setStudentName(e.target.value)} required />
+              <input className="mb-4 w-full border border-black p-2" type="text" placeholder="Surname" value={studentSurname} onChange={(e) => setStudentSurname(e.target.value)} required />
+              <input className="mb-4 w-full border border-black p-2" type="text" placeholder="Phone Number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required />
+              <input className="mb-4 w-full border border-black p-2" type="text" placeholder="Personal Number" value={personalNumber} onChange={(e) => setPersonalNumber(e.target.value)} required />
+              <input className="mb-4 w-full border border-black p-2" type="email" placeholder="Email" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} required />
 
-              <input
-                className="mb-4 w-full border border-black p-2"
-                type="text"
-                name="studentName"
-                placeholder="Name"
-                value={studentName}
-                onChange={(e) => setStudentName(e.target.value)}
-                required
-              />
-              <input
-                className="mb-4 w-full border border-black p-2"
-                type="text"
-                name="phoneNumber"
-                placeholder="Phone Number"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                required
-              />
+              {selectedCourses.map((selected, index) => (
+                <div key={index} className="mb-6 border p-4 rounded-md border-gray-400">
+                  <label className="font-semibold block mb-2">Select Course #{index + 1}:</label>
+                  <select className="w-full border border-black p-2 mb-2" value={selected} onChange={(e) => handleCourseChange(index, e.target.value)} required>
+                    <option value="">-- Select a course --</option>
+                    {courses.map((course) => (
+                      <option key={course.id} value={course.id}>{course.title}</option>
+                    ))}
+                  </select>
+
+                  <label className="font-semibold block mb-2">Payment Method:</label>
+                  <select className="w-full border border-black p-2 mb-2" value={payments[index]} onChange={(e) => handlePaymentChange(index, e.target.value)} required>
+                    <option value="">Select method</option>
+                    <option value="All">Pay All</option>
+                    <option value="Divided">Pay Divided (2 months)</option>
+                  </select>
+
+                  {payments[index] === "All" && (
+                    <input className="w-full border border-black p-2" type="number" placeholder="Amount Paid" min={0} value={amountPaidAll[index]} onChange={(e) => handleAmountPaidAllChange(index, e.target.value)} required />
+                  )}
+
+                  {payments[index] === "Divided" && (
+                    <div className="flex gap-4">
+                      <input className="w-1/2 border border-black p-2" type="number" placeholder="First Month Paid" min={0} value={amountPaidMonth1[index]} onChange={(e) => handleAmountPaidMonth1Change(index, e.target.value)} required />
+                      <input className="w-1/2 border border-black p-2" type="number" placeholder="Second Month Paid" min={0} value={amountPaidMonth2[index]} onChange={(e) => handleAmountPaidMonth2Change(index, e.target.value)} required />
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              <button type="button" className="mb-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-800" onClick={handleAddCourseField}>+ Add Another Course</button>
 
               <div className="mb-4">
-                <label className="font-semibold mb-2 block">
-                  Select Courses:
-                </label>
-                {courses.length > 0 ? (
-                  courses.map((course) => (
-                    <label key={course.id} className="block">
-                      <input
-                        type="checkbox"
-                        value={course.id}
-                        checked={selectedCourses.includes(course.id)}
-                        onChange={handleCourseChange}
-                        className="mr-2"
-                      />
-                      {course.title}
-                    </label>
-                  ))
-                ) : (
-                  <p>No courses available</p>
-                )}
+                <label className="font-semibold block mb-2">Extra Notes:</label>
+                <textarea className="w-full border border-black p-2" rows="3" value={extraNotes} onChange={(e) => setExtraNotes(e.target.value)} placeholder="Any additional notes..." />
               </div>
-
-              <div className="mb-4">
-                <label className="font-semibold mr-4">Payment Method:</label>
-                <select
-                  className="border border-black p-2"
-                  value={payments}
-                  onChange={(e) => setPayments(e.target.value)}
-                  required
-                >
-                  <option value="">Select method</option>
-                  <option value="All">Pay All</option>
-                  <option value="Divided">Pay Divided (2 months)</option>
-                </select>
-              </div>
-              {payments === "All" && (
-                <div className="mb-4">
-                  <label className="font-semibold mr-2">Amount Paid:</label>
-                  <input
-                    className="border border-black p-2 w-1/2"
-                    type="number"
-                    name="amountPaidAll"
-                    placeholder="Enter amount paid"
-                    value={amountPaidAll}
-                    onChange={(e) => setAmountPaidAll(e.target.value)}
-                    min={0}
-                    required
-                  />
-                </div>
-              )}
-              {payments === "Divided" && (
-                <div className="mb-4 flex gap-4">
-                  <div>
-                    <label className="font-semibold mr-2">
-                      First Month Paid:
-                    </label>
-                    <input
-                      className="border border-black p-2 w-24"
-                      type="number"
-                      name="amountPaidMonth1"
-                      placeholder="Month 1"
-                      value={amountPaidMonth1}
-                      onChange={(e) => setAmountPaidMonth1(e.target.value)}
-                      min={0}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="font-semibold mr-2">
-                      Second Month Paid:
-                    </label>
-                    <input
-                      className="border border-black p-2 w-24"
-                      type="number"
-                      name="amountPaidMonth2"
-                      placeholder="Month 2"
-                      value={amountPaidMonth2}
-                      onChange={(e) => setAmountPaidMonth2(e.target.value)}
-                      min={0}
-                      required
-                    />
-                  </div>
-                </div>
-              )}
-              <input
-                className="mb-4 w-full border border-black p-2"
-                type="email"
-                name="studentEmail"
-                placeholder="Email"
-                value={studentEmail}
-                onChange={(e) => setStudentEmail(e.target.value)}
-                required
-              />
-              <input
-                className="mb-4 w-full border border-black p-2"
-                type="password"
-                name="studentPassword"
-                placeholder="Password"
-                value={studentPassword}
-                onChange={(e) => setStudentPassword(e.target.value)}
-                required
-              />
-              <button
-                type="submit"
-                className="bg-[#0e6cff] text-white px-4 py-2 rounded hover:bg-[#255ebb]"
-              >
-                Add
-              </button>
+              <button type="submit" className="bg-[#0e6cff] text-white px-4 py-2 rounded hover:bg-[#255ebb]">Add</button>
             </form>
           </div>
 
-          <div className="card border shadow-xl border-black p-5 w-[45%]">
-            <form onSubmit={handleProfessorSubmit}>
-              <h3 className="text-2xl mb-8 font-semibold border-b-2 border-[#c2c2c2]">
-                Add a new professor
-              </h3>
-              <input
-                className="mb-4 w-full border border-black p-2"
-                type="text"
-                name="professorName"
-                placeholder="Name"
-                value={professorName}
-                onChange={(e) => setProfessorName(e.target.value)}
-                required
-              />
-              <input
-                className="mb-4 w-full border border-black p-2"
-                type="email"
-                name="professorEmail"
-                placeholder="Email"
-                value={professorEmail}
-                onChange={(e) => setProfessorEmail(e.target.value)}
-                required
-              />
-              <input
-                className="mb-4 w-full border border-black p-2"
-                type="password"
-                name="professorPassword"
-                placeholder="Password"
-                value={professorPassword}
-                onChange={(e) => setProfessorPassword(e.target.value)}
-                required
-              />
-              <button
-                type="submit"
-                className="bg-[#0e6cff] text-white px-4 py-2 rounded hover:bg-[#255ebb]"
-              >
-                Add
-              </button>
-            </form>
-          </div>
+          
         </div>
       </div>
     </div>

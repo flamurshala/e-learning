@@ -22,6 +22,9 @@ function AdminNav() {
             <li className="mb-[1rem] text-white font-bold gap-3">
               <Link to="/AddUsers">Add Users</Link>
             </li>
+             <li className="mb-[1rem] text-white font-bold gap-3">
+              <Link to="/AddProf">Add Teachers</Link>
+            </li>
             <li className="mb-[1rem] text-white font-bold gap-3">
               <Link to="/AllStudents">All Students</Link>
             </li>
@@ -31,9 +34,7 @@ function AdminNav() {
             <li className="mb-[1rem] text-white font-bold gap-3">
               <Link to="/AllCourses">All Courses</Link>
             </li>
-            <li className="mb-[1rem] text-white font-bold gap-3">
-              <Link to="/Announcements">Announcements</Link>
-            </li>
+           
             <li className="mb-[1rem] text-white font-bold gap-3">
               <Link
                 to="/admin/notifications"

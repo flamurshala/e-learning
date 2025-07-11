@@ -14,7 +14,7 @@ function AllProfessors() {
   useEffect(() => {
     fetch("http://localhost/e-learning/backend/get_professors_with_courses.php")
       .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch students");
+        if (!res.ok) throw new Error("Failed to fetch professors");
         return res.json();
       })
       .then((data) => {
@@ -48,14 +48,14 @@ function AllProfessors() {
       .catch(() => alert("Error occurred while deleting."));
   };
 
-  if (loading) return <div>Loading profeesors...</div>;
+  if (loading) return <div>Loading professors...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="flex gap-4">
       <AdminNav />
       <div className="mt-4 ml-[22%] w-[75%]">
-        <h1 className="text-2xl font-semibold border-b-2 border-[#c2c2c2] w-[100%]">
+        <h1 className="text-2xl font-semibold border-b-2 border-[#c2c2c2] w-full">
           All Professors
         </h1>
         <table className="w-full mt-4 border-collapse border border-gray-300">
@@ -63,7 +63,6 @@ function AllProfessors() {
             <tr className="text-left bg-gray-100">
               <th className="border border-gray-300 p-2">Name</th>
               <th className="border border-gray-300 p-2">Email</th>
-              <th className="border border-gray-300 p-2">Password</th>
               <th className="border border-gray-300 p-2">Courses</th>
               <th className="border border-gray-300 p-2">Edit</th>
               <th className="border border-gray-300 p-2">Delete</th>
@@ -74,7 +73,6 @@ function AllProfessors() {
               <tr key={professor.id} className="border-b border-gray-300">
                 <td className="p-2">{professor.name}</td>
                 <td className="p-2">{professor.email}</td>
-                <td className="p-2 font-mono text-sm">{professor.password}</td>
                 <td className="p-2">
                   {professor.courses.length > 0
                     ? professor.courses.join(", ")
