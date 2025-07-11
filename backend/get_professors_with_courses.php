@@ -13,7 +13,9 @@ try {
             p.password,
             c.title AS course_title
         FROM professors p
-        LEFT JOIN courses c ON c.professor_id = p.id
+        LEFT JOIN courses c 
+            ON c.professor_id = p.id 
+            AND (c.completed = 0 OR c.completed IS NULL)
     ");
     $stmt->execute();
 

@@ -13,6 +13,7 @@ function CreateCourse() {
   const [professorId, setProfessorId] = useState("");
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const [trainingHours, setTrainingHours] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetch("http://localhost/e-learning/backend/get_professors.php")
@@ -64,6 +65,7 @@ function CreateCourse() {
           setDescription("");
           setProfessorId("");
           setSelectedStudentIds([]);
+          setTrainingHours("");
         } else {
           alert("Error creating course: " + (data.error || "Unknown error"));
         }
@@ -74,8 +76,12 @@ function CreateCourse() {
       });
   };
 
+  const filteredStudents = students.filter((student) =>
+    student.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className=" flex gap-5  bg-white rounded shadow">
+    <div className="flex gap-5 bg-white rounded shadow">
       <AdminNav />
       <div className="w-[75%] ml-[22%] mt-[2rem]">
         <h1 className="text-3xl font-bold mb-4 border-b border-black">
@@ -111,6 +117,7 @@ function CreateCourse() {
               </option>
             ))}
           </select>
+
           <input
             type="number"
             placeholder="Number of training hours"
@@ -123,19 +130,34 @@ function CreateCourse() {
 
           <div>
             <p className="font-semibold mb-2">Select Students:</p>
+
+            {/* Search Bar */}
+            <input
+              type="text"
+              placeholder="Search students..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full border border-gray-300 rounded px-4 py-2 mb-2"
+            />
+
+            {/* Student List */}
             <div className="max-h-48 overflow-auto border border-gray-300 rounded p-2">
-              {students.map((student) => (
-                <label key={student.id} className="block mb-1">
-                  <input
-                    type="checkbox"
-                    value={student.id}
-                    checked={selectedStudentIds.includes(String(student.id))}
-                    onChange={handleStudentCheckboxChange}
-                    className="mr-2"
-                  />
-                  {student.name}
-                </label>
-              ))}
+              {filteredStudents.length > 0 ? (
+                filteredStudents.map((student) => (
+                  <label key={student.id} className="block mb-1">
+                    <input
+                      type="checkbox"
+                      value={student.id}
+                      checked={selectedStudentIds.includes(String(student.id))}
+                      onChange={handleStudentCheckboxChange}
+                      className="mr-2"
+                    />
+                    {student.name}
+                  </label>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No students found.</p>
+              )}
             </div>
           </div>
 

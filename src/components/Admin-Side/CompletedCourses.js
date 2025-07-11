@@ -6,6 +6,7 @@ function CompletedCourses() {
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [professors, setProfessors] = useState(["All"]);
   const [selectedProfessor, setSelectedProfessor] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
   const [openDropdown, setOpenDropdown] = useState(null);
 
   useEffect(() => {
@@ -17,16 +18,13 @@ function CompletedCourses() {
         return res.json();
       })
       .then((data) => {
-        console.log("Completed courses fetched:", data); // Add this!
         if (!Array.isArray(data)) {
           console.error("Expected array from backend but got:", data);
           setCourses([]);
-          setFilteredCourses([]);
-          setProfessors(["All"]);
           return;
         }
+
         setCourses(data);
-        setFilteredCourses(data);
 
         const uniqueProfessors = Array.from(
           new Set(
@@ -43,31 +41,34 @@ function CompletedCourses() {
       .catch((err) => {
         console.error("Failed to load completed courses:", err);
         setCourses([]);
-        setFilteredCourses([]);
-        setProfessors(["All"]);
       });
   }, []);
 
+  // ✅ Case-insensitive filtering based on professor and search
+  useEffect(() => {
+    let filtered = [...courses];
+
+    if (selectedProfessor.toLowerCase() !== "all") {
+      filtered = filtered.filter((course) => {
+        const courseProf = course.professor_name?.trim().toLowerCase() || "unassigned";
+        return courseProf === selectedProfessor.toLowerCase();
+      });
+    }
+
+    if (searchTerm.trim() !== "") {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter((course) => {
+        const title = course.title?.toLowerCase() || "";
+        const professor = course.professor_name?.toLowerCase() || "";
+        return title.includes(search) || professor.includes(search);
+      });
+    }
+
+    setFilteredCourses(filtered);
+  }, [courses, selectedProfessor, searchTerm]);
+
   const toggleDropdown = (courseId) => {
     setOpenDropdown((prev) => (prev === courseId ? null : courseId));
-  };
-
-  const handleFilterChange = (e) => {
-    const value = e.target.value;
-    setSelectedProfessor(value);
-
-    if (value === "All") {
-      setFilteredCourses(courses);
-    } else {
-      setFilteredCourses(
-        courses.filter(
-          (course) =>
-            (course.professor_name && course.professor_name.trim() !== ""
-              ? course.professor_name
-              : "Unassigned") === value
-        )
-      );
-    }
   };
 
   return (
@@ -78,19 +79,31 @@ function CompletedCourses() {
           Completed Courses
         </h1>
 
-        <div className="my-4">
-          <label className="mr-2 font-medium">Filter by Professor:</label>
-          <select
-            value={selectedProfessor}
-            onChange={handleFilterChange}
-            className="border px-3 py-1 rounded"
-          >
-            {professors.map((prof, index) => (
-              <option key={index} value={prof}>
-                {prof}
-              </option>
-            ))}
-          </select>
+        <div className="my-4 flex flex-col md:flex-row items-start md:items-center gap-4">
+          <div>
+            <label className="mr-2 font-medium">Filter by Professor:</label>
+            <select
+              value={selectedProfessor.toLowerCase()}
+              onChange={(e) => setSelectedProfessor(e.target.value)}
+              className="border px-3 py-1 rounded"
+            >
+              {professors.map((prof, index) => (
+                <option key={index} value={prof.toLowerCase()}>
+                  {prof}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="w-full md:w-auto">
+            <input
+              type="text"
+              placeholder="Search by title or professor..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="border px-3 py-1 rounded w-full md:w-80"
+            />
+          </div>
         </div>
 
         <table className="w-full border border-collapse border-gray-300">
@@ -104,14 +117,13 @@ function CompletedCourses() {
             </tr>
           </thead>
           <tbody>
-            {Array.isArray(filteredCourses) && filteredCourses.length > 0 ? (
+            {filteredCourses.length > 0 ? (
               filteredCourses.map((course) => (
                 <tr key={course.id} className="border-b border-gray-300">
                   <td className="p-2 border">{course.title}</td>
                   <td className="p-2 border">{course.description}</td>
                   <td className="p-2 border">
-                    {course.professor_name &&
-                    course.professor_name.trim() !== ""
+                    {course.professor_name && course.professor_name.trim() !== ""
                       ? course.professor_name
                       : "Unassigned"}
                   </td>

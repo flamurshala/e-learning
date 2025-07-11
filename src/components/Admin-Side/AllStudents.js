@@ -76,8 +76,8 @@ function AllStudents() {
               <th className="p-2 border">Name</th>
               <th className="p-2 border">Phone Number</th>
               <th className="p-2 border">Email</th>
-              <th className="p-2 border">Password</th>
-              <th className="p-2 border">Courses & Payments</th>
+              <th className="p-2 border">Courses</th>
+              <th className="p-2 border">Payments</th>
               <th className="p-2 border">Edit</th>
               <th className="p-2 border">Delete</th>
               <th className="p-2 border">Progress</th>
@@ -89,7 +89,21 @@ function AllStudents() {
                 <td className="p-2">{student.name}</td>
                 <td className="p-2">{student.phone_number}</td>
                 <td className="p-2">{student.email}</td>
-                <td className="p-2 font-mono text-sm">{student.password}</td>
+
+                {/* Courses */}
+                <td className="p-2">
+                  {student.courses.length > 0 ? (
+                    <ul className="list-disc ml-5">
+                      {student.courses.map((c, idx) => (
+                        <li key={idx}>{c.title}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    "No courses"
+                  )}
+                </td>
+
+                {/* Payments */}
                 <td className="p-2">
                   {student.courses.length > 0 ? (
                     <ul>
@@ -105,10 +119,11 @@ function AllStudents() {
                       ))}
                     </ul>
                   ) : (
-                    "No courses"
+                    "No payments"
                   )}
                 </td>
 
+                {/* Edit */}
                 <td className="p-2">
                   <Link to={`/edit-student/${student.id}`}>
                     <button className="bg-blue-600 hover:bg-blue-800 text-white py-1 px-3 rounded">
@@ -116,6 +131,8 @@ function AllStudents() {
                     </button>
                   </Link>
                 </td>
+
+                {/* Delete */}
                 <td className="p-2">
                   <button
                     onClick={() => {
@@ -156,6 +173,7 @@ function AllStudents() {
                   </button>
                 </td>
 
+                {/* Progress */}
                 <td className="p-2">
                   <Link to={`/student-progress/${student.id}`}>
                     <button className="bg-blue-600 hover:bg-blue-800 text-white py-1 px-3 rounded">

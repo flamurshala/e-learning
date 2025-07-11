@@ -9,6 +9,7 @@ import ProfessorDashboard from "./components/Professor-Dashboard/ProfessorDashbo
 import AdminLogin from "./components/Admin-Side/AdminLogin";
 import CreateCourse from "./components/Admin-Side/CreateCourse";
 import AddUsers from "./components/Admin-Side/AddUsers";
+import AddProf from "./components/Admin-Side/AddProf";
 import AllStudents from "./components/Admin-Side/AllStudents";
 import EditStudent from "./components/Admin-Side/EditStudent";
 import AllProfessors from "./components/Admin-Side/AllProfessors";
@@ -77,6 +78,15 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+  path="/AddProf"
+  element={
+    <ProtectedRoute userType="user">
+      <AddProf />
+    </ProtectedRoute>
+  }
+/>
+
           <Route
             path="/AllStudents"
             element={
