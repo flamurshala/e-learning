@@ -530,3 +530,9 @@ Notification condition NOT met.
 Total sessions: 5
 Submitted sessions before: 4
 Notification condition NOT met.
+Total sessions: 5
+Submitted sessions before: 2
+Notification condition NOT met.
+Total sessions: 8
+Submitted sessions before: 0
+Notification condition NOT met.
