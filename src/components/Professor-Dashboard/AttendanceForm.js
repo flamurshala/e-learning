@@ -200,17 +200,7 @@ function AttendanceForm({ session, professorId, courseId }) {
       </form>
 
       <div className="mt-6 text-center">
-        <button
-          onClick={completeCourse}
-          disabled={!canComplete}
-          className={`px-4 py-2 rounded text-white mt-2 ${
-            canComplete
-              ? "bg-green-600 hover:bg-green-700"
-              : "bg-gray-400 cursor-not-allowed"
-          }`}
-        >
-          Complete Course
-        </button>
+        
       </div>
     </div>
   );
