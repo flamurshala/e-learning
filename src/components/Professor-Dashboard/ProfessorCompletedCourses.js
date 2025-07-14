@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import ProffesorNav from "./ProffesorNav";
 
-function CompletedCourses() {
+
+function ProfessorCompletedCourses() {
+
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [professors, setProfessors] = useState(["All"]);
@@ -176,4 +178,4 @@ function CompletedCourses() {
   );
 }
 
-export default CompletedCourse;
+export default ProfessorCompletedCourses;

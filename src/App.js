@@ -2,6 +2,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Loader from "./components/Loader";
 import LoginAs from "./components/LoginAs";
 import ProfessorLogin from "./components/Professor-Dashboard/ProfessorLogin";
+import ProfessorCompletedCourses from "./components/Professor-Dashboard/ProfessorCompletedCourses";
+
+
 import StudentLogin from "./components/Students-Dashboard/StudentLogin";
 import StudentDashboard from "./components/Students-Dashboard/StudentDashboard";
 import StudentNav from "./components/Students-Dashboard/StudentNav";
@@ -146,6 +149,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          
           <Route
             path="/StudentAnnouncements"
             element={
@@ -171,6 +175,15 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+  path="/professor/completed-courses"
+  element={
+    <ProtectedRoute userType="professorId">
+      <ProfessorCompletedCourses />
+    </ProtectedRoute>
+  }
+/>
+
           <Route
             path="/professor/attendance"
             element={
