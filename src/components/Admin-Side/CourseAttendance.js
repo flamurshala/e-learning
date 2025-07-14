@@ -1,7 +1,7 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import AdminNav from "./AdminNav";
-import { useNavigate } from "react-router-dom";
+import ProffesorNav from "../Professor-Dashboard/ProffesorNav";
 
 function CourseAttendance() {
   const { courseId } = useParams();
@@ -10,12 +10,13 @@ function CourseAttendance() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // ✅ Check if professor is logged in
+  const isProfessor = localStorage.getItem("professorId");
+
   useEffect(() => {
     document.title = "Course Attendance - Tectigon Academy";
 
-    fetch(
-      `http://localhost/e-learning/backend/get_attendance.php?course_id=${courseId}`
-    )
+    fetch(`http://localhost/e-learning/backend/get_attendance.php?course_id=${courseId}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
@@ -45,10 +46,12 @@ function CourseAttendance() {
 
   return (
     <div className="flex gap-4">
-      <AdminNav />
+      {/* ✅ Dynamic navigation */}
+      {isProfessor ? <ProffesorNav /> : <AdminNav />}
+
       <div className="mt-4 ml-[22%] w-[75%]">
-        <div className="flex mb-2 border-b-2 border-[#c2c2c2] pb-2 items-center justify-between ">
-          <h1 className="text-2xl font-semibold  w-[95%]">Course Attendance</h1>
+        <div className="flex mb-2 border-b-2 border-[#c2c2c2] pb-2 items-center justify-between">
+          <h1 className="text-2xl font-semibold w-[95%]">Course Attendance</h1>
           <button
             onClick={() => navigate(-1)}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-800"
@@ -66,45 +69,40 @@ function CourseAttendance() {
 
         {!loading && !error && (
           <>
-            {Object.entries(grouped).map(
-              ([session, { records, submittedAt }]) => (
-                <div key={session} className="mb-6">
-                  <h3 className="font-semibold mb-2">Session: {session}</h3>
+            {Object.entries(grouped).map(([session, { records }]) => (
+              <div key={session} className="mb-6">
+                <h3 className="font-semibold mb-2">Session: {session}</h3>
 
-                  {records.length > 0 &&
-                  records[0].submitted_after_seconds !== null ? (
-                    <p className="italic text-gray-600 mb-2">
-                      Submitted{" "}
-                      {Math.floor(records[0].submitted_after_seconds / 60)}{" "}
-                      minutes after session started
-                    </p>
-                  ) : (
-                    <p className="italic text-red-600 mb-2">
-                      Not submitted yet
-                    </p>
-                  )}
+                {records[0].submitted_after_seconds !== null ? (
+                  <p className="italic text-gray-600 mb-2">
+                    Submitted{" "}
+                    {Math.floor(records[0].submitted_after_seconds / 60)} minutes
+                    after session started
+                  </p>
+                ) : (
+                  <p className="italic text-red-600 mb-2">Not submitted yet</p>
+                )}
 
-                  <table className="w-full border border-collapse border-gray-300 text-sm">
-                    <thead className="bg-gray-200">
-                      <tr>
-                        <th className="p-2 border">Student</th>
-                        <th className="p-2 border">Status</th>
+                <table className="w-full border border-collapse border-gray-300 text-sm">
+                  <thead className="bg-gray-200">
+                    <tr>
+                      <th className="p-2 border">Student</th>
+                      <th className="p-2 border">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {records.map((r) => (
+                      <tr key={r.attendance_id}>
+                        <td className="p-2 border">{r.student_name}</td>
+                        <td className="p-2 border text-center capitalize">
+                          {r.status}
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {records.map((r) => (
-                        <tr key={r.attendance_id}>
-                          <td className="p-2 border">{r.student_name}</td>
-                          <td className="p-2 border text-center capitalize">
-                            {r.status}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )
-            )}
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
           </>
         )}
       </div>

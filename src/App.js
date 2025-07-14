@@ -193,13 +193,14 @@ function App() {
             }
           />
           <Route
-            path="/course-attendance/:courseId"
-            element={
-              <ProtectedRoute userType="user">
-                <CourseAttendance />
-              </ProtectedRoute>
-            }
-          />
+  path="/course-attendance/:courseId"
+  element={
+    <ProtectedRoute userType={["user", "professorId"]}>
+      <CourseAttendance />
+    </ProtectedRoute>
+  }
+/>
+
           <Route path="/admin/notifications" element={<AdminNotifications />} />
           <Route
             path="/student-progress/:studentId"
