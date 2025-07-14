@@ -45,7 +45,9 @@ function SessionList({ professorId }) {
       .then((data) => {
         if (Array.isArray(data)) setSubmittedSessions(data);
       })
-      .catch((err) => console.error("Failed to fetch submitted sessions:", err));
+      .catch((err) =>
+        console.error("Failed to fetch submitted sessions:", err)
+      );
   }, [selectedCourseId, professorId]);
 
   const handleSessionClick = (session) => {
