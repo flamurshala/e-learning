@@ -189,19 +189,19 @@ function AttendanceForm({ session, professorId, courseId }) {
             </select>
           </div>
         ))}
-        {!locked && (
-          <button
-            type="submit"
-            className="mt-4 bg-blue-600 hover:bg-blue-800 text-white px-4 py-2 rounded"
-          >
-            Submit Attendance
-          </button>
-        )}
+        <button
+          type="submit"
+          className={`mt-4 px-4 py-2 rounded text-white ${
+            locked
+              ? "bg-blue-600 hover:bg-blue-800"
+              : "bg-blue-600 hover:bg-blue-800"
+          }`}
+        >
+          Submit Attendance
+        </button>
       </form>
 
-      <div className="mt-6 text-center">
-        
-      </div>
+      <div className="mt-6 text-center"></div>
     </div>
   );
 }
