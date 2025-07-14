@@ -22,9 +22,14 @@ function ProffesorNav() {
             <img src={assignmentsIcon} alt="calendar" />
             <Link to="/professor/calendar/:courseId">Courses</Link>
           </li>
+          
           <li className="flex items-center text-white font-bold gap-3 px-4">
             <img src={announcementsIcon} alt="announcements" />
             <Link to="/ProfessorAnnouncements">Announcements</Link>
+          </li>
+            <li className="flex items-center text-white font-bold gap-3 px-4">
+            <img src={daIcon} alt="CompletedCourse" />
+            <Link to="/CompletedCourse">CompletedCourse</Link>
           </li>
         </ul>
       </div>
