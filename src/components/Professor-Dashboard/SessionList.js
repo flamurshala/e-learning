@@ -43,15 +43,19 @@ function SessionList({ professorId }) {
     )
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) setSubmittedSessions(data);
+        if (Array.isArray(data)) {
+          const sessionIds = data.map((item) => item.session_id); // 🟢 extract session IDs
+          setSubmittedSessions(sessionIds);
+        }
       })
+
       .catch((err) =>
         console.error("Failed to fetch submitted sessions:", err)
       );
   }, [selectedCourseId, professorId]);
 
   const handleSessionClick = (session) => {
-    if (isSessionSubmitted(session.id)) return; // Prevent click if already submitted
+    // if (isSessionSubmitted(session.id)) return; // Prevent click if already submitted
     navigate("/professor/attendance", {
       state: {
         session,
@@ -89,7 +93,7 @@ function SessionList({ professorId }) {
               key={session.id}
               className={`mb-2 p-2 border rounded ${
                 isSessionSubmitted(session.id)
-                  ? "bg-gray-300 cursor-not-allowed"
+                  ? "cursor-pointer bg-gray-300 hover:bg-gray-300"
                   : "cursor-pointer hover:bg-gray-100"
               }`}
               onClick={() => handleSessionClick(session)}
