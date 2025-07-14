@@ -11,9 +11,9 @@ function AttendanceForm({ session, professorId, courseId }) {
   const [locked, setLocked] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [autoMarkedStudents, setAutoMarkedStudents] = useState([]);
-
   const [canComplete, setCanComplete] = useState(false);
 
+  // Load enrolled students
   useEffect(() => {
     if (!courseId) return;
 
@@ -35,7 +35,28 @@ function AttendanceForm({ session, professorId, courseId }) {
       });
   }, [courseId]);
 
-  // ✅ Hook to check if course can be completed
+  // Load existing attendance (if submitted before)
+  useEffect(() => {
+    if (!session?.id || !courseId || !professorId) return;
+
+    fetch(
+      `http://localhost/e-learning/backend/get_attendance_by_session.php?session_id=${session.id}&professor_id=${professorId}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const saved = {};
+          data.forEach((item) => {
+            saved[item.student_id] = item.status;
+          });
+          setAttendance(saved);
+          setLocked(true); // lock form if attendance already submitted
+        }
+      })
+      .catch((err) => console.error("Error loading attendance:", err));
+  }, [session?.id, courseId, professorId]);
+
+  // Check if course can be completed
   useEffect(() => {
     if (!courseId) return;
     fetch(
@@ -106,6 +127,7 @@ function AttendanceForm({ session, professorId, courseId }) {
     const result = await res.json();
     if (res.ok && result.success) {
       alert("Attendance saved.");
+      setLocked(true); // lock form after successful submit
     } else {
       alert("Error saving attendance: " + (result.error || "Unknown"));
     }
@@ -114,6 +136,7 @@ function AttendanceForm({ session, professorId, courseId }) {
   const completeCourse = async () => {
     if (!window.confirm("Are you sure you want to complete this course?"))
       return;
+
     const res = await fetch(
       "http://localhost/e-learning/backend/complete_course.php",
       {
@@ -123,6 +146,7 @@ function AttendanceForm({ session, professorId, courseId }) {
       }
     );
     const result = await res.json();
+
     if (result.success) {
       alert("Course marked as completed!");
       setCanComplete(false);
@@ -138,8 +162,9 @@ function AttendanceForm({ session, professorId, courseId }) {
       </h2>
 
       <SessionTimer
+        sessionId={session.id}
         onFifteenMinutes={handleFifteenMinutes}
-        onSecondsChange={setSeconds}
+        onTick={setSeconds}
       />
 
       <form onSubmit={handleSubmit}>
@@ -164,15 +189,16 @@ function AttendanceForm({ session, professorId, courseId }) {
             </select>
           </div>
         ))}
-        <button
-          type="submit"
-          className="mt-4 bg-blue-600 hover:bg-blue-800 text-white px-4 py-2 rounded"
-        >
-          Submit Attendance
-        </button>
+        {!locked && (
+          <button
+            type="submit"
+            className="mt-4 bg-blue-600 hover:bg-blue-800 text-white px-4 py-2 rounded"
+          >
+            Submit Attendance
+          </button>
+        )}
       </form>
 
-      {/* ✅ Complete Course Button */}
       <div className="mt-6 text-center">
         <button
           onClick={completeCourse}

@@ -463,3 +463,70 @@ Notification inserted: 📝 Make the certificates ready for course "test notifi 
 =======
 >>>>>>> d78af0282f9bff24ff3e6ea7a1cda5ea806d7f75
 >>>>>>> 2c7c294551c0b8665e5ccbcabab11e5ad5a3b02e
+Total sessions: 5
+Submitted sessions before: 0
+Notification condition NOT met.
+Total sessions: 5
+Submitted sessions before: 1
+Triggering notification for course_id: 51
+Notification inserted: 📝 Make the certificates ready for course "test2". Only two session remains.
+Total sessions: 7
+Submitted sessions before: 6
+Notification condition NOT met.
+Total sessions: 7
+Submitted sessions before: 6
+Notification condition NOT met.
+Total sessions: 7
+Submitted sessions before: 6
+Notification condition NOT met.
+Total sessions: 5
+Submitted sessions before: 1
+Triggering notification for course_id: 51
+Notification inserted: 📝 Make the certificates ready for course "test2". Only two session remains.
+Total sessions: 7
+Submitted sessions before: 6
+Notification condition NOT met.
+Total sessions: 5
+Submitted sessions before: 1
+Triggering notification for course_id: 51
+Notification inserted: 📝 Make the certificates ready for course "test2". Only two session remains.
+Total sessions: 7
+Submitted sessions before: 6
+Notification condition NOT met.
+Total sessions: 5
+Submitted sessions before: 1
+Triggering notification for course_id: 51
+Notification inserted: 📝 Make the certificates ready for course "test2". Only two session remains.
+Total sessions: 7
+Submitted sessions before: 6
+Notification condition NOT met.
+Total sessions: 5
+Submitted sessions before: 2
+Notification condition NOT met.
+Total sessions: 5
+Submitted sessions before: 3
+Notification condition NOT met.
+Total sessions: 22
+Submitted sessions before: 9
+Notification condition NOT met.
+Total sessions: 22
+Submitted sessions before: 9
+Notification condition NOT met.
+Total sessions: 22
+Submitted sessions before: 9
+Notification condition NOT met.
+Total sessions: 7
+Submitted sessions before: 6
+Notification condition NOT met.
+Total sessions: 22
+Submitted sessions before: 9
+Notification condition NOT met.
+Total sessions: 22
+Submitted sessions before: 9
+Notification condition NOT met.
+Total sessions: 5
+Submitted sessions before: 3
+Notification condition NOT met.
+Total sessions: 5
+Submitted sessions before: 4
+Notification condition NOT met.

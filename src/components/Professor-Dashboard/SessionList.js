@@ -7,6 +7,7 @@ function SessionList({ professorId }) {
   const [courses, setCourses] = useState([]);
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [sessions, setSessions] = useState([]);
+  const [submittedSessions, setSubmittedSessions] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,6 +27,7 @@ function SessionList({ professorId }) {
       setSessions([]);
       return;
     }
+
     fetch(
       `http://localhost/e-learning/backend/sessions.php?course_id=${selectedCourseId}`
     )
@@ -34,9 +36,20 @@ function SessionList({ professorId }) {
         if (Array.isArray(data)) setSessions(data);
       })
       .catch((err) => console.error("Failed to load sessions:", err));
-  }, [selectedCourseId]);
+
+    // Fetch submitted session ids
+    fetch(
+      `http://localhost/e-learning/backend/get_submitted_sessions.php?professor_id=${professorId}&course_id=${selectedCourseId}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setSubmittedSessions(data);
+      })
+      .catch((err) => console.error("Failed to fetch submitted sessions:", err));
+  }, [selectedCourseId, professorId]);
 
   const handleSessionClick = (session) => {
+    if (isSessionSubmitted(session.id)) return; // Prevent click if already submitted
     navigate("/professor/attendance", {
       state: {
         session,
@@ -44,6 +57,10 @@ function SessionList({ professorId }) {
         professorId,
       },
     });
+  };
+
+  const isSessionSubmitted = (sessionId) => {
+    return submittedSessions.includes(sessionId);
   };
 
   return (
@@ -68,8 +85,17 @@ function SessionList({ professorId }) {
           {sessions.map((session) => (
             <li
               key={session.id}
-              className="cursor-pointer mb-2 p-2 border rounded hover:bg-gray-100"
+              className={`mb-2 p-2 border rounded ${
+                isSessionSubmitted(session.id)
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : "cursor-pointer hover:bg-gray-100"
+              }`}
               onClick={() => handleSessionClick(session)}
+              title={
+                isSessionSubmitted(session.id)
+                  ? "Attendance already submitted"
+                  : "Click to submit attendance"
+              }
             >
               Session {session.session_number}
             </li>
