@@ -12,11 +12,11 @@ if (!$professor_id) {
 
 try {
     $stmt = $conn->prepare("
-    SELECT c.id, c.title, c.description
-    FROM course_professor cs
-    JOIN courses c ON cs.course_id = c.id
-    WHERE cs.professor_id = ?
-");
+        SELECT c.id, c.title, c.description
+        FROM course_professor cs
+        JOIN courses c ON cs.course_id = c.id
+        WHERE cs.professor_id = ? AND c.completed = 0
+    ");
     $stmt->execute([$professor_id]);
     $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
