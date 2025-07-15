@@ -193,7 +193,7 @@ function AllCourses() {
                       onClick={() =>
                         (window.location.href = `/edit-course/${course.id}`)
                       }
-                      className="bg-blue-600 hover:bg-blue-800 text-white px-3 py-1 rounded"
+                      className="bg-[#152259] hover:bg-[#152239] text-white px-3 py-1 rounded"
                     >
                       Edit
                     </button>

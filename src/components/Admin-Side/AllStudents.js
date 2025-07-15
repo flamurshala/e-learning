@@ -126,7 +126,7 @@ function AllStudents() {
                 {/* Edit */}
                 <td className="p-2">
                   <Link to={`/edit-student/${student.id}`}>
-                    <button className="bg-blue-600 hover:bg-blue-800 text-white py-1 px-3 rounded">
+                    <button className="bg-[#152259] hover:bg-[#152239] text-white py-1 px-3 rounded">
                       Edit
                     </button>
                   </Link>
@@ -176,7 +176,7 @@ function AllStudents() {
                 {/* Progress */}
                 <td className="p-2">
                   <Link to={`/student-progress/${student.id}`}>
-                    <button className="bg-blue-600 hover:bg-blue-800 text-white py-1 px-3 rounded">
+                    <button className="bg-[#152259] hover:bg-[#152239] text-white py-1 px-3 rounded">
                       View Progress
                     </button>
                   </Link>

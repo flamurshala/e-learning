@@ -82,7 +82,7 @@ function ProfessorCompletedCourses() {
                   <td className="p-2 border">{course.description}</td>
                   <td className="p-2 border">
                     <button
-                      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                      className="bg-[#152259] text-white px-3 py-1 rounded hover:bg-[#152249]"
                       onClick={() => toggleDropdown(course.id)}
                     >
                       {openDropdown === course.id ? "Hide Students" : "View Students"}
@@ -101,7 +101,7 @@ function ProfessorCompletedCourses() {
                   </td>
                   <td className="p-2 border text-center">
                     <button
-                      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-800"
+                      className="bg-[#152259] text-white px-3 py-1 rounded hover:bg-[#152249]"
                     onClick={() =>
   (window.location.href = `/course-attendance/${course.id}`)
 }

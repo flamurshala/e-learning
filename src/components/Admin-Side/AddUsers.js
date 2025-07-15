@@ -208,13 +208,13 @@ function AddUsers() {
                 </div>
               ))}
 
-              <button type="button" className="mb-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-800" onClick={handleAddCourseField}>+ Add Another Course</button>
+              <button type="button" className="mb-4 bg-[#152259] text-white px-4 py-2 rounded hover:bg-[#152239]" onClick={handleAddCourseField}>+ Add Another Course</button>
 
               <div className="mb-4">
                 <label className="font-semibold block mb-2">Extra Notes:</label>
                 <textarea className="w-full border border-black p-2" rows="3" value={extraNotes} onChange={(e) => setExtraNotes(e.target.value)} placeholder="Any additional notes..." />
               </div>
-              <button type="submit" className="bg-[#0e6cff] text-white px-4 py-2 rounded hover:bg-[#255ebb]">Add</button>
+              <button type="submit" className="bg-[#152259] text-white px-4 py-2 rounded hover:bg-[#152239]">Add</button>
             </form>
           </div>
 

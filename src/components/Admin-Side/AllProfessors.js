@@ -80,7 +80,7 @@ function AllProfessors() {
                 </td>
                 <td className="p-2">
                   <Link to={`/edit-professor/${professor.id}`}>
-                    <button className="bg-blue-600 hover:bg-blue-800 text-white py-1 px-3 rounded">
+                    <button className="bg-[#152259] hover:bg-[#152239] text-white py-1 px-3 rounded">
                       Edit
                     </button>
                   </Link>
