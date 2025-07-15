@@ -17,13 +17,13 @@ function LoginAs() {
       </div>
 
       {/* Right Side - Form Section */}
-      <div className="w-1/2 bg-[#0e6cff] flex items-center justify-center">
+      <div className="w-1/2 bg-[#152259] flex items-center justify-center">
         <div className="bg-white w-[80%] max-w-[400px] rounded-2xl shadow-xl p-8 text-center">
           <h1 className="text-[30px] mb-6">Login As</h1>
 
           <div className="flex justify-between mb-6">
             {/* Teacher */}
-            <div className="w-[48%] bg-[#0e6cff] p-4 relative group rounded-md overflow-hidden">
+            <div className="w-[48%] bg-[#152259] p-4 relative group rounded-md overflow-hidden">
               <img src={teacher} className="w-full" alt="teacher" />
               <Link
                 to={"/ProfessorLogin"}
@@ -34,7 +34,7 @@ function LoginAs() {
             </div>
 
             {/* Admin */}
-            <div className="w-[48%] bg-[#0e6cff] p-4 relative group rounded-md overflow-hidden">
+            <div className="w-[48%] bg-[#152259] p-4 relative group rounded-md overflow-hidden">
               <img src={admin} className="w-full" alt="admin" />
               <Link
                 to={"/AdminLogin"}
@@ -46,11 +46,11 @@ function LoginAs() {
           </div>
 
           {/* Student Login Button */}
-          <Link to={"/StudentLogin"}>
-            <button className="bg-[#0e6cff] text-white font-semibold py-3 px-6 rounded-lg w-full transition hover:bg-blue-700">
+          {/* <Link to={"/StudentLogin"}>
+            <button className="bg-[#152259] text-white font-semibold py-3 px-6 rounded-lg w-full transition hover:bg-[#152240]">
               Login As Student
             </button>
-          </Link>
+          </Link> */}
         </div>
       </div>
     </div>

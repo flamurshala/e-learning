@@ -58,7 +58,7 @@ function AddUsers() {
               <input className="mb-4 w-full border border-black p-2" type="text" name="professorName" placeholder="Name" value={professorName} onChange={(e) => setProfessorName(e.target.value)} required />
               <input className="mb-4 w-full border border-black p-2" type="email" name="professorEmail" placeholder="Email" value={professorEmail} onChange={(e) => setProfessorEmail(e.target.value)} required />
                <input className="mb-4 w-full border border-black p-2" type="password" name="professorPassword" placeholder="Password" value={professorPassword} onChange={(e) => setProfessorPassword(e.target.value)} required />
-              <button type="submit" className="bg-[#0e6cff] text-white px-4 py-2 rounded hover:bg-[#255ebb]">Add</button>
+              <button type="submit" className="bg-[#152259] text-white px-4 py-2 rounded hover:bg-[#152239]">Add</button>
             </form>
           </div>
         </div>

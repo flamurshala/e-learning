@@ -33,7 +33,7 @@ export default function AdminLogin() {
   };
 
   return (
-    <section className="flex flex-col items-center justify-center min-h-screen w-full bg-gradient-to-br bg-[#0e6cff]">
+    <section className="flex flex-col items-center justify-center min-h-screen w-full bg-gradient-to-br bg-[#152259]">
       <img src={img} className="w-[15%] mb-8 drop-shadow-lg" alt="Logo" />
       <div className="w-full max-w-md">
         <form
@@ -63,7 +63,7 @@ export default function AdminLogin() {
           />
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition"
+            className="w-full bg-[#152259] hover:bg-[#152250] text-white font-semibold py-3 rounded-lg transition"
           >
             Login
           </button>

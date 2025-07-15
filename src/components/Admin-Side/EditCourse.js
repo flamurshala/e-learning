@@ -56,7 +56,7 @@ function EditCourse() {
         <h1 className="text-2xl font-bold mb-4">Edit Course</h1>
         <button
           onClick={() => navigate(-1)}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-800"
+          className="bg-[#152259] text-white px-4 py-2 rounded hover:bg-[#152239]"
         >
           ← Back to Courses
         </button>
@@ -94,7 +94,7 @@ function EditCourse() {
 
         <button
           type="submit"
-          className="bg-[#0e6cff] text-white px-4 py-2 rounded hover:bg-blue-800"
+          className="bg-[#152259] text-white px-4 py-2 rounded hover:bg-[#152239]"
         >
           Save Changes
         </button>

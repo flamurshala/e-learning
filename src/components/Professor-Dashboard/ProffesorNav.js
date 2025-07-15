@@ -7,7 +7,7 @@ import LogOut from "../Professor-Dashboard/ProfessorLogOut";
 
 function ProffesorNav() {
   return (
-    <div className="fixed flex flex-col justify-between p-5 items-start top-0 left-0 h-screen w-[20%] bg-[#0e6cff] z-50">
+    <div className="fixed flex flex-col justify-between p-5 items-start top-0 left-0 h-screen w-[20%] bg-[#152259] z-50">
       <div className="flex flex-col items-start h-full">
         <div className="logo w-[65%] mb-[2rem]">
           <img src={img} alt="logo" className="w-full" />
@@ -22,6 +22,14 @@ function ProffesorNav() {
             <img src={assignmentsIcon} alt="calendar" />
             <Link to="/professor/calendar/:courseId">Courses</Link>
           </li>
+
+          
+        
+            <li className="flex items-center text-white font-bold gap-3 px-4">
+            <img src={daIcon} alt="CompletedCourse" />
+           <Link to="/professor/completed-courses">Completed Courses</Link>
+
+           </li>
 
           <li className="flex items-center text-white font-bold gap-3 px-4">
             <img src={daIcon} alt="CompletedCourse" />
