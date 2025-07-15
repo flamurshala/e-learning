@@ -20,7 +20,7 @@ function AdminNav() {
               <Link to="/CreateCourse">Create Course</Link>
             </li>
             <li className="mb-[1rem] text-white font-bold gap-3">
-              <Link to="/AddUsers">Add Users</Link>
+              <Link to="/AddUsers">Add Student</Link>
             </li>
              <li className="mb-[1rem] text-white font-bold gap-3">
               <Link to="/AddProf">Add Teachers</Link>

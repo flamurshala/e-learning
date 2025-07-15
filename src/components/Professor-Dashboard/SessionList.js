@@ -45,10 +45,13 @@ function SessionList({ professorId }) {
           const sessionIds = submittedData.map((item) => item.session_id);
           setSubmittedSessions(sessionIds);
 
-          const allSubmitted =
-            sessionData.length > 0 &&
-            sessionData.every((s) => sessionIds.includes(s.id));
-          setCanCompleteCourse(allSubmitted);
+          const totalSessions = sessionData.length;
+          const totalSubmitted = sessionIds.length;
+
+          const canComplete =
+            totalSessions >= 3 && totalSubmitted >= totalSessions - 2;
+
+          setCanCompleteCourse(canComplete);
         }
       })
       .catch((err) =>
@@ -71,13 +74,19 @@ function SessionList({ professorId }) {
   };
 
   const completeCourse = async () => {
-    if (!window.confirm("Are you sure you want to mark this course as complete?")) return;
+    if (
+      !window.confirm("Are you sure you want to mark this course as complete?")
+    )
+      return;
 
-    const res = await fetch("http://localhost/e-learning/backend/complete_course.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ course_id: selectedCourseId }),
-    });
+    const res = await fetch(
+      "http://localhost/e-learning/backend/complete_course.php",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ course_id: selectedCourseId }),
+      }
+    );
 
     const result = await res.json();
 
