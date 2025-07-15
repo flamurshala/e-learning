@@ -31,10 +31,6 @@ function ProffesorNav() {
 
            </li>
 
-          <li className="flex items-center text-white font-bold gap-3 px-4">
-            <img src={daIcon} alt="CompletedCourse" />
-            <Link to="/professor/completed-courses">Completed Courses</Link>
-          </li>
         </ul>
       </div>
       <div className="px-4">
