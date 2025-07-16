@@ -191,7 +191,7 @@ function AllCourses() {
                   <td className="p-2">
                     <button
                       onClick={() =>
-                        (window.location.href = `/edit-course/${course.id}`)
+                        navigate( `/edit-course/${course.id}`)
                       }
                       className="bg-[#152259] hover:bg-[#152239] text-white px-3 py-1 rounded"
                     >
