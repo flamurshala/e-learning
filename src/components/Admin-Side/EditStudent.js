@@ -87,6 +87,22 @@ function EditStudent() {
     setAmountPaidMonth2(updated);
   };
 
+  const addAnotherCourse = () => {
+    setSelectedCourses([...selectedCourses, ""]);
+    setPayments([...payments, ""]);
+    setAmountPaidAll([...amountPaidAll, ""]);
+    setAmountPaidMonth1([...amountPaidMonth1, ""]);
+    setAmountPaidMonth2([...amountPaidMonth2, ""]);
+  };
+
+  const removeCourse = (index) => {
+    setSelectedCourses(selectedCourses.filter((_, i) => i !== index));
+    setPayments(payments.filter((_, i) => i !== index));
+    setAmountPaidAll(amountPaidAll.filter((_, i) => i !== index));
+    setAmountPaidMonth1(amountPaidMonth1.filter((_, i) => i !== index));
+    setAmountPaidMonth2(amountPaidMonth2.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -146,12 +162,26 @@ function EditStudent() {
           <input type="email" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} className="w-full border p-2" required />
 
           {selectedCourses.map((courseId, index) => (
-            <div key={index} className="p-4 border rounded-md mb-4">
-              <label className="block font-semibold mb-1">Course #{index + 1}</label>
+            <div key={index} className="p-4 border rounded-md mb-4 bg-gray-50">
+              <div className="flex justify-between items-center mb-2">
+                <label className="font-semibold">Course #{index + 1}</label>
+                <button
+                  type="button"
+                  onClick={() => removeCourse(index)}
+                  className="text-red-500 text-sm"
+                >
+                  🗑️ Remove
+                </button>
+              </div>
+
               <select value={courseId} onChange={(e) => handleCourseChange(index, e.target.value)} className="w-full mb-2 border p-2">
                 <option value="">-- Select Course --</option>
                 {courses.map((course) => (
-                  <option key={course.id} value={course.id}>
+                  <option
+                    key={course.id}
+                    value={course.id}
+                    disabled={selectedCourses.includes(course.id) && course.id !== courseId}
+                  >
                     {course.title}
                   </option>
                 ))}
@@ -186,7 +216,15 @@ function EditStudent() {
             </div>
           ))}
 
-          <label className="block font-semibold">Extra Notes</label>
+          <button
+            type="button"
+            onClick={addAnotherCourse}
+            className="bg-green-600 text-white px-4 py-2 rounded"
+          >
+            ➕ Add Another Course
+          </button>
+
+          <label className="block font-semibold mt-4">Extra Notes</label>
           <textarea value={extraNotes} onChange={(e) => setExtraNotes(e.target.value)} className="w-full border p-2" rows="3" placeholder="Any additional notes..." />
 
           <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-full">
