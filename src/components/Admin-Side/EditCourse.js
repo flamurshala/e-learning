@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import AdminNav from "./AdminNav";
 
 function EditCourse() {
-  useEffect(() => {
-    document.title = "Edit Course - Tectigon Academy";
-  }, []);
-
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -13,22 +10,55 @@ function EditCourse() {
     title: "",
     description: "",
     professor_id: "",
+    training_hours: "",
+    student_ids: [],
   });
 
   const [professors, setProfessors] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost/e-learning/backend/get_course.php?id=${id}`)
-      .then((res) => res.json())
-      .then((data) => setCourse(data));
+    document.title = "Edit Course - Tectigon Academy";
 
+    // Get course details
+    fetch(`${process.env.REACT_APP_API_URL}/get_course.php?id=${id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setCourse({
+          title: data.title,
+          description: data.description,
+          professor_id: data.professor_id,
+          training_hours: data.training_hours || "",
+          student_ids: data.student_ids?.map(String) || [],
+        });
+      });
+
+    // Get all professors
     fetch(`${process.env.REACT_APP_API_URL}/get_professors.php`)
       .then((res) => res.json())
-      .then((data) => setProfessors(data));
+      .then(setProfessors);
+
+    // Get all students
+    fetch(`${process.env.REACT_APP_API_URL}/get_students.php`)
+      .then((res) => res.json())
+      .then(setStudents);
   }, [id]);
 
   const handleChange = (e) => {
     setCourse({ ...course, [e.target.name]: e.target.value });
+  };
+
+  const handleStudentCheckboxChange = (e) => {
+    const id = e.target.value;
+    const checked = e.target.checked;
+
+    setCourse((prev) => ({
+      ...prev,
+      student_ids: checked
+        ? [...prev.student_ids, id]
+        : prev.student_ids.filter((sid) => sid !== id),
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -50,55 +80,100 @@ function EditCourse() {
       });
   };
 
+  const filteredStudents = students.filter((s) =>
+    s.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="p-6">
-      <div className="flex w-[34%] items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold mb-4">Edit Course</h1>
-        <button
-          onClick={() => navigate(-1)}
-          className="bg-[#152259] text-white px-4 py-2 rounded hover:bg-[#152239]"
-        >
-          ← Back to Courses
-        </button>
+    <div className="flex gap-5">
+      <AdminNav />
+      <div className="w-[75%] ml-[22%] mt-6">
+        <div className="flex justify-between w-full mb-4">
+          <h1 className="text-2xl font-bold">Edit Course</h1>
+          <button
+            onClick={() => navigate(-1)}
+            className="bg-[#152259] text-white px-4 py-2 rounded hover:bg-[#152239]"
+          >
+            ← Back
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            name="title"
+            value={course.title}
+            onChange={handleChange}
+            placeholder="Course Title"
+            required
+            className="w-full border p-2 rounded"
+          />
+
+          <textarea
+            name="description"
+            value={course.description}
+            onChange={handleChange}
+            placeholder="Description"
+            className="w-full border p-2 rounded"
+          ></textarea>
+
+          <select
+            name="professor_id"
+            value={course.professor_id}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+          >
+            <option value="">-- Select Professor --</option>
+            {professors.map((prof) => (
+              <option key={prof.id} value={prof.id}>
+                {prof.name}
+              </option>
+            ))}
+          </select>
+
+          <input
+            type="number"
+            name="training_hours"
+            value={course.training_hours}
+            onChange={handleChange}
+            placeholder="Training Hours"
+            min={1}
+            className="w-full border p-2 rounded"
+          />
+
+          <div>
+            <p className="font-semibold">Select Students:</p>
+            <input
+              type="text"
+              placeholder="Search students..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full border p-2 mb-2 rounded"
+            />
+
+            <div className="max-h-48 overflow-y-auto border p-2 rounded">
+              {filteredStudents.map((s) => (
+                <label key={s.id} className="block">
+                  <input
+                    type="checkbox"
+                    value={s.id}
+                    checked={course.student_ids.includes(String(s.id))}
+                    onChange={handleStudentCheckboxChange}
+                    className="mr-2"
+                  />
+                  {s.name}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="bg-[#152259] text-white px-4 py-2 rounded hover:bg-[#152239]"
+          >
+            Save Changes
+          </button>
+        </form>
       </div>
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
-        <input
-          type="text"
-          name="title"
-          value={course.title}
-          onChange={handleChange}
-          placeholder="Course Title"
-          className="w-full p-2 border rounded"
-        />
-        <textarea
-          name="description"
-          value={course.description}
-          onChange={handleChange}
-          placeholder="Description"
-          className="w-full p-2 border rounded"
-        ></textarea>
-
-        <select
-          name="professor_id"
-          value={course.professor_id}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-        >
-          <option value="">-- Select Professor --</option>
-          {professors.map((prof) => (
-            <option key={prof.id} value={prof.id}>
-              {prof.name}
-            </option>
-          ))}
-        </select>
-
-        <button
-          type="submit"
-          className="bg-[#152259] text-white px-4 py-2 rounded hover:bg-[#152239]"
-        >
-          Save Changes
-        </button>
-      </form>
     </div>
   );
 }
