@@ -25,15 +25,22 @@ if (!$user) {
 }
 
 if ($password === $user['password']) {
-    echo json_encode(value: [
+    // Get default course for the professor
+    $stmtCourse = $conn->prepare("SELECT id FROM courses WHERE professor_id = ? LIMIT 1");
+    $stmtCourse->execute([$user['id']]);
+    $course = $stmtCourse->fetch(PDO::FETCH_ASSOC);
+
+    echo json_encode([
         "success" => true,
         "user" => [
             "id" => $user['id'],
             "name" => $user['name'],
-            "email" => $user['email']
+            "email" => $user['email'],
+            "course_id" => $course['id'] ?? null  // send course_id if available
         ]
     ]);
-} else {
+}
+ else {
     echo json_encode(value: [
         "success" => false,
         "message" => "Invalid password"
