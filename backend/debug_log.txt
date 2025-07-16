@@ -605,3 +605,16 @@ Notification condition NOT met.
 Total sessions: 8
 Submitted sessions before: 8
 Notification condition NOT met.
+Total sessions: 6
+Submitted sessions before: 0
+Notification condition NOT met.
+Total sessions: 6
+Submitted sessions before: 1
+Notification condition NOT met.
+Total sessions: 6
+Submitted sessions before: 2
+Triggering notification for course_id: 53
+Notification inserted: 📝 Make the certificates ready for course "testi i 101". Only two session remains.
+Total sessions: 6
+Submitted sessions before: 3
+Notification condition NOT met.
