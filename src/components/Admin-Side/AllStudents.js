@@ -11,7 +11,7 @@ function AllStudents() {
   useEffect(() => {
     document.title = "All Students - Tectigon Academy";
 
-    fetch("http://localhost/e-learning/backend/get_students_with_payments.php")
+    fetch(`${process.env.REACT_APP_API_URL}/get_students_with_payments.php`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -142,7 +142,7 @@ function AllStudents() {
                         )
                       ) {
                         fetch(
-                          "http://localhost/e-learning/backend/delete_student.php",
+                          `${process.env.REACT_APP_API_URL}/delete_student.php`,
                           {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },

@@ -14,7 +14,7 @@ export default function Login() {
 
   const handleLogin = async () => {
     const res = await fetch(
-      "http://localhost/e-learning/backend/professorLogin.php",
+      `${process.env.REACT_APP_API_URL}/professorLogin.php`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

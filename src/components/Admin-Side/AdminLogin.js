@@ -15,7 +15,7 @@ export default function AdminLogin() {
 
   const handleLogin = async () => {
     const res = await fetch(
-      "http://localhost/e-learning/backend/admin_login.php",
+      `${process.env.REACT_APP_API_URL}/admin_login.php`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

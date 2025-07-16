@@ -16,7 +16,7 @@ function CourseAttendance() {
   useEffect(() => {
     document.title = "Course Attendance - Tectigon Academy";
 
-    fetch(`http://localhost/e-learning/backend/get_attendance.php?course_id=${courseId}`)
+    fetch(`${process.env.REACT_APP_API_URL}/get_attendance.php?course_id=${courseId}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {

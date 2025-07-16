@@ -16,12 +16,12 @@ function CreateCourse() {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost/e-learning/backend/get_professors.php")
+    fetch(`${process.env.REACT_APP_API_URL}/get_professors.php`)
       .then((res) => res.json())
       .then(setProfessors)
       .catch((err) => console.error("Error fetching professors:", err));
 
-    fetch("http://localhost/e-learning/backend/get_students.php")
+    fetch(`${process.env.REACT_APP_API_URL}/get_students.php`)
       .then((res) => res.json())
       .then(setStudents)
       .catch((err) => console.error("Error fetching students:", err));
@@ -52,7 +52,7 @@ function CreateCourse() {
       training_hours: Number(trainingHours),
     };
 
-    fetch("http://localhost/e-learning/backend/create_courses.php", {
+    fetch(`${process.env.REACT_APP_API_URL}/create_courses.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

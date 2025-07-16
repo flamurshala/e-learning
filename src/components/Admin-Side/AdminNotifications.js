@@ -11,7 +11,7 @@ function AdminNotifications() {
   useEffect(() => {
     document.title = "Admin Notifications - Tectigon Academy";
 
-    fetch("http://localhost/e-learning/backend/get_admin_notifications.php")
+    fetch(`${process.env.REACT_APP_API_URL}/get_admin_notifications.php`)
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
@@ -53,7 +53,7 @@ function AdminNotifications() {
 
     try {
       const res = await fetch(
-        "http://localhost/e-learning/backend/delete_multiple_notifications.php",
+        `${process.env.REACT_APP_API_URL}/delete_multiple_notifications.php`,
         {
           method: "POST",
           headers: {

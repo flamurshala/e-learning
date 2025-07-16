@@ -18,7 +18,7 @@ function EditStudent() {
   });
 
   useEffect(() => {
-    fetch(`http://localhost/e-learning/backend/get_single_student.php?id=${id}`)
+    fetch(`${process.env.REACT_APP_API_URL}/get_single_student.php?id=${id}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success === false) {
@@ -45,7 +45,7 @@ function EditStudent() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetch("http://localhost/e-learning/backend/update_student.php", {
+    fetch(`${process.env.REACT_APP_API_URL}/update_student.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, ...student }),

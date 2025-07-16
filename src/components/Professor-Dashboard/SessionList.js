@@ -14,7 +14,7 @@ function SessionList({ professorId }) {
   useEffect(() => {
     if (!professorId) return;
     fetch(
-      `http://localhost/e-learning/backend/get_professor_courses.php?professor_id=${professorId}`
+      `${process.env.REACT_APP_API_URL}/get_professor_courses.php?professor_id=${professorId}`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -33,10 +33,10 @@ function SessionList({ professorId }) {
 
     Promise.all([
       fetch(
-        `http://localhost/e-learning/backend/sessions.php?course_id=${selectedCourseId}`
+        `${process.env.REACT_APP_API_URL}/sessions.php?course_id=${selectedCourseId}`
       ).then((res) => res.json()),
       fetch(
-        `http://localhost/e-learning/backend/get_submitted_sessions.php?professor_id=${professorId}&course_id=${selectedCourseId}`
+        `${process.env.REACT_APP_API_URL}/get_submitted_sessions.php?professor_id=${professorId}&course_id=${selectedCourseId}`
       ).then((res) => res.json()),
     ])
       .then(([sessionData, submittedData]) => {
@@ -80,7 +80,7 @@ function SessionList({ professorId }) {
       return;
 
     const res = await fetch(
-      "http://localhost/e-learning/backend/complete_course.php",
+      `${process.env.REACT_APP_API_URL}/complete_course.php`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -27,7 +27,7 @@ function AddUsers() {
   const isEmpty = (val) => !val.trim();
 
   useEffect(() => {
-    fetch("http://localhost/e-learning/backend/get_course.php")
+    fetch(`${process.env.REACT_APP_API_URL}/get_course.php`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setCourses(data);
@@ -61,7 +61,7 @@ function AddUsers() {
       courses: selectedCourses,
     };
 
-    fetch("http://localhost/e-learning/backend/add_students.php", {
+    fetch(`${process.env.REACT_APP_API_URL}/add_students.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -142,7 +142,7 @@ function AddUsers() {
       email: professorEmail,
     };
 
-    fetch("http://localhost/e-learning/backend/add_professors.php", {
+    fetch(`${process.env.REACT_APP_API_URL}/add_professors.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

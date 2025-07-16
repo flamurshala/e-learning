@@ -18,7 +18,7 @@ function EditProfessor() {
 
   useEffect(() => {
     fetch(
-      `http://localhost/e-learning/backend/get_single_professor.php?id=${id}`
+      `${process.env.REACT_APP_API_URL}/get_single_professor.php?id=${id}`
     )
       .then((res) => res.json())
       .then((data) => setProfessor(data))
@@ -31,7 +31,7 @@ function EditProfessor() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetch("http://localhost/e-learning/backend/update_professor.php", {
+    fetch(`${process.env.REACT_APP_API_URL}/update_professor.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, ...professor }),

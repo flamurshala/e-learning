@@ -11,7 +11,7 @@ function StudentProgress() {
 
   useEffect(() => {
     fetch(
-      `http://localhost/e-learning/backend/get_student_progress_for_admin.php?student_id=${studentId}`
+      `${process.env.REACT_APP_API_URL}/get_student_progress_for_admin.php?student_id=${studentId}`
     )
       .then((res) => res.json())
       .then((data) => {

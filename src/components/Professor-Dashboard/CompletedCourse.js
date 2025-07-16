@@ -12,7 +12,7 @@ function CompletedCourses() {
   useEffect(() => {
     document.title = "Completed Courses - Tectigon Academy";
 
-    fetch("http://localhost/e-learning/backend/get_completed_courses.php")
+    fetch(`${process.env.REACT_APP_API_URL}/get_completed_courses.php`)
       .then((res) => {
         if (!res.ok) throw new Error("Network response was not ok");
         return res.json();

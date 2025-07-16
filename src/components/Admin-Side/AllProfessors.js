@@ -12,7 +12,7 @@ function AllProfessors() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost/e-learning/backend/get_professors_with_courses.php")
+    fetch(`${process.env.REACT_APP_API_URL}/get_professors_with_courses.php`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch professors");
         return res.json();
@@ -32,7 +32,7 @@ function AllProfessors() {
     if (!window.confirm("Are you sure you want to delete this professor?"))
       return;
 
-    fetch("http://localhost/e-learning/backend/delete_professor.php", {
+    fetch(`${process.env.REACT_APP_API_URL}/delete_professor.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: Number(id) }),

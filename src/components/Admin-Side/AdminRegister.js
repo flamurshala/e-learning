@@ -21,7 +21,7 @@ export default function AdminRegister() {
 
     try {
       const response = await fetch(
-        "http://localhost/e-learning/backend/register_admin.php",
+        `${process.env.REACT_APP_API_URL}/register_admin.php`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

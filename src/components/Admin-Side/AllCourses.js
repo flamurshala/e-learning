@@ -21,7 +21,7 @@ function AllCourses() {
   useEffect(() => {
     setLoading(true);
     fetch(
-      "http://localhost/e-learning/backend/get_courses_with_details_for_all_courses.php"
+      `${process.env.REACT_APP_API_URL}/get_courses_with_details_for_all_courses.php`
     )
       .then((res) => {
         if (!res.ok) throw new Error("Network response was not ok");
@@ -68,7 +68,7 @@ function AllCourses() {
   const handleDelete = (id) => {
     if (!window.confirm("Are you sure you want to delete this course?")) return;
 
-    fetch("http://localhost/e-learning/backend/delete_course.php", {
+    fetch(`${process.env.REACT_APP_API_URL}/delete_course.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),

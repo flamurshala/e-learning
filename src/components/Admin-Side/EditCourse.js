@@ -22,7 +22,7 @@ function EditCourse() {
       .then((res) => res.json())
       .then((data) => setCourse(data));
 
-    fetch("http://localhost/e-learning/backend/get_professors.php")
+    fetch(`${process.env.REACT_APP_API_URL}/get_professors.php`)
       .then((res) => res.json())
       .then((data) => setProfessors(data));
   }, [id]);
@@ -34,7 +34,7 @@ function EditCourse() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    fetch("http://localhost/e-learning/backend/update_course.php", {
+    fetch(`${process.env.REACT_APP_API_URL}/update_course.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...course, id }),

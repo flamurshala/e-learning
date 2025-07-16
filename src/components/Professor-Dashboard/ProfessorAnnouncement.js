@@ -13,7 +13,7 @@ function StudentAnnouncements() {
 
   useEffect(() => {
     fetch(
-      `http://localhost/e-learning/backend/get_announcements.php?audience=professorss&user_id=${professor_id}`
+      `${process.env.REACT_APP_API_URL}/get_announcements.php?audience=professorss&user_id=${professor_id}`
     )
       .then((res) => res.json())
       .then(setAnnouncements);
@@ -23,7 +23,7 @@ function StudentAnnouncements() {
     if (!window.confirm("Are you sure you want to clear all announcements?"))
       return;
 
-    fetch("http://localhost/e-learning/backend/clear_announcements.php", {
+    fetch(`${process.env.REACT_APP_API_URL}/clear_announcements.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

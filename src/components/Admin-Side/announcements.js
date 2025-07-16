@@ -14,7 +14,7 @@ function Announcements() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    fetch("http://localhost/e-learning/backend/create_announcement.php", {
+    fetch(`${process.env.REACT_APP_API_URL}/create_announcement.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, content, audience }),

@@ -18,7 +18,7 @@ function AttendanceForm({ session, professorId, courseId }) {
     if (!courseId) return;
 
     fetch(
-      `http://localhost/e-learning/backend/enrolled_students.php?course_id=${courseId}`
+      `${process.env.REACT_APP_API_URL}/enrolled_students.php?course_id=${courseId}`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -40,7 +40,7 @@ function AttendanceForm({ session, professorId, courseId }) {
     if (!session?.id || !courseId || !professorId) return;
 
     fetch(
-      `http://localhost/e-learning/backend/get_attendance_by_session.php?session_id=${session.id}&professor_id=${professorId}`
+      `${process.env.REACT_APP_API_URL}/get_attendance_by_session.php?session_id=${session.id}&professor_id=${professorId}`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -60,7 +60,7 @@ function AttendanceForm({ session, professorId, courseId }) {
   useEffect(() => {
     if (!courseId) return;
     fetch(
-      `http://localhost/e-learning/backend/can_complete_course.php?course_id=${courseId}`
+      `${process.env.REACT_APP_API_URL}/can_complete_course.php?course_id=${courseId}`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -116,7 +116,7 @@ function AttendanceForm({ session, professorId, courseId }) {
     };
 
     const res = await fetch(
-      "http://localhost/e-learning/backend/attendance.php",
+      `${process.env.REACT_APP_API_URL}/attendance.php`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -138,7 +138,7 @@ function AttendanceForm({ session, professorId, courseId }) {
       return;
 
     const res = await fetch(
-      "http://localhost/e-learning/backend/complete_course.php",
+      `${process.env.REACT_APP_API_URL}/complete_course.php`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
