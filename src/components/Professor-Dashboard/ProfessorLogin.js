@@ -26,7 +26,8 @@ export default function Login() {
 
     if (data.success) {
       localStorage.setItem("professorId", data.user.id);
-      navigate("/professor/calendar/:courseId");
+      navigate(`/professor/calendar/${data.user.course_id}`);
+
     } else {
       setError(data.message);
     }
