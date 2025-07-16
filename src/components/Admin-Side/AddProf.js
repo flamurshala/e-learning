@@ -25,7 +25,7 @@ function AddUsers() {
       password: professorPassword,
     };
 
-    fetch(`${process.env.REACT_APP_API_URL}add_professors.php`, {
+    fetch(`${process.env.REACT_APP_API_URL}/add_professors.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

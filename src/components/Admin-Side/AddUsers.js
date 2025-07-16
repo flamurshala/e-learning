@@ -99,6 +99,26 @@ function AddUsers() {
     setAmountPaidMonth2([...amountPaidMonth2, ""]);
   };
 
+  const handleRemoveCourseField = (index) => {
+    const newSelectedCourses = [...selectedCourses];
+    const newPayments = [...payments];
+    const newAmountPaidAll = [...amountPaidAll];
+    const newAmountPaidMonth1 = [...amountPaidMonth1];
+    const newAmountPaidMonth2 = [...amountPaidMonth2];
+
+    newSelectedCourses.splice(index, 1);
+    newPayments.splice(index, 1);
+    newAmountPaidAll.splice(index, 1);
+    newAmountPaidMonth1.splice(index, 1);
+    newAmountPaidMonth2.splice(index, 1);
+
+    setSelectedCourses(newSelectedCourses);
+    setPayments(newPayments);
+    setAmountPaidAll(newAmountPaidAll);
+    setAmountPaidMonth1(newAmountPaidMonth1);
+    setAmountPaidMonth2(newAmountPaidMonth2);
+  };
+
   const handleCourseChange = (index, value) => {
     const newCourses = [...selectedCourses];
     newCourses[index] = value;
@@ -179,7 +199,16 @@ function AddUsers() {
               <input className="mb-4 w-full border border-black p-2" type="email" placeholder="Email" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} required />
 
               {selectedCourses.map((selected, index) => (
-                <div key={index} className="mb-6 border p-4 rounded-md border-gray-400">
+                <div key={index} className="mb-6 border p-4 rounded-md border-gray-400 relative">
+                  {selectedCourses.length > 1 && (
+                    <button
+                      type="button"
+                      className="absolute top-2 right-2 text-red-500 font-bold hover:text-red-700 text-lg"
+                      onClick={() => handleRemoveCourseField(index)}
+                    >
+                      ×
+                    </button>
+                  )}
                   <label className="font-semibold block mb-2">Select Course #{index + 1}:</label>
                   <select className="w-full border border-black p-2 mb-2" value={selected} onChange={(e) => handleCourseChange(index, e.target.value)} required>
                     <option value="">-- Select a course --</option>
@@ -202,7 +231,7 @@ function AddUsers() {
                   {payments[index] === "Divided" && (
                     <div className="flex gap-4">
                       <input className="w-1/2 border border-black p-2" type="number" placeholder="First Month Paid" min={0} value={amountPaidMonth1[index]} onChange={(e) => handleAmountPaidMonth1Change(index, e.target.value)} required />
-                      <input className="w-1/2 border border-black p-2" type="number" placeholder="Second Month Paid" min={0} value={amountPaidMonth2[index]} onChange={(e) => handleAmountPaidMonth2Change(index, e.target.value)} required />
+                      <input className="w-1/2 border border-black p-2" type="number" placeholder="Second Month Paid" min={0} value={amountPaidMonth2[index]} onChange={(e) => handleAmountPaidMonth2Change(index, e.target.value)} />
                     </div>
                   )}
                 </div>
@@ -217,8 +246,6 @@ function AddUsers() {
               <button type="submit" className="bg-[#152259] text-white px-4 py-2 rounded hover:bg-[#152239]">Add</button>
             </form>
           </div>
-
-          
         </div>
       </div>
     </div>

@@ -3,21 +3,31 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 function EditStudent() {
-  useEffect(() => {
-    document.title = "Edit Student - Tectigon Academy";
-  }, []);
-
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [student, setStudent] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    password: "",
-  });
+  const [studentName, setStudentName] = useState("");
+  const [studentSurname, setStudentSurname] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [personalNumber, setPersonalNumber] = useState("");
+  const [studentEmail, setStudentEmail] = useState("");
+  const [extraNotes, setExtraNotes] = useState("");
+
+  const [courses, setCourses] = useState([]);
+  const [selectedCourses, setSelectedCourses] = useState([""]);
+  const [payments, setPayments] = useState([""]);
+  const [amountPaidAll, setAmountPaidAll] = useState([""]);
+  const [amountPaidMonth1, setAmountPaidMonth1] = useState([""]);
+  const [amountPaidMonth2, setAmountPaidMonth2] = useState([""]);
 
   useEffect(() => {
+    document.title = "Edit Student - Tectigon Academy";
+
+    fetch(`${process.env.REACT_APP_API_URL}/get_course.php`)
+      .then((res) => res.json())
+      .then((data) => setCourses(Array.isArray(data) ? data : []))
+      .catch(() => setCourses([]));
+
     fetch(`${process.env.REACT_APP_API_URL}/get_single_student.php?id=${id}`)
       .then((res) => res.json())
       .then((data) => {
@@ -26,12 +36,20 @@ function EditStudent() {
           navigate("/AllStudents");
           return;
         }
-        setStudent({
-          name: data.name || "",
-          phone: data.phone_number || "",
-          email: data.email || "",
-          password: data.password || "",
-        });
+
+        setStudentName(data.name || "");
+        setStudentSurname(data.surname || "");
+        setPhoneNumber(data.phone_number || "");
+        setPersonalNumber(data.personal_number || "");
+        setStudentEmail(data.email || "");
+        setExtraNotes(data.notes || "");
+
+        const userCourses = data.courses || [];
+        setSelectedCourses(userCourses.map((c) => c.course_id));
+        setPayments(userCourses.map((c) => c.payment_method || ""));
+        setAmountPaidAll(userCourses.map((c) => c.amount_all || ""));
+        setAmountPaidMonth1(userCourses.map((c) => c.amount_month1 || ""));
+        setAmountPaidMonth2(userCourses.map((c) => c.amount_month2 || ""));
       })
       .catch((err) => {
         console.error("Failed to load student", err);
@@ -39,84 +57,140 @@ function EditStudent() {
       });
   }, [id, navigate]);
 
-  const handleChange = (e) => {
-    setStudent({ ...student, [e.target.name]: e.target.value });
+  const handleCourseChange = (index, value) => {
+    const updated = [...selectedCourses];
+    updated[index] = value;
+    setSelectedCourses(updated);
+  };
+
+  const handlePaymentChange = (index, value) => {
+    const updated = [...payments];
+    updated[index] = value;
+    setPayments(updated);
+  };
+
+  const handleAmountPaidAllChange = (index, value) => {
+    const updated = [...amountPaidAll];
+    updated[index] = value;
+    setAmountPaidAll(updated);
+  };
+
+  const handleAmountPaidMonth1Change = (index, value) => {
+    const updated = [...amountPaidMonth1];
+    updated[index] = value;
+    setAmountPaidMonth1(updated);
+  };
+
+  const handleAmountPaidMonth2Change = (index, value) => {
+    const updated = [...amountPaidMonth2];
+    updated[index] = value;
+    setAmountPaidMonth2(updated);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const payload = {
+      id,
+      name: studentName,
+      surname: studentSurname,
+      phoneNumber,
+      personalNumber,
+      email: studentEmail,
+      notes: extraNotes,
+      courses: selectedCourses,
+      payments,
+      amountPaidAll,
+      amountPaidMonth1,
+      amountPaidMonth2,
+    };
+
     fetch(`${process.env.REACT_APP_API_URL}/update_student.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, ...student }),
+      body: JSON.stringify(payload),
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("Update response:", data);
         if (data.success) {
+          alert("Student updated successfully");
           navigate("/AllStudents");
         } else {
           alert("Update failed: " + (data.error || "Unknown error"));
         }
       })
-      .catch((err) => {
-        alert("Fetch error: " + err.message);
-      });
+      .catch((err) => alert("Fetch error: " + err.message));
   };
 
   return (
     <div className="flex gap-4">
       <AdminNav />
-      <div className="w-[30%] ml-[22%] mt-8">
-        <div className="flex  items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold mb-4">Edit Student</h1>
-          <button
-            onClick={() => navigate(-1)}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-800"
-          >
-            ←
-          </button>
-        </div>
+      <div className="ml-[22%] mt-6 w-[75%]">
+        <h1 className="text-2xl font-semibold border-b-2 border-[#c2c2c2] mb-6">
+          Edit Student
+        </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            name="name"
-            value={student.name}
-            onChange={handleChange}
-            placeholder="Name"
-            className="block border p-2 w-full"
-            required
-          />
-          <input
-            name="phone"
-            value={student.phone}
-            onChange={handleChange}
-            placeholder="Phone Number"
-            className="block border p-2 w-full"
-            required
-          />
-          <input
-            name="email"
-            value={student.email}
-            onChange={handleChange}
-            placeholder="Email"
-            className="block border p-2 w-full"
-            type="email"
-            required
-          />
-          <input
-            name="password"
-            value={student.password}
-            onChange={handleChange}
-            placeholder="Password"
-            className="block border p-2 w-full"
-            type="password"
-            required
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 w-full text-white px-4 py-2 rounded"
-          >
-            Save
+          <label className="block font-semibold">Name</label>
+          <input type="text" value={studentName} onChange={(e) => setStudentName(e.target.value)} className="w-full border p-2" required />
+
+          <label className="block font-semibold">Surname</label>
+          <input type="text" value={studentSurname} onChange={(e) => setStudentSurname(e.target.value)} className="w-full border p-2" required />
+
+          <label className="block font-semibold">Phone Number</label>
+          <input type="text" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="w-full border p-2" required />
+
+          <label className="block font-semibold">Personal Number</label>
+          <input type="text" value={personalNumber} onChange={(e) => setPersonalNumber(e.target.value)} className="w-full border p-2" required />
+
+          <label className="block font-semibold">Email</label>
+          <input type="email" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} className="w-full border p-2" required />
+
+          {selectedCourses.map((courseId, index) => (
+            <div key={index} className="p-4 border rounded-md mb-4">
+              <label className="block font-semibold mb-1">Course #{index + 1}</label>
+              <select value={courseId} onChange={(e) => handleCourseChange(index, e.target.value)} className="w-full mb-2 border p-2">
+                <option value="">-- Select Course --</option>
+                {courses.map((course) => (
+                  <option key={course.id} value={course.id}>
+                    {course.title}
+                  </option>
+                ))}
+              </select>
+
+              <label className="block font-semibold mb-1">Payment Method</label>
+              <select value={payments[index]} onChange={(e) => handlePaymentChange(index, e.target.value)} className="w-full mb-2 border p-2">
+                <option value="">Select method</option>
+                <option value="All">Pay All</option>
+                <option value="Divided">Pay Divided (2 months)</option>
+              </select>
+
+              {payments[index] === "All" && (
+                <div>
+                  <label className="block font-semibold">Amount Paid</label>
+                  <input type="number" placeholder="Amount Paid" className="w-full mb-2 border p-2" value={amountPaidAll[index]} onChange={(e) => handleAmountPaidAllChange(index, e.target.value)} />
+                </div>
+              )}
+
+              {payments[index] === "Divided" && (
+                <div className="flex gap-2">
+                  <div className="w-1/2">
+                    <label className="block font-semibold">Month 1</label>
+                    <input type="number" placeholder="Month 1 Paid" className="w-full border p-2" value={amountPaidMonth1[index]} onChange={(e) => handleAmountPaidMonth1Change(index, e.target.value)} />
+                  </div>
+                  <div className="w-1/2">
+                    <label className="block font-semibold">Month 2</label>
+                    <input type="number" placeholder="Month 2 Paid" className="w-full border p-2" value={amountPaidMonth2[index]} onChange={(e) => handleAmountPaidMonth2Change(index, e.target.value)} />
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+
+          <label className="block font-semibold">Extra Notes</label>
+          <textarea value={extraNotes} onChange={(e) => setExtraNotes(e.target.value)} className="w-full border p-2" rows="3" placeholder="Any additional notes..." />
+
+          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-full">
+            Save Changes
           </button>
         </form>
       </div>

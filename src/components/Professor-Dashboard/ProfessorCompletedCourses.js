@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import ProffesorNav from "./ProffesorNav";
+import { useNavigate } from "react-router-dom";
 
 function ProfessorCompletedCourses() {
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [openDropdown, setOpenDropdown] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.title = "Completed Courses - Tectigon Academy";
@@ -102,10 +104,7 @@ function ProfessorCompletedCourses() {
                   <td className="p-2 border text-center">
                     <button
                       className="bg-[#152259] text-white px-3 py-1 rounded hover:bg-[#152249]"
-                    onClick={() =>
-  (window.location.href = `/course-attendance/${course.id}`)
-}
-
+                      onClick={() => navigate(`/course-attendance/${course.id}`)}
                     >
                       View Attendance
                     </button>

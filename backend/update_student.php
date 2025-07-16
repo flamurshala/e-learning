@@ -6,33 +6,60 @@ header("Content-Type: application/json");
 
 include "db.php";
 
-// Read and decode JSON input
+// Get data
 $data = json_decode(file_get_contents("php://input"), true);
 
-// Validate input
 $student_id = $data['id'] ?? null;
 $name = $data['name'] ?? '';
+$surname = $data['surname'] ?? '';
+$phoneNumber = $data['phoneNumber'] ?? '';
+$personalNumber = $data['personalNumber'] ?? '';
 $email = $data['email'] ?? '';
-$password = $data['password'] ?? '';
+$notes = $data['notes'] ?? '';
 
-if (!$student_id || !$name || !$email || !$password) {
-    echo json_encode([
-        "success" => false,
-        "error" => "Missing data"
-    ]);
+$courses = $data['courses'] ?? [];
+$payments = $data['payments'] ?? [];
+$amountPaidAll = $data['amountPaidAll'] ?? [];
+$amountPaidMonth1 = $data['amountPaidMonth1'] ?? [];
+$amountPaidMonth2 = $data['amountPaidMonth2'] ?? [];
+
+if (!$student_id || !$name || !$email) {
+    echo json_encode(["success" => false, "error" => "Missing core student data"]);
     exit;
 }
 
-// Update student in the database
 try {
-    $stmt = $conn->prepare("UPDATE students SET name = ?, email = ?, password = ? WHERE id = ?");
-    $stmt->execute([$name, $email, $password, $student_id]);
+    $conn->beginTransaction();
 
+    // Update core student info
+    $stmt = $conn->prepare("UPDATE students SET name=?, surname=?, phone_number=?, personal_number=?, email=?, notes=? WHERE id=?");
+    $stmt->execute([$name, $surname, $phoneNumber, $personalNumber, $email, $notes, $student_id]);
+
+    // Remove existing courses and payments for this student
+    $conn->prepare("DELETE FROM course_student WHERE student_id=?")->execute([$student_id]);
+    $conn->prepare("DELETE FROM student_payments WHERE student_id=?")->execute([$student_id]);
+
+    // Insert new course/payment entries
+    for ($i = 0; $i < count($courses); $i++) {
+        $courseId = $courses[$i];
+        $method = $payments[$i] ?? '';
+        $all = $amountPaidAll[$i] !== '' ? floatval($amountPaidAll[$i]) : null;
+        $m1 = $amountPaidMonth1[$i] !== '' ? floatval($amountPaidMonth1[$i]) : null;
+        $m2 = $amountPaidMonth2[$i] !== '' ? floatval($amountPaidMonth2[$i]) : null;
+
+        // Insert into course_student
+        $conn->prepare("INSERT INTO course_student (student_id, course_id) VALUES (?, ?)")
+            ->execute([$student_id, $courseId]);
+
+        // Insert into student_payments
+        $conn->prepare("INSERT INTO student_payments (student_id, course_id, payment_method, amount_all, amount_month1, amount_month2)
+            VALUES (?, ?, ?, ?, ?, ?)")
+            ->execute([$student_id, $courseId, $method, $all, $m1, $m2]);
+    }
+
+    $conn->commit();
     echo json_encode(["success" => true]);
 } catch (PDOException $e) {
-    echo json_encode([
-        "success" => false,
-        "error" => $e->getMessage()
-    ]);
+    $conn->rollBack();
+    echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }
-?>
