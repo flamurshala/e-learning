@@ -187,7 +187,7 @@ function AddUsers() {
     <div className="flex gap-4">
       <AdminNav />
       <div className="mt-4 ml-[22%] w-[75%]">
-        <h1 className="text-2xl font-semibold border-b-2 border-[#c2c2c2] w-[95%]">Add a new User</h1>
+        {/* <h1 className="text-2xl font-semibold border-b-2 border-[#c2c2c2] w-[95%]">Add a new Student</h1> */}
         <div className="cards mt-6 items-center flex flex-wrap gap-4">
           <div className="card border shadow-xl border-black p-5 w-[45%]">
             <form onSubmit={handleStudentSubmit}>

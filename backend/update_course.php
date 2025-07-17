@@ -14,6 +14,7 @@ $title = trim($data['title'] ?? '');
 $description = trim($data['description'] ?? '');
 $professor_id = $data['professor_id'] ?? null;
 $student_ids = is_array($data['student_ids']) ? $data['student_ids'] : [];
+$requestedTrainingHours = intval($data['training_hours'] ?? 0);
 
 // Validation
 if (!$id || !$title || !$professor_id) {
@@ -27,12 +28,8 @@ try {
     $stmt->execute([$id]);
     $existingSessionCount = (int) ($stmt->fetch(PDO::FETCH_ASSOC)['count'] ?? 0);
 
-    // Step 2: Update course info (no training_hours column needed)
-    $stmt = $conn->prepare("
-        UPDATE courses 
-        SET title = ?, description = ?, professor_id = ? 
-        WHERE id = ?
-    ");
+    // Step 2: Update course info
+    $stmt = $conn->prepare("UPDATE courses SET title = ?, description = ?, professor_id = ? WHERE id = ?");
     $success = $stmt->execute([$title, $description, $professor_id, $id]);
 
     if (!$success) {
@@ -48,25 +45,33 @@ try {
         $insertStudent->execute([$sid, $id]);
     }
 
-    // Step 4: Regenerate sessions based on new count passed from frontend (if provided)
-    $requestedSessionCount = intval($data['training_hours'] ?? 0);
+    // Step 4: Adjust training sessions
+    if ($requestedTrainingHours > 0) {
+        if ($requestedTrainingHours < $existingSessionCount) {
+            // Delete only the latest sessions
+            $toDelete = $existingSessionCount - $requestedTrainingHours;
+            $stmt = $conn->prepare(
+                "DELETE FROM training_sessions 
+                 WHERE course_id = ? AND session_number > ?"
+            );
+            $stmt->execute([$id, $requestedTrainingHours]);
+        } elseif ($requestedTrainingHours > $existingSessionCount) {
+            // Add more sessions
+            $stmt = $conn->prepare("SELECT MAX(session_number) as max_num FROM training_sessions WHERE course_id = ?");
+            $stmt->execute([$id]);
+            $startFrom = (int)($stmt->fetch(PDO::FETCH_ASSOC)['max_num'] ?? 0);
 
-    if ($requestedSessionCount > 0 && $requestedSessionCount !== $existingSessionCount) {
-        // Delete old
-        $conn->prepare("DELETE FROM training_sessions WHERE course_id = ?")->execute([$id]);
+            $insertSession = $conn->prepare(
+                "INSERT INTO training_sessions (course_id, session_number, session_date, created_at) VALUES (?, ?, ?, ?)"
+            );
 
-        // Insert new
-        $insertSession = $conn->prepare("
-            INSERT INTO training_sessions (course_id, session_number, session_date, created_at)
-            VALUES (?, ?, ?, ?)
-        ");
+            $now = date("Y-m-d H:i:s");
+            $startDate = date("Y-m-d");
 
-        $now = date("Y-m-d H:i:s");
-        $startDate = date("Y-m-d");
-
-        for ($i = 1; $i <= $requestedSessionCount; $i++) {
-            $sessionDate = date("Y-m-d 12:00:00", strtotime("+$i day", strtotime($startDate)));
-            $insertSession->execute([$id, $i, $sessionDate, $now]);
+            for ($i = $startFrom + 1; $i <= $requestedTrainingHours; $i++) {
+                $sessionDate = date("Y-m-d 12:00:00", strtotime("+$i day", strtotime($startDate)));
+                $insertSession->execute([$id, $i, $sessionDate, $now]);
+            }
         }
     }
 

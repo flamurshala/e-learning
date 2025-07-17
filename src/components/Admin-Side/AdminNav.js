@@ -1,11 +1,23 @@
 import img from "../img/logo.png";
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import LogOut from "./AdminLogOut";
 
 function AdminNav() {
+  const [notificationCount, setNotificationCount] = useState(0);
+ 
+
   useEffect(() => {
     document.title = "Admin Dashboard - Tectigon Academy";
+
+    // Fetch notification count and notifications from unified endpoint
+    fetch(`${process.env.REACT_APP_API_URL}/get_notification_count.php`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.count !== undefined) setNotificationCount(data.count);
+      });
+
+   
   }, []);
 
   return (
@@ -22,7 +34,7 @@ function AdminNav() {
             <li className="mb-[1rem] text-white font-bold gap-3">
               <Link to="/AddUsers">Add Student</Link>
             </li>
-             <li className="mb-[1rem] text-white font-bold gap-3">
+            <li className="mb-[1rem] text-white font-bold gap-3">
               <Link to="/AddProf">Add Teachers</Link>
             </li>
             <li className="mb-[1rem] text-white font-bold gap-3">
@@ -34,25 +46,22 @@ function AdminNav() {
             <li className="mb-[1rem] text-white font-bold gap-3">
               <Link to="/AllCourses">All Courses</Link>
             </li>
-           
-            <li className="mb-[1rem] text-white font-bold gap-3">
-              <Link
-                to="/admin/notifications"
-              >
-                Notifications
-              </Link>
+            <li className="mb-[1rem] text-white font-bold gap-3 flex items-center justify-between">
+              <Link to="/admin/notifications">Notifications</Link>
+              {notificationCount > 0 && (
+                <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full ml-2">
+                  {notificationCount}
+                </span>
+              )}
             </li>
             <li className="mb-[1rem] text-white font-bold gap-3">
-              <Link
-                to="/CompletedCourse"
-              >
-                Completed Courses
-              </Link>
+              <Link to="/CompletedCourse">Completed Courses</Link>
             </li>
           </ul>
         </div>
       </div>
-      <div>
+      <div className="text-white text-left">
+        
         <LogOut />
       </div>
     </div>

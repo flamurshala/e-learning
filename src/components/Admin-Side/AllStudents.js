@@ -86,7 +86,7 @@ function AllStudents() {
           <tbody>
             {filteredStudents.map((student) => (
               <tr key={student.id} className="border-b border-gray-300">
-                <td className="p-2">{student.name}</td>
+                <td className="p-2">{student.name} {student.surname}</td>
                 <td className="p-2">{student.phone_number}</td>
                 <td className="p-2">{student.email}</td>
 

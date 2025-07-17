@@ -17,6 +17,7 @@ function EditCourse() {
   const [professors, setProfessors] = useState([]);
   const [students, setStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [originalTrainingHours, setOriginalTrainingHours] = useState(0); // 🆕
 
   useEffect(() => {
     document.title = "Edit Course - Tectigon Academy";
@@ -32,6 +33,7 @@ function EditCourse() {
           training_hours: data.training_hours || "",
           student_ids: data.student_ids?.map(String) || [],
         });
+        setOriginalTrainingHours(Number(data.training_hours) || 0); // 🆕
       });
 
     // Get all professors
@@ -63,6 +65,18 @@ function EditCourse() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const newHours = Number(course.training_hours);
+
+    // If reducing session count, show a warning
+    if (newHours < originalTrainingHours) {
+      const confirmed = window.confirm(
+        `You are reducing the training sessions from ${originalTrainingHours} to ${newHours}. ` +
+        `This will permanently delete the last ${originalTrainingHours - newHours} session(s). ` +
+        `Are you sure you want to proceed?`
+      );
+      if (!confirmed) return;
+    }
 
     fetch(`${process.env.REACT_APP_API_URL}/update_course.php`, {
       method: "POST",
