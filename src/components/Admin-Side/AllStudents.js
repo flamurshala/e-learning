@@ -7,6 +7,9 @@ function AllStudents() {
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 10;
 
   useEffect(() => {
     document.title = "All Students - Tectigon Academy";
@@ -35,17 +38,51 @@ function AllStudents() {
   const handleFilterChange = (e) => {
     const selected = e.target.value;
     setSelectedCourse(selected);
+    setCurrentPage(1);
+
+    const filtered = students.filter((student) => {
+      const fullName = `${student.name || ""} ${student.surname || ""}`.toLowerCase();
+      return fullName.includes(searchQuery.toLowerCase());
+    });
 
     if (selected === "All") {
-      setFilteredStudents(students);
+      setFilteredStudents(filtered);
     } else {
       setFilteredStudents(
-        students.filter((student) =>
+        filtered.filter((student) =>
           student.courses.some((c) => c.title === selected)
         )
       );
     }
   };
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+    setCurrentPage(1);
+
+    const filtered = students.filter((student) => {
+      const fullName = `${student.name || ""} ${student.surname || ""}`.toLowerCase();
+      return fullName.includes(query);
+    });
+
+    if (selectedCourse !== "All") {
+      setFilteredStudents(
+        filtered.filter((student) =>
+          student.courses.some((c) => c.title === selectedCourse)
+        )
+      );
+    } else {
+      setFilteredStudents(filtered);
+    }
+  };
+
+  const paginatedStudents = filteredStudents.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
+  const totalPages = Math.ceil(filteredStudents.length / rowsPerPage);
 
   return (
     <div className="flex gap-4">
@@ -55,19 +92,29 @@ function AllStudents() {
           All Students
         </h1>
 
-        <div className="my-4">
-          <label className="mr-2 font-medium">Filter by Course:</label>
-          <select
-            value={selectedCourse}
-            onChange={handleFilterChange}
-            className="border px-3 py-1 rounded"
-          >
-            {courses.map((course, i) => (
-              <option key={i} value={course}>
-                {course}
-              </option>
-            ))}
-          </select>
+        <div className="my-4 flex justify-between">
+          <div>
+            <label className="mr-2 font-medium">Filter by Course:</label>
+            <select
+              value={selectedCourse}
+              onChange={handleFilterChange}
+              className="border px-3 py-1 rounded"
+            >
+              {courses.map((course, i) => (
+                <option key={i} value={course}>
+                  {course}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <input
+            type="text"
+            placeholder="Search by name or surname"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="border px-3 py-1 rounded w-1/3"
+          />
         </div>
 
         <table className="w-full mt-4 border-collapse border border-gray-300">
@@ -84,13 +131,11 @@ function AllStudents() {
             </tr>
           </thead>
           <tbody>
-            {filteredStudents.map((student) => (
+            {paginatedStudents.map((student) => (
               <tr key={student.id} className="border-b border-gray-300">
                 <td className="p-2">{student.name} {student.surname}</td>
                 <td className="p-2">{student.phone_number}</td>
                 <td className="p-2">{student.email}</td>
-
-                {/* Courses */}
                 <td className="p-2">
                   {student.courses.length > 0 ? (
                     <ul className="list-disc ml-5">
@@ -102,8 +147,6 @@ function AllStudents() {
                     "No courses"
                   )}
                 </td>
-
-                {/* Payments */}
                 <td className="p-2">
                   {student.courses.length > 0 ? (
                     <ul>
@@ -122,8 +165,6 @@ function AllStudents() {
                     "No payments"
                   )}
                 </td>
-
-                {/* Edit */}
                 <td className="p-2">
                   <Link to={`/edit-student/${student.id}`}>
                     <button className="bg-[#152259] hover:bg-[#152239] text-white py-1 px-3 rounded">
@@ -131,8 +172,6 @@ function AllStudents() {
                     </button>
                   </Link>
                 </td>
-
-                {/* Delete */}
                 <td className="p-2">
                   <button
                     onClick={() => {
@@ -172,8 +211,6 @@ function AllStudents() {
                     Delete
                   </button>
                 </td>
-
-                {/* Progress */}
                 <td className="p-2">
                   <Link to={`/student-progress/${student.id}`}>
                     <button className="bg-[#152259] hover:bg-[#152239] text-white py-1 px-3 rounded">
@@ -185,6 +222,26 @@ function AllStudents() {
             ))}
           </tbody>
         </table>
+
+        <div className="flex justify-center items-center mt-6">
+          <button
+            className="px-4 py-1 mx-1 border rounded disabled:opacity-50"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((prev) => prev - 1)}
+          >
+            Prev
+          </button>
+          <span className="px-2 font-medium">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="px-4 py-1 mx-1 border rounded disabled:opacity-50"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );
