@@ -16,6 +16,9 @@ $professor_id = $data['professor_id'] ?? null;
 $student_ids = is_array($data['student_ids']) ? $data['student_ids'] : [];
 $requestedTrainingHours = intval($data['training_hours'] ?? 0);
 
+// ✅ Add 2 extra sessions to the user-provided number
+$requestedTrainingHours += 2;
+
 // Validation
 if (!$id || !$title || !$professor_id) {
     echo json_encode(["success" => false, "error" => "Missing required fields"]);
@@ -39,7 +42,6 @@ try {
 
     // Step 3: Sync students
     $conn->prepare("DELETE FROM course_student WHERE course_id = ?")->execute([$id]);
-
     $insertStudent = $conn->prepare("INSERT INTO course_student (student_id, course_id) VALUES (?, ?)");
     foreach ($student_ids as $sid) {
         $insertStudent->execute([$sid, $id]);
@@ -49,7 +51,6 @@ try {
     if ($requestedTrainingHours > 0) {
         if ($requestedTrainingHours < $existingSessionCount) {
             // Delete only the latest sessions
-            $toDelete = $existingSessionCount - $requestedTrainingHours;
             $stmt = $conn->prepare(
                 "DELETE FROM training_sessions 
                  WHERE course_id = ? AND session_number > ?"
