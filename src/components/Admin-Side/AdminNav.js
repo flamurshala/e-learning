@@ -5,19 +5,16 @@ import LogOut from "./AdminLogOut";
 
 function AdminNav() {
   const [notificationCount, setNotificationCount] = useState(0);
- 
+  const userRole = localStorage.getItem("userRole"); // Get the user's role
 
   useEffect(() => {
     document.title = "Admin Dashboard - Tectigon Academy";
 
-    // Fetch notification count and notifications from unified endpoint
     fetch(`${process.env.REACT_APP_API_URL}/get_notification_count.php`)
       .then((res) => res.json())
       .then((data) => {
         if (data.count !== undefined) setNotificationCount(data.count);
       });
-
-   
   }, []);
 
   return (
@@ -37,6 +34,20 @@ function AdminNav() {
             <li className="mb-[1rem] text-white font-bold gap-3">
               <Link to="/AddProf">Add Teachers</Link>
             </li>
+
+            {/* Show only if user is superadmin */}
+            {userRole === "superadmin" && (
+              <li className="mb-[1rem] text-white font-bold gap-3">
+                <Link to="/AddAdmin">Add Admin</Link>
+              </li>
+            )}
+            {/* Show only if user is superadmin */}
+            {userRole === "superadmin" && (
+              <li className="mb-[1rem] text-white font-bold gap-3">
+                <Link to="/AllAdmins">All Admins</Link>
+              </li>
+            )}
+
             <li className="mb-[1rem] text-white font-bold gap-3">
               <Link to="/AllStudents">All Students</Link>
             </li>
@@ -46,6 +57,7 @@ function AdminNav() {
             <li className="mb-[1rem] text-white font-bold gap-3">
               <Link to="/AllCourses">All Courses</Link>
             </li>
+
             <li className="mb-[1rem] text-white font-bold gap-3 flex items-center justify-between">
               <Link to="/admin/notifications">Notifications</Link>
               {notificationCount > 0 && (
@@ -54,6 +66,7 @@ function AdminNav() {
                 </span>
               )}
             </li>
+
             <li className="mb-[1rem] text-white font-bold gap-3">
               <Link to="/CompletedCourse">Completed Courses</Link>
             </li>
@@ -61,7 +74,6 @@ function AdminNav() {
         </div>
       </div>
       <div className="text-white text-left">
-        
         <LogOut />
       </div>
     </div>

@@ -16,7 +16,12 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 if ($user && password_verify($password, $user['password'])) {
     echo json_encode([
         "success" => true,
-        "user" => [ "id" => $user['id'], "email" => $user['email'] ]
+        "user" => [
+            "id" => $user['id'],
+            "email" => $user['email'],
+            "username" => $user['username'],
+            "role" => $user['role'] // 👈 This is what you added
+        ]
     ]);
 } else {
     echo json_encode([

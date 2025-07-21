@@ -34,7 +34,8 @@ import CourseAttendance from "./components/Admin-Side/CourseAttendance";
 import AdminNotifications from "./components/Admin-Side/AdminNotifications";
 import StudentProgress from "./components/Admin-Side/StudentProgess";
 import CompletedCourses from "./components/Admin-Side/CompletedCourses";
-import AdminRegister from "./components/Admin-Side/AdminRegister";
+import AddAdmin from "./components/Admin-Side/AddAdmin";
+import AllAdmins from "./components/Admin-Side/AllAdmins";
 
 function App() {
   return (
@@ -46,7 +47,8 @@ function App() {
           <Route path="LoginAs" element={<LoginAs />} />
           <Route path="/ProfessorLogin" element={<ProfessorLogin />} />
           <Route path="/StudentLogin" element={<StudentLogin />} />
-          <Route path="/AdminRegister" element={<AdminRegister />} />
+          <Route path="/AddAdmin" element={<AddAdmin />} />
+          <Route path="/AllAdmins" element={<AllAdmins />} />
           <Route
             path="/StudentDashboard"
             element={

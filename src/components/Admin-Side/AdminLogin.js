@@ -26,6 +26,7 @@ export default function AdminLogin() {
 
     if (data.success) {
       localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("userRole", data.user.role);
       navigate("/CreateCourse");
     } else {
       setError(data.message);
