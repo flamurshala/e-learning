@@ -17,14 +17,14 @@
    
 // online db credentials =================================================================================
    
-   // $host = 'localhost';
-   // $dbname = 'u729255246_tsms';
-   // $user = 'u729255246_tsms';
-   // $pass = 'Erioni00##';
+    // $host = 'localhost';
+    // $dbname = 'u412661009_tsms';
+    // $user = 'u412661009_tsms';
+    // $pass = 'Erioni00##';
 
-   // try{
-   //  $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
-   // } catch (PDOException $e){
-   //  die("Connection failed: " . $e->getMessage());
-   // }
+    // try{
+    //  $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
+    // } catch (PDOException $e){
+    //  die("Connection failed: " . $e->getMessage());
+    // }
 ?>

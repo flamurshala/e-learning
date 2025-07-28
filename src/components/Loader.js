@@ -20,7 +20,7 @@ const LoadingPage = () => {
   return (
     <div className="flex items-center justify-center h-screen bg-[#0e6cff]">
       <div className="text-center">
-        <img src={img} className="w-[70%] swipe-up m-auto" alt="logo"/>
+        <img src={img} className="w-[80%] swipe-up m-auto" alt="logo"/>
       </div>
     </div>
   );

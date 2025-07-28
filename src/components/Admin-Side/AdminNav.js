@@ -18,7 +18,7 @@ function AdminNav() {
   }, []);
 
   return (
-    <div className="navBar fixed top-0 left-0 w-[20%] h-screen bg-[#152259] p-5 flex flex-col justify-between z-50">
+    <div className="navBar fixed top-0 left-0 w-[17%] h-screen bg-[#152259] p-5 flex flex-col justify-between z-50">
       <div className="">
         <div className="container flex justify-center flex-col">
           <div className="logo w-[65%] mb-[2rem]">
@@ -32,7 +32,7 @@ function AdminNav() {
               <Link to="/AddUsers">Add Student</Link>
             </li>
             <li className="mb-[1rem] text-white font-bold gap-3">
-              <Link to="/AddProf">Add Teachers</Link>
+              <Link to="/AddProf">Add Professor</Link>
             </li>
 
             {/* Show only if user is superadmin */}

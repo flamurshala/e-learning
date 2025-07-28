@@ -13,7 +13,7 @@ function LoginAs() {
     <div className="flex h-screen w-screen">
       {/* Left Side - Logo */}
       <div className="w-1/2 bg-white flex items-center justify-center">
-        <img src={img} alt="logo" className="w-[60%] max-w-[300px]" />
+        <img src={img} alt="logo" className="w-[65%] max-w-[450px]" />
       </div>
 
       {/* Right Side - Form Section */}

@@ -178,4 +178,4 @@ function CompletedCourses() {
   );
 }
 
-export default CompletedCourse;
+export default CompletedCourses;

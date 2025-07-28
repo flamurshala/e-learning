@@ -7,7 +7,7 @@ import LogOut from "../Professor-Dashboard/ProfessorLogOut";
 
 function ProffesorNav() {
   return (
-    <div className="fixed flex flex-col justify-between p-5 items-start top-0 left-0 h-screen w-[20%] bg-[#152259] z-50">
+    <div className="fixed flex flex-col justify-between p-5 items-start top-0 left-0 h-screen w-[17%] bg-[#152259] z-50">
       <div className="flex flex-col items-start h-full">
         <div className="logo w-[65%] mb-[2rem]">
           <img src={img} alt="logo" className="w-full" />

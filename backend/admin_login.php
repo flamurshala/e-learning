@@ -6,11 +6,14 @@ header("Access-Control-Allow-Headers: *");
 include "db.php";
 
 $data = json_decode(file_get_contents("php://input"), true);
-$email = $data['email'] ?? '';
+
+// Changed from 'email' to 'username'
+$username = $data['username'] ?? '';
 $password = $data['password'] ?? '';
 
-$stmt = $conn->prepare("SELECT * FROM admins WHERE email = ?");
-$stmt->execute([$email]);
+// Lookup by username now
+$stmt = $conn->prepare("SELECT * FROM admins WHERE username = ?");
+$stmt->execute([$username]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if ($user && password_verify($password, $user['password'])) {
@@ -18,15 +21,15 @@ if ($user && password_verify($password, $user['password'])) {
         "success" => true,
         "user" => [
             "id" => $user['id'],
-            "email" => $user['email'],
             "username" => $user['username'],
-            "role" => $user['role'] // 👈 This is what you added
+            "email" => $user['email'],
+            "role" => $user['role']
         ]
     ]);
 } else {
     echo json_encode([
         "success" => false,
-        "message" => "Invalid email or password"
+        "message" => "Invalid username or password"
     ]);
 }
 ?>
