@@ -36,6 +36,7 @@ import StudentProgress from "./components/Admin-Side/StudentProgess";
 import CompletedCourses from "./components/Admin-Side/CompletedCourses";
 import AddAdmin from "./components/Admin-Side/AddAdmin";
 import AllAdmins from "./components/Admin-Side/AllAdmins";
+import CertificateForm from "./components/Admin-Side/CertificateForm";
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
           <Route path="/StudentLogin" element={<StudentLogin />} />
           <Route path="/AddAdmin" element={<AddAdmin />} />
           <Route path="/AllAdmins" element={<AllAdmins />} />
+          <Route path="/CertificateForm" element={<CertificateForm />} />
           <Route
             path="/StudentDashboard"
             element={

@@ -618,3 +618,12 @@ Notification inserted: 📝 Make the certificates ready for course "testi i 101"
 Total sessions: 6
 Submitted sessions before: 3
 Notification condition NOT met.
+Total sessions: 5
+Submitted sessions before: 0
+Notification condition NOT met.
+Total sessions: 32
+Submitted sessions before: 0
+Notification condition NOT met.
+Total sessions: 32
+Submitted sessions before: 1
+Notification condition NOT met.
