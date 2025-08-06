@@ -71,7 +71,10 @@ function AdminNav() {
               <Link to="/CompletedCourse">Completed Courses</Link>
             </li>
             <li className="mb-[1rem] text-white font-bold gap-3">
-              <Link to="/CertificateForm">CertificateForm</Link>
+              <Link to="/CertificateForm">Certificate Form</Link>
+            </li>
+            <li className="mb-[1rem] text-white font-bold gap-3">
+              <Link to="/AllCertificates">All Certificates</Link>
             </li>
           </ul>
         </div>
