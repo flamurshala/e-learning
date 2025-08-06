@@ -170,9 +170,10 @@ $certificateId = $nextId;
     $pdfFiles[] = $filePath;
 
     if ($student['id']) {
-        $stmt = $conn->prepare("INSERT INTO certificates (student_id, course_id, certificate_id, file_path) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$student['id'], $course_id, $certificateId, basename($filePath)]);
-    }
+    $stmt = $conn->prepare("INSERT INTO certificates (student_id, course_id, certificate_id, file_path, selected_date) VALUES (?, ?, ?, ?, ?)");
+    $stmt->execute([$student['id'], $course_id, $certificateId, basename($filePath), $date]);
+}
+
 }
 
 // === Merge PDFs ===

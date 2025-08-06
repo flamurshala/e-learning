@@ -66,8 +66,11 @@ export default function AllCertificates() {
                 </td>
                 <td className="p-2 border">{cert.course_name}</td>
                 <td className="p-2 border">
-                  {new Date(cert.created_at).toLocaleDateString()}
-                </td>
+  {cert.selected_date
+    ? new Date(cert.selected_date).toLocaleDateString()
+    : "N/A"}
+</td>
+
                 <td className="p-2 border text-center">
                   <a
                     href={`${process.env.REACT_APP_API_URL}/certificates/${cert.file_path}`}

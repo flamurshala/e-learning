@@ -10,9 +10,9 @@ export default function CertificateGenerator() {
   const [formData, setFormData] = useState({
     manualStudent: "",
     formattedCourse: "",
-    duration: "60h",
+    duration: "",
     date: "",
-    instructor: "Erion Prokshi",
+    instructor: "",
   });
 
   useEffect(() => {
@@ -131,7 +131,7 @@ export default function CertificateGenerator() {
           </div>
 
           {/* Manual Student Name */}
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="block font-semibold mb-1">Or Enter Student Name Manually (Optional)</label>
             <input
               type="text"
@@ -141,7 +141,7 @@ export default function CertificateGenerator() {
               className="w-full border px-3 py-2 rounded"
               placeholder="Only if not selected above"
             />
-          </div>
+          </div> */}
 
           {/* Duration */}
           <input
@@ -171,6 +171,7 @@ export default function CertificateGenerator() {
             value={formData.instructor}
             onChange={(e) => setFormData(prev => ({ ...prev, instructor: e.target.value }))}
             className="w-full mb-6 border px-3 py-2 rounded"
+            placeholder="E.g. Erion Prokshi"
             required
           />
 

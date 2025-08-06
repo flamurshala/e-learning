@@ -5,12 +5,12 @@ header("Content-Type: application/json");
 
 try {
     $stmt = $conn->prepare("
-        SELECT c.certificate_id, c.file_path, c.created_at, 
-               s.name AS student_name, cr.title AS course_name
-        FROM certificates c
-        LEFT JOIN students s ON c.student_id = s.id
-        LEFT JOIN courses cr ON c.course_id = cr.id
-        ORDER BY c.created_at DESC
+       SELECT c.*, s.name AS student_name, co.title AS course_name
+FROM certificates c
+LEFT JOIN students s ON c.student_id = s.id
+LEFT JOIN courses co ON c.course_id = co.id
+ORDER BY c.id DESC
+
     ");
     $stmt->execute();
     $certificates = $stmt->fetchAll(PDO::FETCH_ASSOC);

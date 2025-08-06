@@ -41,6 +41,9 @@ function AdminNav() {
                 <Link to="/AddAdmin">Add Admin</Link>
               </li>
             )}
+              <li className="mb-[1rem] text-white font-bold gap-3">
+              <Link to="/CertificateForm">Generate Certificate</Link>
+            </li>
             {/* Show only if user is superadmin */}
             {userRole === "superadmin" && (
               <li className="mb-[1rem] text-white font-bold gap-3">
@@ -57,6 +60,10 @@ function AdminNav() {
             <li className="mb-[1rem] text-white font-bold gap-3">
               <Link to="/AllCourses">All Courses</Link>
             </li>
+            
+            <li className="mb-[1rem] text-white font-bold gap-3">
+              <Link to="/AllCertificates">All Certificates</Link>
+            </li>
 
             <li className="mb-[1rem] text-white font-bold gap-3 flex items-center justify-between">
               <Link to="/admin/notifications">Notifications</Link>
@@ -70,12 +77,7 @@ function AdminNav() {
             <li className="mb-[1rem] text-white font-bold gap-3">
               <Link to="/CompletedCourse">Completed Courses</Link>
             </li>
-            <li className="mb-[1rem] text-white font-bold gap-3">
-              <Link to="/CertificateForm">Certificate Form</Link>
-            </li>
-            <li className="mb-[1rem] text-white font-bold gap-3">
-              <Link to="/AllCertificates">All Certificates</Link>
-            </li>
+          
           </ul>
         </div>
       </div>
