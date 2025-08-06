@@ -1,120 +1,187 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import AdminNav from "./AdminNav"; // 👈 Make sure this import is correct
 
 export default function CertificateGenerator() {
+  const [courses, setCourses] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [selectedCourseId, setSelectedCourseId] = useState("");
+  const [selectedStudents, setSelectedStudents] = useState([]);
   const [formData, setFormData] = useState({
-    name: "",
-    course: "FULL-STACK\nDEVELOPMENT", // default with a line break
+    manualStudent: "",
+    formattedCourse: "",
     duration: "60h",
     date: "",
     instructor: "Erion Prokshi",
   });
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+  useEffect(() => {
+    axios.get(`${process.env.REACT_APP_API_URL}/get_courses.php`)
+      .then(res => setCourses(res.data))
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (selectedCourseId) {
+      axios.get(`${process.env.REACT_APP_API_URL}/get_students_by_course.php?course_id=${selectedCourseId}`)
+        .then(res => setStudents(res.data))
+        .catch(console.error);
+    } else {
+      setStudents([]);
+    }
+  }, [selectedCourseId]);
+
+  const handleCheckboxChange = (id) => {
+    setSelectedStudents(prev =>
+      prev.includes(id) ? prev.filter(sid => sid !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedStudents.length === students.length) {
+      setSelectedStudents([]);
+    } else {
+      setSelectedStudents(students.map(s => s.id));
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Encode newline characters correctly for the PHP backend
-    const query = new URLSearchParams({
-      ...formData,
-      course: formData.course.replace(/\n/g, "\\n"), // Send line breaks as "\n" string
-    }).toString();
+    const payload = {
+      course_id: selectedCourseId,
+      course_text: formData.formattedCourse,
+      selected_students: selectedStudents,
+      manual_name: formData.manualStudent,
+      duration: formData.duration,
+      date: formData.date,
+      instructor: formData.instructor,
+    };
 
-    window.open(`${process.env.REACT_APP_API_URL}/generate_certificate.php?${query}`, "_blank");
+    axios.post(`${process.env.REACT_APP_API_URL}/generate_certificate.php`, payload)
+      .then(res => {
+        if (res.data?.merged_pdf_url) {
+          const mergedUrl = `${process.env.REACT_APP_API_URL}/${res.data.merged_pdf_url}`;
+          window.location.href = mergedUrl;
+        } else {
+          alert("Failed to generate certificates.");
+        }
+      })
+      .catch((err) => {
+        console.error("Error:", err);
+        alert("An error occurred while generating the certificates.");
+      });
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-center">Generate Certificate</h2>
+    <div className="flex gap-4">
+      <AdminNav />
+      <div className="mt-10 ml-[22%] w-[75%] p-6 bg-white rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold mb-6 text-center">Generate Certificate</h2>
+        <form onSubmit={handleSubmit}>
 
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="name">
-            Student Name
-          </label>
+          {/* Select Course */}
+          <label className="block mb-2 font-semibold">Select Course</label>
+          <select
+            className="w-full mb-4 border px-3 py-2 rounded"
+            value={selectedCourseId}
+            onChange={(e) => setSelectedCourseId(e.target.value)}
+          >
+            <option value="">-- Choose Course --</option>
+            {courses.map(course => (
+              <option key={course.id} value={course.id}>{course.title}</option>
+            ))}
+          </select>
+
+          {/* Students List */}
+          {students.length > 0 && (
+            <div className="mb-4">
+              <label className="block font-semibold mb-2">Select Students</label>
+              {students.map(student => (
+                <label key={student.id} className="block mb-1">
+                  <input
+                    type="checkbox"
+                    checked={selectedStudents.includes(student.id)}
+                    onChange={() => handleCheckboxChange(student.id)}
+                  />
+                  <span className="ml-2">{student.name}</span>
+                </label>
+              ))}
+              <button
+                type="button"
+                className="mt-2 text-sm text-blue-600 underline"
+                onClick={toggleSelectAll}
+              >
+                {selectedStudents.length === students.length ? "Unselect All" : "Select All"}
+              </button>
+            </div>
+          )}
+
+          {/* Manual Course Text */}
+          <div className="mb-4">
+            <label className="block font-semibold mb-1">Course Text (how it appears on certificate)</label>
+            <textarea
+              rows="2"
+              name="formattedCourse"
+              value={formData.formattedCourse}
+              onChange={(e) => setFormData(prev => ({ ...prev, formattedCourse: e.target.value }))}
+              className="w-full border px-3 py-2 rounded"
+              placeholder="E.g. FULL-STACK\nDEVELOPMENT"
+            />
+          </div>
+
+          {/* Manual Student Name */}
+          <div className="mb-4">
+            <label className="block font-semibold mb-1">Or Enter Student Name Manually (Optional)</label>
+            <input
+              type="text"
+              name="manualStudent"
+              value={formData.manualStudent}
+              onChange={(e) => setFormData(prev => ({ ...prev, manualStudent: e.target.value }))}
+              className="w-full border px-3 py-2 rounded"
+              placeholder="Only if not selected above"
+            />
+          </div>
+
+          {/* Duration */}
           <input
             type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="course">
-            Course Name <span className="text-sm text-gray-500">(Use Shift+Enter to break line)</span>
-          </label>
-          <textarea
-            id="course"
-            name="course"
-            value={formData.course}
-            onChange={handleChange}
-            rows={2}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
-          ></textarea>
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="duration">
-            Duration (e.g., 60h)
-          </label>
-          <input
-            type="text"
-            id="duration"
             name="duration"
             value={formData.duration}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
+            className="w-full mb-4 border px-3 py-2 rounded"
+            placeholder="Duration (e.g. 60h)"
             required
           />
-        </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="date">
-            Completion Date
-          </label>
+          {/* Date */}
           <input
             type="date"
-            id="date"
             name="date"
             value={formData.date}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+            className="w-full mb-4 border px-3 py-2 rounded"
             required
           />
-        </div>
 
-        <div className="mb-6">
-          <label className="block text-gray-700 mb-2" htmlFor="instructor">
-            Instructor Name
-          </label>
+          {/* Instructor */}
           <input
             type="text"
-            id="instructor"
             name="instructor"
             value={formData.instructor}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onChange={(e) => setFormData(prev => ({ ...prev, instructor: e.target.value }))}
+            className="w-full mb-6 border px-3 py-2 rounded"
             required
           />
-        </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
-        >
-          Generate Certificate
-        </button>
-      </form>
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          >
+            Generate Certificates
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
