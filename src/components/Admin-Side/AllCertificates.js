@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import AdminNav from "./AdminNav";
 
 export default function AllCertificates() {
@@ -7,6 +8,7 @@ export default function AllCertificates() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios
@@ -54,7 +56,7 @@ export default function AllCertificates() {
               <th className="p-2 border">Student</th>
               <th className="p-2 border">Course</th>
               <th className="p-2 border">Date</th>
-              <th className="p-2 border">Download</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -66,12 +68,11 @@ export default function AllCertificates() {
                 </td>
                 <td className="p-2 border">{cert.course_name}</td>
                 <td className="p-2 border">
-  {cert.selected_date
-    ? new Date(cert.selected_date).toLocaleDateString()
-    : "N/A"}
-</td>
-
-                <td className="p-2 border text-center">
+                  {cert.selected_date
+                    ? new Date(cert.selected_date).toLocaleDateString()
+                    : "N/A"}
+                </td>
+                <td className="p-2 border text-center space-x-2">
                   <a
                     href={`${process.env.REACT_APP_API_URL}/certificates/${cert.file_path}`}
                     download
@@ -79,6 +80,14 @@ export default function AllCertificates() {
                   >
                     Download
                   </a>
+                  <button
+                    onClick={() =>
+                      navigate(`/edit-certificate/${cert.certificate_id}`)
+                    }
+                    className="text-green-600 hover:underline"
+                  >
+                    Edit
+                  </button>
                 </td>
               </tr>
             ))}
