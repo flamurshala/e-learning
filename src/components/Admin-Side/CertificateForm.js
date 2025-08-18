@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AdminNav from "./AdminNav"; // 👈 Make sure this import is correct
+import BackButton from "../BackButton";
 
 export default function CertificateGenerator() {
   const [courses, setCourses] = useState([]);
@@ -77,6 +78,8 @@ export default function CertificateGenerator() {
     <div className="flex gap-4">
       <AdminNav />
       <div className="mt-10 ml-[22%] w-[75%] p-6 bg-white rounded-lg shadow-md">
+            <BackButton text="Go Back" className="mb-4" />
+        
         <h2 className="text-2xl font-bold mb-6 text-center">Generate Certificate</h2>
         <form onSubmit={handleSubmit}>
 
@@ -177,7 +180,7 @@ export default function CertificateGenerator() {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+            className="w-full bg-[#152259] hover:bg-[#1C2F81] text-white py-2 rounded "
           >
             Generate Certificates
           </button>

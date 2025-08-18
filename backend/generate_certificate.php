@@ -170,8 +170,24 @@ $certificateId = $nextId;
     $pdfFiles[] = $filePath;
 
     if ($student['id']) {
-    $stmt = $conn->prepare("INSERT INTO certificates (student_id, course_id, certificate_id, file_path, selected_date) VALUES (?, ?, ?, ?, ?)");
-    $stmt->execute([$student['id'], $course_id, $certificateId, basename($filePath), $date]);
+    $stmt = $conn->prepare("
+    INSERT INTO certificates 
+    (student_id, manual_name, course_id, course_text, certificate_id, file_path, selected_date, duration, instructor)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+");
+
+$stmt->execute([
+    $student['id'],                // student_id or null
+    $student['id'] ? null : $student['name'], // manual_name if no student_id
+    $course_id,
+    $course_text ?: $course_title,
+    $certificateId,
+    basename($filePath),
+    $date,
+    $duration,
+    $instructor
+]);
+
 }
 
 }

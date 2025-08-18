@@ -15,12 +15,12 @@ if (!$certificateId) {
     exit;
 }
 
-// Fetch current file path and student info
+// Fetch current certificate info
 $stmt = $conn->prepare("SELECT file_path FROM certificates WHERE certificate_id = ?");
 $stmt->execute([$certificateId]);
-$file = $stmt->fetchColumn();
+$currentFile = $stmt->fetchColumn();
 
-if (!$file) {
+if (!$currentFile) {
     echo json_encode(['error' => 'Certificate not found']);
     exit;
 }
@@ -30,10 +30,14 @@ $courseText = strtoupper($data['course_text'] ?? 'COURSE');
 $duration = $data['duration'] ?? '60h';
 $date = $data['date'] ?? date('Y-m-d');
 $instructor = $data['instructor'] ?? 'Instructor';
-
 $formattedDate = date("F d, Y", strtotime($date));
+
+// === Re-generate PDF ===
 $certDir = __DIR__ . '/certificates/';
-$filePath = $certDir . $file;
+if (!is_dir($certDir)) {
+    mkdir($certDir, 0755, true);
+}
+$filePath = $certDir . $currentFile;
 
 $pdf = new Fpdi('L', 'mm', 'A4');
 $pdf->AddPage();
@@ -86,14 +90,14 @@ $pdf->Text(148.12, 189, $instructor);
 
 $pdf->Output('F', $filePath);
 
-// Update DB
+// === Update DB ===
 $stmt = $conn->prepare("
     UPDATE certificates SET 
         manual_name = ?, 
-        course_name = ?, 
+        course_text = ?, 
         duration = ?, 
         selected_date = ?, 
-        instructor = ?
+        instructor = ? 
     WHERE certificate_id = ?
 ");
 $stmt->execute([
@@ -105,5 +109,15 @@ $stmt->execute([
     $certificateId
 ]);
 
-echo json_encode(['success' => true]);
+if ($stmt->rowCount() === 0) {
+    error_log("DB update failed for certificate ID: $certificateId");
+}
+
+
+// At the end of the PHP file
+echo json_encode([
+    'success' => true,
+    'file_url' => 'certificates/' . basename($currentFile)
+
+]);
 exit;

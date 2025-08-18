@@ -39,6 +39,7 @@ import AllAdmins from "./components/Admin-Side/AllAdmins";
 import CertificateForm from "./components/Admin-Side/CertificateForm";
 import AllCertificates from "./components/Admin-Side/AllCertificates";
 import EditCertificate from "./components/Admin-Side/EditCertificate";
+import BackButton from "./components/BackButton";
 
 function App() {
   return (
@@ -55,6 +56,7 @@ function App() {
           <Route path="/CertificateForm" element={<CertificateForm />} />
           <Route path="/AllCertificates" element={<AllCertificates />} />
           <Route path="/edit-certificate/:id" element={<EditCertificate />} />
+          <Route path="/BackButton" element={<BackButton />} />
 
           <Route
             path="/StudentDashboard"
