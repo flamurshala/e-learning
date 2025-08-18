@@ -76,7 +76,7 @@ export default function AllCertificates() {
                   <a
                     href={`${process.env.REACT_APP_API_URL}/certificates/${cert.file_path}`}
                     download
-                    className="text-blue-600 hover:underline"
+                    className="bg-[#152259] hover:bg-[#152239] text-white py-1 px-3 rounded"
                   >
                     Download
                   </a>
@@ -84,7 +84,7 @@ export default function AllCertificates() {
                     onClick={() =>
                       navigate(`/edit-certificate/${cert.certificate_id}`)
                     }
-                    className="text-green-600 hover:underline"
+                    className="bg-[#152259] hover:bg-[#152239] text-white py-1 px-3 rounded"
                   >
                     Edit
                   </button>

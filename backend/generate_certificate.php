@@ -198,7 +198,7 @@ $mergedBaseName = 'merged_' . time() . '.pdf';
 $mergedFilePath = $certDir . $mergedBaseName;
 $mergedPublicPath = 'certificates/' . $mergedBaseName;
 
-$mergedPdf = new \setasign\Fpdi\Fpdi();
+$mergedPdf = new Fpdi();
 
 foreach ($pdfFiles as $file) {
     $pageCount = $mergedPdf->setSourceFile($file);

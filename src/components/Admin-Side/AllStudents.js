@@ -214,7 +214,7 @@ function AllStudents() {
                 <td className="p-2">
                   <Link to={`/student-progress/${student.id}`}>
                     <button className="bg-[#152259] hover:bg-[#152239] text-white py-1 px-3 rounded">
-                      View Progress
+                      Progress
                     </button>
                   </Link>
                 </td>
