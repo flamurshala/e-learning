@@ -9,7 +9,6 @@ function EditStudent() {
   const [studentName, setStudentName] = useState("");
   const [studentSurname, setStudentSurname] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [personalNumber, setPersonalNumber] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
   const [extraNotes, setExtraNotes] = useState("");
 
@@ -40,7 +39,6 @@ function EditStudent() {
         setStudentName(data.name || "");
         setStudentSurname(data.surname || "");
         setPhoneNumber(data.phone_number || "");
-        setPersonalNumber(data.personal_number || "");
         setStudentEmail(data.email || "");
         setExtraNotes(data.notes || "");
 
@@ -111,7 +109,6 @@ function EditStudent() {
       name: studentName,
       surname: studentSurname,
       phoneNumber,
-      personalNumber,
       email: studentEmail,
       notes: extraNotes,
       courses: selectedCourses,
@@ -154,9 +151,6 @@ function EditStudent() {
 
           <label className="block font-semibold">Phone Number</label>
           <input type="text" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="w-full border p-2" required />
-
-          <label className="block font-semibold">Personal Number</label>
-          <input type="text" value={personalNumber} onChange={(e) => setPersonalNumber(e.target.value)} className="w-full border p-2" required />
 
           <label className="block font-semibold">Email</label>
           <input type="email" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} className="w-full border p-2" required />

@@ -13,7 +13,6 @@ $student_id = $data['id'] ?? null;
 $name = $data['name'] ?? '';
 $surname = $data['surname'] ?? '';
 $phoneNumber = $data['phoneNumber'] ?? '';
-$personalNumber = $data['personalNumber'] ?? '';
 $email = $data['email'] ?? '';
 $notes = $data['notes'] ?? '';
 
@@ -32,8 +31,8 @@ try {
     $conn->beginTransaction();
 
     // Update core student info
-    $stmt = $conn->prepare("UPDATE students SET name=?, surname=?, phone_number=?, personal_number=?, email=?, notes=? WHERE id=?");
-    $stmt->execute([$name, $surname, $phoneNumber, $personalNumber, $email, $notes, $student_id]);
+    $stmt = $conn->prepare("UPDATE students SET name=?, surname=?, phone_number=?, email=?, notes=? WHERE id=?");
+    $stmt->execute([$name, $surname, $phoneNumber, $email, $notes, $student_id]);
 
     // Remove existing courses and payments for this student
     $conn->prepare("DELETE FROM course_student WHERE student_id=?")->execute([$student_id]);

@@ -16,7 +16,6 @@ try {
     $name = trim($data['name'] ?? '');
     $surname = trim($data['surname'] ?? '');
     $phone = trim($data['phoneNumber'] ?? '');
-    $personalNumber = trim($data['personalNumber'] ?? '');
     $email = trim($data['email'] ?? '');
     $notes = trim($data['notes'] ?? '');
     
@@ -27,15 +26,15 @@ try {
     $amountMonth1 = $data['amountPaidMonth1'] ?? [];
     $amountMonth2 = $data['amountPaidMonth2'] ?? [];
 
-    if (!$name || !$surname || !$phone || !$personalNumber || !$email || empty($courses)) {
+    if (!$name || !$surname || !$phone  || !$email || empty($courses)) {
         echo json_encode(['success' => false, 'error' => 'Missing fields or courses']);
         exit;
     }
 
     $conn->beginTransaction();
 
-    $stmt = $conn->prepare("INSERT INTO students (name, surname, phone_number, personal_number, email, notes) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$name, $surname, $phone, $personalNumber, $email, $notes]);
+    $stmt = $conn->prepare("INSERT INTO students (name, surname, phone_number,  email, notes) VALUES (?, ?, ?, ?, ?)");
+    $stmt->execute([$name, $surname, $phone,  $email, $notes]);
 
     $student_id = $conn->lastInsertId();
 

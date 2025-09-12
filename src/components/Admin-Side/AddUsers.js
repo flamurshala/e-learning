@@ -9,7 +9,6 @@ function AddUsers() {
   const [studentName, setStudentName] = useState("");
   const [studentSurname, setStudentSurname] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [personalNumber, setPersonalNumber] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
   const [extraNotes, setExtraNotes] = useState("");
 
@@ -40,7 +39,7 @@ function AddUsers() {
     e.preventDefault();
 
     if (
-      [studentName, studentSurname, phoneNumber, personalNumber, studentEmail].some(isEmpty) ||
+      [studentName, studentSurname, phoneNumber, studentEmail].some(isEmpty) ||
       selectedCourses.some((course) => !course)
     ) {
       alert("Please fill all student fields and select at least one course.");
@@ -51,7 +50,6 @@ function AddUsers() {
       name: studentName,
       surname: studentSurname,
       phoneNumber,
-      personalNumber,
       payments,
       amountPaidAll,
       amountPaidMonth1,
@@ -73,7 +71,6 @@ function AddUsers() {
           setStudentName("");
           setStudentSurname("");
           setPhoneNumber("");
-          setPersonalNumber("");
           setPayments([""]);
           setAmountPaidAll([""]);
           setAmountPaidMonth1([""]);
@@ -195,7 +192,7 @@ function AddUsers() {
               <input className="mb-4 w-full border border-black p-2" type="text" placeholder="Name" value={studentName} onChange={(e) => setStudentName(e.target.value)} required />
               <input className="mb-4 w-full border border-black p-2" type="text" placeholder="Surname" value={studentSurname} onChange={(e) => setStudentSurname(e.target.value)} required />
               <input className="mb-4 w-full border border-black p-2" type="text" placeholder="Phone Number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required />
-              <input className="mb-4 w-full border border-black p-2" type="text" placeholder="Personal Number" value={personalNumber} onChange={(e) => setPersonalNumber(e.target.value)} required />
+              
               <input className="mb-4 w-full border border-black p-2" type="email" placeholder="Email" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} required />
 
               {selectedCourses.map((selected, index) => (
