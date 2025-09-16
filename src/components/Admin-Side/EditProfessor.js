@@ -12,16 +12,23 @@ function EditProfessor() {
 
   const [professor, setProfessor] = useState({
     name: "",
+    username: "",
     email: "",
     password: "",
   });
 
   useEffect(() => {
-    fetch(
-      `${process.env.REACT_APP_API_URL}/get_single_professor.php?id=${id}`
-    )
+    fetch(`${process.env.REACT_APP_API_URL}/get_single_professor.php?id=${id}`)
       .then((res) => res.json())
-      .then((data) => setProfessor(data))
+      .then((data) =>
+        setProfessor({
+          name: data?.name ?? "",
+          username: data?.username ?? "",
+          email: data?.email ?? "",
+          // keep whatever your API returns; if you don't want to prefill, set "" here
+          password: data?.password ?? "",
+        })
+      )
       .catch((err) => console.error("Failed to load professor", err));
   }, [id]);
 
@@ -43,14 +50,15 @@ function EditProfessor() {
         } else {
           alert("Update failed");
         }
-      });
+      })
+      .catch(() => alert("Update failed"));
   };
 
   return (
     <div className="flex gap-4 ">
       <AdminNav />
       <div className="w-[30%] ml-[22%] mt-[2rem]">
-        <div className="flex  items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold mb-4">Edit Professor</h1>
           <button
             onClick={() => navigate(-1)}
@@ -66,6 +74,14 @@ function EditProfessor() {
             onChange={handleChange}
             className="block border p-2 w-full"
             placeholder="Name"
+          />
+          {/* NEW: Username field */}
+          <input
+            name="username"
+            value={professor.username}
+            onChange={handleChange}
+            className="block border p-2 w-full"
+            placeholder="Username"
           />
           <input
             name="email"
@@ -83,7 +99,7 @@ function EditProfessor() {
           />
           <button
             type="submit"
-            className="bg-blue-600 w-[100%  ] text-white px-4 py-2 rounded"
+            className="bg-blue-600 w-full text-white px-4 py-2 rounded"
           >
             Save
           </button>

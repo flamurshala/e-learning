@@ -5,12 +5,16 @@ header("Content-Type: application/json");
 include "db.php";
 
 try {
-    // Fetch all students (include surname and personal_number if needed)
-    $stmtStudents = $conn->query("SELECT id, name, surname, email, phone_number FROM students");
+    // Fetch all students newest-first
+    $stmtStudents = $conn->query("
+        SELECT id, name, surname, email, phone_number
+        FROM students
+        ORDER BY id DESC
+    ");
     $students = $stmtStudents->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($students as &$student) {
-        // Get courses and payment info per student
+        // Get courses and payment info per student (newest-first by course id)
         $stmtCourses = $conn->prepare("
             SELECT 
                 c.title,
@@ -23,6 +27,7 @@ try {
             LEFT JOIN student_payments sp 
                 ON sp.student_id = cs.student_id AND sp.course_id = cs.course_id
             WHERE cs.student_id = ?
+            ORDER BY c.id DESC
         ");
         $stmtCourses->execute([$student['id']]);
         $student['courses'] = $stmtCourses->fetchAll(PDO::FETCH_ASSOC) ?: [];

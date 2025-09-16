@@ -627,3 +627,60 @@ Notification condition NOT met.
 Total sessions: 32
 Submitted sessions before: 1
 Notification condition NOT met.
+Total sessions: 12
+Submitted sessions before: 0
+Notification condition NOT met.
+Total sessions: 12
+Submitted sessions before: 1
+Notification condition NOT met.
+Total sessions: 12
+Submitted sessions before: 1
+Notification condition NOT met.
+Total sessions: 12
+Submitted sessions before: 2
+Notification condition NOT met.
+Total sessions: 12
+Submitted sessions before: 3
+Notification condition NOT met.
+Total sessions: 12
+Submitted sessions before: 4
+Notification condition NOT met.
+Total sessions: 12
+Submitted sessions before: 4
+Notification condition NOT met.
+Total sessions: 12
+Submitted sessions before: 4
+Notification condition NOT met.
+Total sessions: 12
+Submitted sessions before: 4
+Notification condition NOT met.
+Total sessions: 12
+Submitted sessions before: 5
+Notification condition NOT met.
+Total sessions: 13
+Submitted sessions before: 0
+Notification condition NOT met.
+Total sessions: 13
+Submitted sessions before: 0
+Notification condition NOT met.
+Total sessions: 13
+Submitted sessions before: 1
+Notification condition NOT met.
+Total sessions: 13
+Submitted sessions before: 2
+Notification condition NOT met.
+Total sessions: 13
+Submitted sessions before: 3
+Notification condition NOT met.
+Total sessions: 13
+Submitted sessions before: 4
+Notification condition NOT met.
+Total sessions: 13
+Submitted sessions before: 5
+Notification condition NOT met.
+Total sessions: 13
+Submitted sessions before: 6
+Notification condition NOT met.
+Total sessions: 13
+Submitted sessions before: 6
+Notification condition NOT met.

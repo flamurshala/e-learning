@@ -5,62 +5,88 @@ header("Access-Control-Allow-Headers: *");
 
 include "db.php";
 
-// ✅ Enable error reporting
+// ✅ Errors visible during dev
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// ✅ Decode incoming JSON
+// ✅ Decode JSON
 $data = json_decode(file_get_contents("php://input"), true);
 
-// ✅ Validate required fields
-$title = $data['title'] ?? '';
-$description = $data['description'] ?? '';
-$professor_id = $data['professor_id'] ?? null;
-$student_ids = $data['student_ids'] ?? [];
-$training_hours = isset($data['training_hours']) ? (int)$data['training_hours'] : 0;
+// ✅ Required fields
+$title        = $data['title'] ?? '';
+$description  = $data['description'] ?? '';
+$professor_id = isset($data['professor_id']) ? (int)$data['professor_id'] : 0;
+$student_ids  = $data['student_ids'] ?? [];
+$base_hours   = isset($data['training_hours']) ? max(1, (int)$data['training_hours']) : 0;
 
-// ✅ Add 2 extra training hours (sessions)
-$training_hours += 2;
+// ✅ Add 3 extra sessions: 1st info, last 2 extra hours
+$extra_sessions = 3;
+$total_sessions = $base_hours + $extra_sessions;
 
-if (!$title || !$description || !$professor_id || $training_hours < 1) {
-    echo json_encode(['error' => 'Missing fields or invalid training hours']);
-    exit;
+if (!$title || !$description || !$professor_id || $total_sessions < 1) {
+  echo json_encode(['error' => 'Missing fields or invalid training hours']);
+  exit;
 }
 
 try {
-    $conn->beginTransaction();
+  $conn->beginTransaction();
 
-    // ✅ Insert course
-    $stmt = $conn->prepare("INSERT INTO courses (title, description, professor_id) VALUES (?, ?, ?)");
-    $stmt->execute([$title, $description, $professor_id]);
-    $course_id = $conn->lastInsertId();
+  // Insert course
+  $stmt = $conn->prepare("INSERT INTO courses (title, description, professor_id) VALUES (?, ?, ?)");
+  $stmt->execute([$title, $description, $professor_id]);
+  $course_id = (int)$conn->lastInsertId();
 
-    // ✅ Insert course_professor
-    $stmt2 = $conn->prepare("INSERT INTO course_professor (course_id, professor_id) VALUES (?, ?)");
-    $stmt2->execute([$course_id, $professor_id]);
+  // Map professor
+  $stmt2 = $conn->prepare("INSERT INTO course_professor (course_id, professor_id) VALUES (?, ?)");
+  $stmt2->execute([$course_id, $professor_id]);
 
-    // ✅ Insert students
-    if (!empty($student_ids)) {
-        $stmt3 = $conn->prepare("INSERT INTO course_student (course_id, student_id) VALUES (?, ?)");
-        foreach ($student_ids as $sid) {
-            $stmt3->execute([$course_id, $sid]);
-        }
+  // Enroll students
+  if (!empty($student_ids)) {
+    $stmt3 = $conn->prepare("INSERT INTO course_student (course_id, student_id) VALUES (?, ?)");
+    foreach ($student_ids as $sid) {
+      $stmt3->execute([$course_id, (int)$sid]);
+    }
+  }
+
+  // Create sessions (spaced 1 day apart as an example)
+  $startDate = new DateTime('now', new DateTimeZone('UTC'));
+  $stmt4 = $conn->prepare("
+    INSERT INTO training_sessions (course_id, session_number, session_title, session_date)
+    VALUES (?, ?, ?, ?)
+  ");
+
+  for ($i = 1; $i <= $total_sessions; $i++) {
+    $sessionDate = clone $startDate;
+    $sessionDate->modify('+' . ($i - 1) . ' days');
+
+    // ✅ Title logic for EVERY session
+    if ($i === 1) {
+      // First session: Sessioni Informues
+      $titleForThis = 'Sessioni Informues';
+    } elseif ($i >= $total_sessions - 1) {
+      // Last two sessions: Extra Hours
+      $titleForThis = 'Extra Hours';
+    } else {
+      // Main sessions start counting from 1 right after the info session
+      $titleForThis = 'Session ' . ($i - 1);
     }
 
-    // ✅ Insert training sessions
-    $startDate = new DateTime();
-    $stmt4 = $conn->prepare("INSERT INTO training_sessions (course_id, session_number, session_date) VALUES (?, ?, ?)");
+    $stmt4->execute([
+      $course_id,
+      $i,                       // session_number (1..total_sessions)
+      $titleForThis,            // session_title (always set)
+      $sessionDate->format('Y-m-d H:i:s')
+    ]);
+  }
 
-    for ($i = 1; $i <= $training_hours; $i++) {
-        $sessionDate = clone $startDate;
-        $sessionDate->modify("+" . ($i - 1) . " days");
-        $stmt4->execute([$course_id, $i, $sessionDate->format('Y-m-d H:i:s')]);
-    }
-
-    $conn->commit();
-    echo json_encode(['success' => true]);
+  $conn->commit();
+  echo json_encode([
+    'success' => true,
+    'course_id' => $course_id,
+    'total_sessions' => $total_sessions
+  ]);
 
 } catch (PDOException $e) {
-    $conn->rollBack();
-    echo json_encode(['error' => $e->getMessage()]);
+  $conn->rollBack();
+  echo json_encode(['error' => $e->getMessage()]);
 }

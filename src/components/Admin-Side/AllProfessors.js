@@ -29,8 +29,7 @@ function AllProfessors() {
   }, []);
 
   const handleDelete = (id) => {
-    if (!window.confirm("Are you sure you want to delete this professor?"))
-      return;
+    if (!window.confirm("Are you sure you want to delete this professor?")) return;
 
     fetch(`${process.env.REACT_APP_API_URL}/delete_professor.php`, {
       method: "POST",
@@ -62,6 +61,7 @@ function AllProfessors() {
           <thead>
             <tr className="text-left bg-gray-100">
               <th className="border border-gray-300 p-2">Name</th>
+              <th className="border border-gray-300 p-2">Username</th> {/* NEW */}
               <th className="border border-gray-300 p-2">Email</th>
               <th className="border border-gray-300 p-2">Courses</th>
               <th className="border border-gray-300 p-2">Edit</th>
@@ -72,9 +72,12 @@ function AllProfessors() {
             {professors.map((professor) => (
               <tr key={professor.id} className="border-b border-gray-300">
                 <td className="p-2">{professor.name}</td>
+                <td className="p-2">
+                  {professor.username ?? professor.user_name ?? "-"}
+                </td>
                 <td className="p-2">{professor.email}</td>
                 <td className="p-2">
-                  {professor.courses.length > 0
+                  {professor.courses && professor.courses.length > 0
                     ? professor.courses.join(", ")
                     : "No courses"}
                 </td>

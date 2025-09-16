@@ -49,9 +49,9 @@ function ProfessorAttendancePage() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-800 mb-1">
-            Session {session.session_number}
+            Tectigon Academy
           </h1>
-          <p className="text-gray-500">📅 {session.session_date}</p>
+          {/* <p className="text-gray-500">📅 {session.session_date}</p> */}
 
         </div>
         <button

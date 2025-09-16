@@ -7,15 +7,17 @@ include "db.php";
 try {
     $stmt = $conn->prepare("
         SELECT 
-            p.id AS professor_id,
-            p.name AS professor_name,
+            p.id        AS professor_id,
+            p.name      AS professor_name,
+            p.username  AS username,     -- ✅ include username
             p.email,
             p.password,
-            c.title AS course_title
+            c.title     AS course_title
         FROM professors p
         LEFT JOIN courses c 
             ON c.professor_id = p.id 
             AND (c.completed = 0 OR c.completed IS NULL)
+        ORDER BY p.name ASC, c.title ASC
     ");
     $stmt->execute();
 
@@ -27,15 +29,16 @@ try {
         $id = $row['professor_id'];
         if (!isset($professors[$id])) {
             $professors[$id] = [
-                'id' => $id,
-                'name' => $row['professor_name'],
-                'email' => $row['email'],
+                'id'       => $id,
+                'name'     => $row['professor_name'],
+                'username' => $row['username'],  // ✅ added to output
+                'email'    => $row['email'],
                 'password' => $row['password'],
-                'courses' => [],
+                'courses'  => [],
             ];
         }
 
-        if ($row['course_title']) {
+        if (!empty($row['course_title'])) {
             $professors[$id]['courses'][] = $row['course_title'];
         }
     }
@@ -44,4 +47,3 @@ try {
 } catch (PDOException $e) {
     echo json_encode(['error' => $e->getMessage()]);
 }
-?>

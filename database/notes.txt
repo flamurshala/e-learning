@@ -4,3 +4,44 @@
 ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 ====================================================================
+
+
+
+
+
+================= added a new sql column  =============================
+
+
+ALTER TABLE training_sessions
+  ADD COLUMN session_title VARCHAR(100) NULL AFTER session_number;
+
+
+
+
+------------------------------------------------------
+qekjo per sesionet egzistuse  me ja caktu emrat
+--------------------------------------------------------
+
+-- First session -> Sessioni Informues
+UPDATE training_sessions t
+JOIN (
+  SELECT course_id, MIN(session_number) AS first_sn
+  FROM training_sessions GROUP BY course_id
+) x ON x.course_id = t.course_id AND t.session_number = x.first_sn
+SET t.session_title = 'Sessioni Informues';
+
+-- Last two sessions -> Extra Hours
+UPDATE training_sessions t
+JOIN (
+  SELECT course_id,
+         MAX(session_number) AS last_sn,
+         MAX(session_number)-1 AS last_minus_one
+  FROM training_sessions GROUP BY course_id
+) y ON y.course_id = t.course_id
+SET t.session_title = 'Extra Hours'
+WHERE t.session_number IN (y.last_sn, y.last_minus_one);
+
+
+
+
+=======================================================================

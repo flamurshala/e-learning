@@ -11,12 +11,25 @@ if (!$course_id) {
 }
 
 try {
-    $stmt = $conn->prepare("SELECT s.id AS student_id, s.name FROM students s
-    JOIN course_student cs ON cs.student_id = s.id
-    WHERE cs.course_id = ?");
+    $sql = "
+        SELECT DISTINCT
+            s.id AS student_id,
+            s.name,
+            s.surname,
+            -- Ready-to-use full name (also aliased as student_name for compatibility)
+            TRIM(CONCAT(COALESCE(s.name, ''), ' ', COALESCE(s.surname, ''))) AS full_name,
+            TRIM(CONCAT(COALESCE(s.name, ''), ' ', COALESCE(s.surname, ''))) AS student_name
+        FROM students s
+        INNER JOIN course_student cs ON cs.student_id = s.id
+        WHERE cs.course_id = ?
+        ORDER BY s.name ASC, s.surname ASC
+    ";
+
+    $stmt = $conn->prepare($sql);
     $stmt->execute([$course_id]);
     $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    echo json_encode($students);
+
+    echo json_encode($students ?: []);
 } catch (PDOException $e) {
     echo json_encode(['error' => $e->getMessage()]);
 }

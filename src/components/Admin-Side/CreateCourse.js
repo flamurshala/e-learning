@@ -28,7 +28,7 @@ function CreateCourse() {
   }, []);
 
   const handleStudentCheckboxChange = (e) => {
-    const id = e.target.value;
+    const id = e.target.value; // keep as string for stable comparison
     if (e.target.checked) {
       setSelectedStudentIds((prev) => [...prev, id]);
     } else {
@@ -48,6 +48,7 @@ function CreateCourse() {
       title,
       description,
       professor_id: professorId,
+      // backend can cast to int if needed
       student_ids: selectedStudentIds,
       training_hours: Number(trainingHours),
     };
@@ -66,6 +67,7 @@ function CreateCourse() {
           setProfessorId("");
           setSelectedStudentIds([]);
           setTrainingHours("");
+          setSearchTerm("");
         } else {
           alert("Error creating course: " + (data.error || "Unknown error"));
         }
@@ -76,9 +78,19 @@ function CreateCourse() {
       });
   };
 
-  const filteredStudents = students.filter((student) =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // 🔍 search by name OR surname
+  const lcQuery = searchTerm.toLowerCase();
+  const filteredStudents = students.filter((s) => {
+    const full = `${s.name || ""} ${s.surname || ""}`.trim().toLowerCase();
+    return full.includes(lcQuery);
+  });
+
+  // optional: sort alphabetically by full name
+  filteredStudents.sort((a, b) => {
+    const fa = `${a.name || ""} ${a.surname || ""}`.trim().toLowerCase();
+    const fb = `${b.name || ""} ${b.surname || ""}`.trim().toLowerCase();
+    return fa.localeCompare(fb);
+  });
 
   return (
     <div className="flex gap-5 bg-white rounded shadow">
@@ -87,10 +99,11 @@ function CreateCourse() {
         <h1 className="text-3xl font-bold mb-4 border-b border-black">
           Create New Course
         </h1>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
-            placeholder="Course Title"
+            placeholder="WP-sep-pm-25"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
@@ -120,7 +133,7 @@ function CreateCourse() {
 
           <input
             type="number"
-            placeholder="Number of training hours"
+            placeholder="Number of training hours 3 sessions are added automatically "
             value={trainingHours}
             min={1}
             onChange={(e) => setTrainingHours(e.target.value)}
@@ -141,20 +154,22 @@ function CreateCourse() {
             />
 
             {/* Student List */}
-            <div className="max-h-48 overflow-auto border border-gray-300 rounded p-2">
+            <div className="max-h-64 overflow-auto border border-gray-300 rounded p-2">
               {filteredStudents.length > 0 ? (
-                filteredStudents.map((student) => (
-                  <label key={student.id} className="block mb-1">
-                    <input
-                      type="checkbox"
-                      value={student.id}
-                      checked={selectedStudentIds.includes(String(student.id))}
-                      onChange={handleStudentCheckboxChange}
-                      className="mr-2"
-                    />
-                    {student.name}
-                  </label>
-                ))
+                filteredStudents.map((s) => {
+                  const fullName = `${s.name || ""} ${s.surname || ""}`.trim();
+                  return (
+                    <label key={s.id} className="flex items-center gap-2 mb-1">
+                      <input
+                        type="checkbox"
+                        value={String(s.id)}
+                        checked={selectedStudentIds.includes(String(s.id))}
+                        onChange={handleStudentCheckboxChange}
+                      />
+                      <span>{fullName || "(No name)"}</span>
+                    </label>
+                  );
+                })
               ) : (
                 <p className="text-sm text-gray-500">No students found.</p>
               )}

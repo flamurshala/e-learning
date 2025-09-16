@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AdminNav from "./AdminNav";
+import { color } from "framer-motion";
 
 function EditCourse() {
   const { id } = useParams();
@@ -72,8 +73,8 @@ function EditCourse() {
     if (newHours < originalTrainingHours) {
       const confirmed = window.confirm(
         `You are reducing the training sessions from ${originalTrainingHours} to ${newHours}. ` +
-        `This will permanently delete the last ${originalTrainingHours - newHours} session(s). ` +
-        `Are you sure you want to proceed?`
+          `This will permanently delete the last ${originalTrainingHours - newHours} session(s). ` +
+          `Are you sure you want to proceed?`
       );
       if (!confirmed) return;
     }
@@ -94,9 +95,14 @@ function EditCourse() {
       });
   };
 
-  const filteredStudents = students.filter((s) =>
-    s.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // 🔧 Now searches by name, surname, and "name surname"
+  const filteredStudents = students.filter((s) => {
+    const name = (s.name || "").toLowerCase();
+    const surname = (s.surname || "").toLowerCase();
+    const full = `${name} ${surname}`.trim();
+    const term = (searchTerm || "").toLowerCase();
+    return name.includes(term) || surname.includes(term) || full.includes(term);
+  });
 
   return (
     <div className="flex gap-5">
@@ -143,7 +149,8 @@ function EditCourse() {
               </option>
             ))}
           </select>
-
+       
+            
           <input
             type="number"
             name="training_hours"
@@ -153,6 +160,7 @@ function EditCourse() {
             min={1}
             className="w-full border p-2 rounded"
           />
+          <label className="text-gray-400">(Add 3 extra hours for informative session and the extra 2 at the end)</label>
 
           <div>
             <p className="font-semibold">Select Students:</p>
@@ -165,18 +173,21 @@ function EditCourse() {
             />
 
             <div className="max-h-48 overflow-y-auto border p-2 rounded">
-              {filteredStudents.map((s) => (
-                <label key={s.id} className="block">
-                  <input
-                    type="checkbox"
-                    value={s.id}
-                    checked={course.student_ids.includes(String(s.id))}
-                    onChange={handleStudentCheckboxChange}
-                    className="mr-2"
-                  />
-                  {s.name}
-                </label>
-              ))}
+              {filteredStudents.map((s) => {
+                const label = [s.name, s.surname].filter(Boolean).join(" ");
+                return (
+                  <label key={s.id} className="block">
+                    <input
+                      type="checkbox"
+                      value={s.id}
+                      checked={course.student_ids.includes(String(s.id))}
+                      onChange={handleStudentCheckboxChange}
+                      className="mr-2"
+                    />
+                    {label}
+                  </label>
+                );
+              })}
             </div>
           </div>
 
