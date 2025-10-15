@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import AdminNav from "./AdminNav"; // 👈 Make sure this import is correct
+import AdminNav from "./AdminNav";
 import BackButton from "../BackButton";
 
 export default function CertificateGenerator() {
@@ -17,15 +17,19 @@ export default function CertificateGenerator() {
   });
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_API_URL}/get_courses.php`)
-      .then(res => setCourses(res.data))
+    axios
+      .get(`${process.env.REACT_APP_API_URL}/get_courses.php`)
+      .then((res) => setCourses(res.data))
       .catch(console.error);
   }, []);
 
   useEffect(() => {
     if (selectedCourseId) {
-      axios.get(`${process.env.REACT_APP_API_URL}/get_students_by_course.php?course_id=${selectedCourseId}`)
-        .then(res => setStudents(res.data))
+      axios
+        .get(
+          `${process.env.REACT_APP_API_URL}/get_students_by_course.php?course_id=${selectedCourseId}`
+        )
+        .then((res) => setStudents(res.data || []))
         .catch(console.error);
     } else {
       setStudents([]);
@@ -33,8 +37,8 @@ export default function CertificateGenerator() {
   }, [selectedCourseId]);
 
   const handleCheckboxChange = (id) => {
-    setSelectedStudents(prev =>
-      prev.includes(id) ? prev.filter(sid => sid !== id) : [...prev, id]
+    setSelectedStudents((prev) =>
+      prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]
     );
   };
 
@@ -42,8 +46,20 @@ export default function CertificateGenerator() {
     if (selectedStudents.length === students.length) {
       setSelectedStudents([]);
     } else {
-      setSelectedStudents(students.map(s => s.id));
+      setSelectedStudents(students.map((s) => s.id));
     }
+  };
+
+  const getFullName = (s) => {
+    // Prefer a prebuilt full name if API provides it
+    const ready = s.student_name && String(s.student_name).trim();
+    if (ready) return ready;
+
+    // Fallback to name + surname
+    const first = s.name ? String(s.name).trim() : "";
+    const last = s.surname ? String(s.surname).trim() : "";
+    const combo = [first, last].filter(Boolean).join(" ");
+    return combo || `Student #${s.id}`;
   };
 
   const handleSubmit = (e) => {
@@ -59,8 +75,9 @@ export default function CertificateGenerator() {
       instructor: formData.instructor,
     };
 
-    axios.post(`${process.env.REACT_APP_API_URL}/generate_certificate.php`, payload)
-      .then(res => {
+    axios
+      .post(`${process.env.REACT_APP_API_URL}/generate_certificate.php`, payload)
+      .then((res) => {
         if (res.data?.merged_pdf_url) {
           const mergedUrl = `${process.env.REACT_APP_API_URL}/${res.data.merged_pdf_url}`;
           window.location.href = mergedUrl;
@@ -78,11 +95,10 @@ export default function CertificateGenerator() {
     <div className="flex gap-4">
       <AdminNav />
       <div className="mt-10 ml-[22%] w-[75%] p-6 bg-white rounded-lg shadow-md">
-            <BackButton text="Go Back" className="mb-4" />
-        
+        <BackButton text="Go Back" className="mb-4" />
+
         <h2 className="text-2xl font-bold mb-6 text-center">Generate Certificate</h2>
         <form onSubmit={handleSubmit}>
-
           {/* Select Course */}
           <label className="block mb-2 font-semibold">Select Course</label>
           <select
@@ -91,8 +107,10 @@ export default function CertificateGenerator() {
             onChange={(e) => setSelectedCourseId(e.target.value)}
           >
             <option value="">-- Choose Course --</option>
-            {courses.map(course => (
-              <option key={course.id} value={course.id}>{course.title}</option>
+            {courses.map((course) => (
+              <option key={course.id} value={course.id}>
+                {course.title}
+              </option>
             ))}
           </select>
 
@@ -100,14 +118,14 @@ export default function CertificateGenerator() {
           {students.length > 0 && (
             <div className="mb-4">
               <label className="block font-semibold mb-2">Select Students</label>
-              {students.map(student => (
+              {students.map((student) => (
                 <label key={student.id} className="block mb-1">
                   <input
                     type="checkbox"
                     checked={selectedStudents.includes(student.id)}
                     onChange={() => handleCheckboxChange(student.id)}
                   />
-                  <span className="ml-2">{student.name}</span>
+                  <span className="ml-2">{getFullName(student)}</span>
                 </label>
               ))}
               <button
@@ -122,36 +140,29 @@ export default function CertificateGenerator() {
 
           {/* Manual Course Text */}
           <div className="mb-4">
-            <label className="block font-semibold mb-1">Course Text (how it appears on certificate)</label>
+            <label className="block font-semibold mb-1">
+              Course Text (how it appears on certificate)
+            </label>
             <textarea
               rows="2"
               name="formattedCourse"
               value={formData.formattedCourse}
-              onChange={(e) => setFormData(prev => ({ ...prev, formattedCourse: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, formattedCourse: e.target.value }))
+              }
               className="w-full border px-3 py-2 rounded"
               placeholder="E.g. FULL-STACK\nDEVELOPMENT"
             />
           </div>
-
-          {/* Manual Student Name */}
-          {/* <div className="mb-4">
-            <label className="block font-semibold mb-1">Or Enter Student Name Manually (Optional)</label>
-            <input
-              type="text"
-              name="manualStudent"
-              value={formData.manualStudent}
-              onChange={(e) => setFormData(prev => ({ ...prev, manualStudent: e.target.value }))}
-              className="w-full border px-3 py-2 rounded"
-              placeholder="Only if not selected above"
-            />
-          </div> */}
 
           {/* Duration */}
           <input
             type="text"
             name="duration"
             value={formData.duration}
-            onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, duration: e.target.value }))
+            }
             className="w-full mb-4 border px-3 py-2 rounded"
             placeholder="Duration (e.g. 60h)"
             required
@@ -162,7 +173,7 @@ export default function CertificateGenerator() {
             type="date"
             name="date"
             value={formData.date}
-            onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+            onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
             className="w-full mb-4 border px-3 py-2 rounded"
             required
           />
@@ -172,7 +183,9 @@ export default function CertificateGenerator() {
             type="text"
             name="instructor"
             value={formData.instructor}
-            onChange={(e) => setFormData(prev => ({ ...prev, instructor: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, instructor: e.target.value }))
+            }
             className="w-full mb-6 border px-3 py-2 rounded"
             placeholder="E.g. Erion Prokshi"
             required
