@@ -4,8 +4,10 @@ function LogOut() {
 
   const handleLogout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("lastActivity");
 
-    navigate("/");
+    navigate("/AdminLogin");
   };
 
   return (

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminNav from "./AdminNav";
+import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 function AllCourses() {
   useEffect(() => {
@@ -17,6 +18,8 @@ function AllCourses() {
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
+  const currentAdmin = getCurrentAdminActor();
+  const canForceCompleteCourse = ["admin", "superadmin"].includes(currentAdmin.role);
 
   useEffect(() => {
     setLoading(true);
@@ -49,6 +52,30 @@ function AllCourses() {
     setOpenDropdown((prev) => (prev === courseId ? null : courseId));
   };
 
+  const removeCourseFromList = (id) => {
+    const updatedCourses = courses.filter((c) => c.id !== id);
+    setCourses(updatedCourses);
+
+    if (selectedProfessor === "All") {
+      setFilteredCourses(updatedCourses);
+    } else {
+      setFilteredCourses(
+        updatedCourses.filter(
+          (course) =>
+            (course.professor_name || "Unassigned") === selectedProfessor
+        )
+      );
+    }
+
+    if (selectedCourseId === id) {
+      setSelectedCourseId(null);
+    }
+
+    if (openDropdown === id) {
+      setOpenDropdown(null);
+    }
+  };
+
   const handleFilterChange = (e) => {
     const value = e.target.value;
     setSelectedProfessor(value);
@@ -76,29 +103,43 @@ function AllCourses() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          const updatedCourses = courses.filter((c) => c.id !== id);
-          setCourses(updatedCourses);
-
-          // Re-apply filter on updated courses
-          if (selectedProfessor === "All") {
-            setFilteredCourses(updatedCourses);
-          } else {
-            setFilteredCourses(
-              updatedCourses.filter(
-                (course) =>
-                  (course.professor_name || "Unassigned") === selectedProfessor
-              )
-            );
-          }
-
-          if (selectedCourseId === id) {
-            setSelectedCourseId(null);
-          }
+          removeCourseFromList(id);
         } else {
           alert("Delete failed: " + (data.error || "Unknown error"));
         }
       })
       .catch((err) => alert("Error deleting course: " + err.message));
+  };
+
+  const handleCompleteCourse = (course) => {
+    if (!canForceCompleteCourse) return;
+
+    if (
+      !window.confirm(
+        `Mark "${course.title}" as completed now? This can be done even if not all sessions are finished.`
+      )
+    ) {
+      return;
+    }
+
+    fetch(`${process.env.REACT_APP_API_URL}/admin_complete_course.php`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        course_id: course.id,
+        actor: currentAdmin,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          alert(data.message || "Course marked as completed.");
+          removeCourseFromList(course.id);
+        } else {
+          alert("Failed to complete course: " + (data.error || "Unknown error"));
+        }
+      })
+      .catch((err) => alert("Error completing course: " + err.message));
   };
 
   if (loading) return <p className="p-4 text-center">Loading courses...</p>;
@@ -108,9 +149,15 @@ function AllCourses() {
     <div className="flex gap-4">
       <AdminNav />
       <div className="mt-4 ml-[22%] w-[75%]">
-        <h1 className="text-2xl font-semibold border-b-2 border-[#c2c2c2] w-[95%]">
-          All Courses
-        </h1>
+        <div className="flex items-center justify-between border-b-2 border-[#c2c2c2] pb-2 w-[95%]">
+          <h1 className="text-2xl font-semibold">All Courses</h1>
+          <button
+            onClick={() => navigate("/CreateCourse")}
+            className="bg-[#152259] hover:bg-[#152239] text-white px-4 py-2 rounded"
+          >
+            Add Course
+          </button>
+        </div>
 
         <div className="my-4">
           <label className="mr-2 font-medium">Filter by Professor:</label>
@@ -135,6 +182,7 @@ function AllCourses() {
               <th className="p-2 border">Professor</th>
               <th className="p-2 border">Students</th>
               <th className="p-2 border">Attendance</th>
+              {canForceCompleteCourse && <th className="p-2 border">Complete</th>}
               <th className="p-2 border">Delete</th>
               <th className="p-2 border">Edit</th>
             </tr>
@@ -180,6 +228,16 @@ function AllCourses() {
                       View Attendance
                     </button>
                   </td>
+                  {canForceCompleteCourse && (
+                    <td className="p-2 border text-center">
+                      <button
+                        onClick={() => handleCompleteCourse(course)}
+                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
+                      >
+                        Complete
+                      </button>
+                    </td>
+                  )}
                   <td className="p-2">
                     <button
                       onClick={() => handleDelete(course.id)}
@@ -202,7 +260,10 @@ function AllCourses() {
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="text-center p-4 text-gray-500">
+                <td
+                  colSpan={canForceCompleteCourse ? 8 : 7}
+                  className="text-center p-4 text-gray-500"
+                >
                   No courses found.
                 </td>
               </tr>

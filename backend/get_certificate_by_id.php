@@ -13,8 +13,13 @@ if (!$certificate_id) {
 
 try {
     $stmt = $conn->prepare("
-        SELECT c.*, 
-               s.name AS student_name, 
+        SELECT c.*,
+               s.name AS student_first_name,
+               s.surname AS student_surname,
+               COALESCE(
+                   NULLIF(TRIM(CONCAT(COALESCE(s.name, ''), ' ', COALESCE(s.surname, ''))), ''),
+                   c.manual_name
+               ) AS student_name,
                co.title AS course_name
         FROM certificates c
         LEFT JOIN students s ON c.student_id = s.id

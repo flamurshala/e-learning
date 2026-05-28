@@ -6,6 +6,7 @@ import AdminNav from "./AdminNav";
 export default function AllCertificates() {
   const [certificates, setCertificates] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCourse, setSelectedCourse] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
   const navigate = useNavigate();
@@ -17,10 +18,32 @@ export default function AllCertificates() {
       .catch((err) => console.error("Failed to load certificates:", err));
   }, []);
 
+  const getStudentName = (cert) => {
+    const fullName = cert.student_name && String(cert.student_name).trim();
+    return fullName || "Manual Entry";
+  };
+
+  const courseOptions = [
+    "All",
+    ...Array.from(
+      new Set(
+        certificates
+          .map((certificate) => certificate.course_name)
+          .filter((courseName) => courseName && String(courseName).trim())
+      )
+    ).sort((a, b) => a.localeCompare(b)),
+  ];
+
   const filtered = certificates.filter(
-    (c) =>
-      c.student_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      String(c.certificate_id).includes(searchTerm)
+    (c) => {
+      const matchesSearch =
+        getStudentName(c).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        String(c.certificate_id).includes(searchTerm);
+      const matchesCourse =
+        selectedCourse === "All" || c.course_name === selectedCourse;
+
+      return matchesSearch && matchesCourse;
+    }
   );
 
   // Pagination logic
@@ -36,18 +59,45 @@ export default function AllCertificates() {
     <div className="flex">
       <AdminNav />
       <div className="mt-4 ml-[22%] w-[75%]">
-        <h1 className="text-2xl font-semibold mb-4">All Certificates</h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-semibold">All Certificates</h1>
+          <button
+            onClick={() => navigate("/CertificateForm")}
+            className="bg-[#152259] hover:bg-[#152239] text-white px-4 py-2 rounded"
+          >
+            Generate Certificate
+          </button>
+        </div>
 
-        <input
-          type="text"
-          placeholder="Search by name or ID"
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1); // Reset to first page when searching
-          }}
-          className="w-[50%] mb-4 px-3 py-2 border rounded"
-        />
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <input
+            type="text"
+            placeholder="Search by name or ID"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1); // Reset to first page when searching
+            }}
+            className="w-full px-3 py-2 border rounded sm:w-[50%]"
+          />
+          <div>
+            <label className="mr-2 font-medium">Filter by Course:</label>
+            <select
+              value={selectedCourse}
+              onChange={(e) => {
+                setSelectedCourse(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="border px-3 py-2 rounded"
+            >
+              {courseOptions.map((courseName) => (
+                <option key={courseName} value={courseName}>
+                  {courseName}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
         <table className="w-full border border-collapse border-gray-300">
           <thead className="bg-gray-100">
@@ -64,7 +114,7 @@ export default function AllCertificates() {
               <tr key={i}>
                 <td className="p-2 border">{cert.certificate_id}</td>
                 <td className="p-2 border">
-                  {cert.student_name || "Manual Entry"}
+                  {getStudentName(cert)}
                 </td>
                 <td className="p-2 border">{cert.course_name}</td>
                 <td className="p-2 border">

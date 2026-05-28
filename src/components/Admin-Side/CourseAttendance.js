@@ -6,6 +6,8 @@ import ProffesorNav from "../Professor-Dashboard/ProffesorNav";
 function CourseAttendance() {
   const { courseId } = useParams();
   const [attendanceData, setAttendanceData] = useState([]);
+  const [attendanceSummary, setAttendanceSummary] = useState(null);
+  const [summaryError, setSummaryError] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -16,7 +18,7 @@ function CourseAttendance() {
   // Format any ISO/"YYYY-MM-DD HH:MM:SS" as Europe/Belgrade
   const formatBelgrade = (s) => {
     if (!s) return null;
-    const hasTZ = /[zZ]|[+\-]\d{2}:?\d{2}$/.test(s);
+    const hasTZ = /[zZ]|[+-]\d{2}:?\d{2}$/.test(s);
     const iso = hasTZ ? s : s.replace(" ", "T") + "Z"; // treat bare MySQL datetime as UTC
     const d = new Date(iso);
     if (isNaN(d)) return s;
@@ -29,14 +31,30 @@ function CourseAttendance() {
 
   useEffect(() => {
     document.title = "Course Attendance - Tectigon Academy";
+    setLoading(true);
+    setError("");
+    setSummaryError("");
 
-    fetch(`${process.env.REACT_APP_API_URL}/get_attendance.php?course_id=${courseId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          setError(data.error);
+    Promise.all([
+      fetch(`${process.env.REACT_APP_API_URL}/get_attendance.php?course_id=${courseId}`).then((res) =>
+        res.json()
+      ),
+      fetch(`${process.env.REACT_APP_API_URL}/course_attendance_percentages.php?course_id=${courseId}`).then((res) =>
+        res.json()
+      ),
+    ])
+      .then(([attendance, summary]) => {
+        if (attendance.error) {
+          setError(attendance.error);
         } else {
-          setAttendanceData(Array.isArray(data) ? data : []);
+          setAttendanceData(Array.isArray(attendance) ? attendance : []);
+        }
+
+        if (summary.error) {
+          setSummaryError(summary.error);
+          setAttendanceSummary(null);
+        } else {
+          setAttendanceSummary(summary);
         }
         setLoading(false);
       })
@@ -90,6 +108,52 @@ function CourseAttendance() {
 
         {loading && <p className="mt-4">Loading attendance...</p>}
         {error && <p className="mt-4 text-red-600">{error}</p>}
+
+        {!loading && !summaryError && attendanceSummary && (
+          <div className="mb-6 rounded border bg-white p-4 shadow-sm">
+            <div className="mb-3">
+              <h2 className="text-lg font-semibold">
+                Attendance Percentage
+                {attendanceSummary.course?.title ? ` - ${attendanceSummary.course.title}` : ""}
+              </h2>
+            </div>
+
+            {attendanceSummary.students?.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full border text-sm">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="border p-2 text-left">Student</th>
+                      <th className="border p-2 text-center">Attended</th>
+                      <th className="border p-2 text-center">Total Sessions</th>
+                      <th className="border p-2 text-center">Attendance %</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {attendanceSummary.students.map((student) => (
+                      <tr key={student.student_id}>
+                        <td className="border p-2">
+                          {student.student_name || `Student #${student.student_id}`}
+                        </td>
+                        <td className="border p-2 text-center">{student.attended_sessions}</td>
+                        <td className="border p-2 text-center">{student.total_sessions}</td>
+                        <td className="border p-2 text-center font-semibold">
+                          {Number(student.attendance_percentage).toFixed(2)}%
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-600">No students found for this course.</p>
+            )}
+          </div>
+        )}
+
+        {!loading && summaryError && (
+          <p className="mt-4 text-red-600">{summaryError}</p>
+        )}
 
         {!loading && !error && Object.keys(grouped).length === 0 && (
           <p className="mt-4">No attendance records found.</p>

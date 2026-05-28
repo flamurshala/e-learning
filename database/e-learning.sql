@@ -32,7 +32,7 @@ CREATE TABLE `admins` (
   `username` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` enum('admin','superadmin') NOT NULL DEFAULT 'admin'
+  `role` enum('admin','superadmin','administrata') NOT NULL DEFAULT 'admin'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -207,7 +207,7 @@ CREATE TABLE `student_course_payments` (
   `id` int(11) NOT NULL,
   `student_id` int(11) NOT NULL,
   `course_id` int(11) NOT NULL,
-  `payment_method` enum('All','Divided') NOT NULL,
+  `payment_method` enum('All','Divided','POS','Cash','Did not pay','Free') NOT NULL,
   `amount_paid_all` decimal(10,2) DEFAULT NULL,
   `amount_paid_month1` decimal(10,2) DEFAULT NULL,
   `amount_paid_month2` decimal(10,2) DEFAULT NULL,
@@ -225,7 +225,7 @@ CREATE TABLE `student_payments` (
   `id` int(11) NOT NULL,
   `student_id` int(11) NOT NULL,
   `course_id` int(11) NOT NULL,
-  `payment_method` enum('All','Divided') NOT NULL,
+  `payment_method` enum('All','Divided','POS','Cash','Did not pay','Free') NOT NULL,
   `amount_all` decimal(10,2) DEFAULT NULL,
   `amount_month1` decimal(10,2) DEFAULT NULL,
   `amount_month2` decimal(10,2) DEFAULT NULL,

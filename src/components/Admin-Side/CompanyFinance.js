@@ -1,0 +1,633 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import AdminNav from "./AdminNav";
+import { getCurrentAdminActor, getCurrentAdminQueryString } from "../../utils/currentAdmin";
+
+const expenseCategories = ["Rent", "Utilities", "Supplies", "Marketing", "Maintenance", "Software", "Other"];
+const expenseCategoryLabels = {
+  Rent: "Qira",
+  Utilities: "Shërbime komunale",
+  Supplies: "Furnizime",
+  Marketing: "Marketing",
+  Maintenance: "Mirëmbajtje",
+  Software: "Softuer",
+  Other: "Tjetër",
+};
+const salaryStatuses = ["unpaid", "partially_paid", "paid"];
+const salaryStatusLabels = {
+  unpaid: "Unpaid",
+  partially_paid: "Pjesërisht e paguar",
+  paid: "Paid",
+};
+const paymentMethodLabels = {
+  All: "Pagesë e plotë",
+  Divided: "Pagesë me këste",
+  POS: "POS",
+  Cash: "Para në dorë",
+  "Did not pay": "Did not pay",
+};
+const paymentStatusLabels = {
+  paid: "Paid",
+  unpaid: "Unpaid",
+  partially_paid: "Pjesërisht e paguar",
+  cash: "Paguar me para në dorë",
+  pos: "Paid by POS",
+};
+const statusOptions = [
+  ["paid", "Paid"],
+  ["unpaid", "Unpaid"],
+  ["partially_paid", "Pjesërisht e paguar"],
+  ["cash", "Paguar me para në dorë"],
+  ["pos", "Paid by POS"],
+];
+const defaultPagination = { page: 1, limit: 50, total_rows: 0, total_pages: 1 };
+const defaultSalarySummary = {
+  expected_amount: null,
+  total_paid: 0,
+  remaining_amount: null,
+  status: "",
+};
+const emptyExpense = {
+  id: "",
+  title: "",
+  bill_number: "",
+  category: "Rent",
+  amount: "",
+  expense_date: new Date().toISOString().slice(0, 10),
+  payment_method: "",
+  description: "",
+};
+const emptySalary = {
+  teacher_id: "",
+  course_id: "",
+  expected_amount: "",
+  paid_amount: "",
+  payment_date: new Date().toISOString().slice(0, 10),
+  notes: "",
+};
+
+function money(value) {
+  return `${Number(value || 0).toFixed(2)} €`;
+}
+
+function optionalMoney(value) {
+  return value === null || value === undefined || value === "" ? "-" : money(value);
+}
+
+function labelFor(map, value) {
+  return map[value] || value || "-";
+}
+
+function PaginationControls({ pagination, onPageChange }) {
+  const page = Number(pagination?.page || 1);
+  const totalPages = Number(pagination?.total_pages || 1);
+  const totalRows = Number(pagination?.total_rows || 0);
+  const limit = Number(pagination?.limit || 50);
+  const start = totalRows === 0 ? 0 : (page - 1) * limit + 1;
+  const end = Math.min(page * limit, totalRows);
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-sm text-gray-700">
+      <span>
+        Duke shfaqur {start}-{end} nga {totalRows} rreshta
+      </span>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => onPageChange(page - 1)}
+          disabled={page <= 1}
+          className="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Para
+        </button>
+        <span>
+          Faqja {page} nga {totalPages}
+        </span>
+        <button
+          type="button"
+          onClick={() => onPageChange(page + 1)}
+          disabled={page >= totalPages}
+          className="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Pas
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function apiUrl(endpoint, params = {}) {
+  const search = new URLSearchParams(getCurrentAdminQueryString());
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== "" && value !== null && value !== undefined) search.set(key, value);
+  });
+  const query = search.toString();
+  return `${process.env.REACT_APP_API_URL}/${endpoint}${query ? `?${query}` : ""}`;
+}
+
+export default function CompanyFinance() {
+  const [activeTab, setActiveTab] = useState("income");
+  const [summary, setSummary] = useState({
+    total_income: 0,
+    total_expenses: 0,
+    total_teacher_salaries: 0,
+    net_profit: 0,
+  });
+  const [courses, setCourses] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [incomeRows, setIncomeRows] = useState([]);
+  const [incomeTotal, setIncomeTotal] = useState(0);
+  const [expenses, setExpenses] = useState([]);
+  const [expensesTotal, setExpensesTotal] = useState(0);
+  const [salaryPayments, setSalaryPayments] = useState([]);
+  const [salaryTotal, setSalaryTotal] = useState(0);
+  const [incomePage, setIncomePage] = useState(1);
+  const [expensePage, setExpensePage] = useState(1);
+  const [salaryPage, setSalaryPage] = useState(1);
+  const [incomePagination, setIncomePagination] = useState(defaultPagination);
+  const [expensePagination, setExpensePagination] = useState(defaultPagination);
+  const [salaryPagination, setSalaryPagination] = useState(defaultPagination);
+  const [selectedSalarySummary, setSelectedSalarySummary] = useState(defaultSalarySummary);
+  const [message, setMessage] = useState({ text: "", type: "" });
+
+  const [topFilters, setTopFilters] = useState({
+    date_from: "",
+    date_to: "",
+    course_id: "",
+    status: "",
+  });
+  const [incomeFilters, setIncomeFilters] = useState({
+    student: "",
+  });
+  const [expenseFilters, setExpenseFilters] = useState({
+    category: "",
+    amount_min: "",
+    amount_max: "",
+  });
+  const [salaryFilters, setSalaryFilters] = useState({
+    teacher_id: "",
+  });
+  const [expenseForm, setExpenseForm] = useState(emptyExpense);
+  const [salaryForm, setSalaryForm] = useState(emptySalary);
+
+  useEffect(() => {
+    document.title = "Financat e kompanisë - Tectigon Academy";
+  }, []);
+
+  const loadSummary = useCallback(() => {
+    axios
+      .get(apiUrl("finance_summary.php", topFilters))
+      .then((res) => {
+        if (res.data?.success) setSummary(res.data.totals || {
+          total_income: 0,
+          total_expenses: 0,
+          total_teacher_salaries: 0,
+          net_profit: 0,
+        });
+      })
+      .catch(() => setMessage({ text: "Nuk u arrit të ngarkohet përmbledhja financiare.", type: "error" }));
+  }, [topFilters]);
+
+  const loadOptions = useCallback(() => {
+    axios
+      .get(apiUrl("finance_options.php"))
+      .then((res) => {
+        if (res.data?.success) {
+          setCourses(Array.isArray(res.data.courses) ? res.data.courses : []);
+          setTeachers(Array.isArray(res.data.teachers) ? res.data.teachers : []);
+        }
+      })
+      .catch(() => setMessage({ text: "Nuk u arrit të ngarkohen opsionet financiare.", type: "error" }));
+  }, []);
+
+  const loadIncome = useCallback(() => {
+    axios
+      .get(apiUrl("finance_income.php", { ...topFilters, ...incomeFilters, page: incomePage }))
+      .then((res) => {
+        if (res.data?.success) {
+          setIncomeRows(Array.isArray(res.data.payments) ? res.data.payments : []);
+          setIncomeTotal(res.data.total_income || 0);
+          setIncomePagination(res.data.pagination || defaultPagination);
+        }
+      })
+      .catch(() => setMessage({ text: "Nuk u arrit të ngarkohen të ardhurat.", type: "error" }));
+  }, [incomeFilters, incomePage, topFilters]);
+
+  const loadExpenses = useCallback(() => {
+    axios
+      .get(apiUrl("finance_expenses.php", {
+        date_from: topFilters.date_from,
+        date_to: topFilters.date_to,
+        page: expensePage,
+        ...expenseFilters,
+      }))
+      .then((res) => {
+        if (res.data?.success) {
+          setExpenses(Array.isArray(res.data.expenses) ? res.data.expenses : []);
+          setExpensesTotal(res.data.total_expenses || 0);
+          setExpensePagination(res.data.pagination || defaultPagination);
+        }
+      })
+      .catch(() => setMessage({ text: "Nuk u arrit të ngarkohen shpenzimet.", type: "error" }));
+  }, [expenseFilters, expensePage, topFilters.date_from, topFilters.date_to]);
+
+  const loadSalaryPayments = useCallback(() => {
+    const salaryStatus = salaryStatuses.includes(topFilters.status) ? topFilters.status : "";
+    axios
+      .get(apiUrl("teacher_salary_payments.php", {
+        date_from: topFilters.date_from,
+        date_to: topFilters.date_to,
+        course_id: topFilters.course_id,
+        status: salaryStatus,
+        page: salaryPage,
+        ...salaryFilters,
+      }))
+      .then((res) => {
+        if (res.data?.success) {
+          setSalaryPayments(Array.isArray(res.data.payments) ? res.data.payments : []);
+          setSalaryTotal(res.data.total_paid || 0);
+          setSalaryPagination(res.data.pagination || defaultPagination);
+        }
+      })
+      .catch(() => setMessage({ text: "Nuk u arrit të ngarkohen pagat e mësimdhënësve.", type: "error" }));
+  }, [salaryFilters, salaryPage, topFilters]);
+
+  useEffect(() => {
+    loadSummary();
+    loadOptions();
+  }, [loadSummary, loadOptions]);
+
+  useEffect(() => {
+    loadIncome();
+  }, [loadIncome]);
+
+  useEffect(() => {
+    loadExpenses();
+  }, [loadExpenses]);
+
+  useEffect(() => {
+    loadSalaryPayments();
+  }, [loadSalaryPayments]);
+
+  useEffect(() => {
+    if (!salaryForm.teacher_id || !salaryForm.course_id) {
+      setSelectedSalarySummary(defaultSalarySummary);
+      return;
+    }
+
+    axios
+      .get(apiUrl("teacher_salary_payments.php", {
+        teacher_id: salaryForm.teacher_id,
+        course_id: salaryForm.course_id,
+        page: 1,
+      }))
+      .then((res) => {
+        if (res.data?.success) {
+          setSelectedSalarySummary(res.data.salary_summary || defaultSalarySummary);
+        }
+      })
+      .catch(() => setSelectedSalarySummary(defaultSalarySummary));
+  }, [salaryForm.teacher_id, salaryForm.course_id]);
+
+  const relatedCourses = useMemo(
+    () => courses.filter((course) => String(course.teacher_id || "") === String(salaryForm.teacher_id || "")),
+    [courses, salaryForm.teacher_id]
+  );
+
+  const previousSalaryPaid = Number(selectedSalarySummary.total_paid || 0);
+  const suggestedExpected = selectedSalarySummary.expected_amount || "";
+  const expectedForProjection = salaryForm.expected_amount || suggestedExpected;
+  const remainingBeforePayment =
+    expectedForProjection === "" ? null : Math.max(Number(expectedForProjection || 0) - previousSalaryPaid, 0);
+
+  const resetPages = () => {
+    setIncomePage(1);
+    setExpensePage(1);
+    setSalaryPage(1);
+  };
+  const updateTopFilter = (key, value) => {
+    resetPages();
+    setTopFilters((prev) => ({ ...prev, [key]: value }));
+  };
+  const updateIncomeFilter = (key, value) => {
+    setIncomePage(1);
+    setIncomeFilters((prev) => ({ ...prev, [key]: value }));
+  };
+  const updateExpenseFilter = (key, value) => {
+    setExpensePage(1);
+    setExpenseFilters((prev) => ({ ...prev, [key]: value }));
+  };
+  const updateSalaryFilter = (key, value) => {
+    setSalaryPage(1);
+    setSalaryFilters((prev) => ({ ...prev, [key]: value }));
+  };
+  const updateExpenseForm = (key, value) => setExpenseForm((prev) => ({ ...prev, [key]: value }));
+  const clearFilters = () => {
+    resetPages();
+    setTopFilters({ date_from: "", date_to: "", course_id: "", status: "" });
+    setIncomeFilters({ student: "" });
+    setExpenseFilters({ category: "", amount_min: "", amount_max: "" });
+    setSalaryFilters({ teacher_id: "" });
+  };
+  const updateSalaryForm = (key, value) => {
+    setSalaryForm((prev) => {
+      const next = { ...prev, [key]: value };
+      if (key === "teacher_id") next.course_id = "";
+      return next;
+    });
+  };
+
+  const saveExpense = (e) => {
+    e.preventDefault();
+    setMessage({ text: "", type: "" });
+    axios
+      .post(`${process.env.REACT_APP_API_URL}/save_finance_expense.php`, {
+        ...expenseForm,
+        actor: getCurrentAdminActor(),
+      })
+      .then((res) => {
+        if (res.data?.success) {
+          setMessage({ text: res.data.message || "Expense saved.", type: "success" });
+          setExpenseForm(emptyExpense);
+          loadExpenses();
+          loadSummary();
+        } else {
+          setMessage({ text: res.data?.error || "Nuk u arrit të ruhet shpenzimi.", type: "error" });
+        }
+      })
+      .catch(() => setMessage({ text: "Nuk u arrit të ruhet shpenzimi.", type: "error" }));
+  };
+
+  const editExpense = (expense) => {
+    setExpenseForm({
+      id: expense.id,
+      title: expense.title || "",
+      bill_number: expense.bill_number || "",
+      category: expense.category || "Other",
+      amount: expense.amount || "",
+      expense_date: expense.expense_date || new Date().toISOString().slice(0, 10),
+      payment_method: expense.payment_method || "",
+      description: expense.description || "",
+    });
+    setActiveTab("expenses");
+  };
+
+  const deleteExpense = (id) => {
+    if (!window.confirm("Të fshihet ky shpenzimë")) return;
+    axios
+      .post(`${process.env.REACT_APP_API_URL}/delete_finance_expense.php`, {
+        id,
+        actor: getCurrentAdminActor(),
+      })
+      .then((res) => {
+        if (res.data?.success) {
+          loadExpenses();
+          loadSummary();
+        } else {
+          setMessage({ text: res.data?.error || "Nuk u arrit të fshihet shpenzimi.", type: "error" });
+        }
+      })
+      .catch(() => setMessage({ text: "Nuk u arrit të fshihet shpenzimi.", type: "error" }));
+  };
+
+  const saveSalaryPayment = (e) => {
+    e.preventDefault();
+    setMessage({ text: "", type: "" });
+    axios
+      .post(`${process.env.REACT_APP_API_URL}/save_teacher_salary_payment.php`, {
+        ...salaryForm,
+        actor: getCurrentAdminActor(),
+      })
+      .then((res) => {
+        if (res.data?.success) {
+          setMessage({
+            text: `Pagesa e pagës së mësimdhënësit u ruajt si ${labelFor(salaryStatusLabels, res.data.status)}.`,
+            type: "success",
+          });
+          setSalaryForm(emptySalary);
+          loadSalaryPayments();
+          loadSummary();
+        } else {
+          setMessage({ text: res.data?.error || "Nuk u arrit të ruhet pagesa e pagës së mësimdhënësit.", type: "error" });
+        }
+      })
+      .catch(() => setMessage({ text: "Nuk u arrit të ruhet pagesa e pagës së mësimdhënësit.", type: "error" }));
+  };
+
+  return (
+    <div className="flex gap-4">
+      <AdminNav />
+      <div className="ml-[22%] mt-6 w-[75%] pb-10">
+        <h1 className="mb-4 border-b-2 border-[#c2c2c2] pb-2 text-2xl font-semibold">
+          Financat e kompanisë
+        </h1>
+
+        <div className="mb-6 rounded border bg-white p-4 shadow-sm">
+          <h2 className="mb-3 text-lg font-semibold">Filtrat</h2>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+            <input type="date" value={topFilters.date_from} onChange={(e) => updateTopFilter("date_from", e.target.value)} className="rounded border px-3 py-2" />
+            <input type="date" value={topFilters.date_to} onChange={(e) => updateTopFilter("date_to", e.target.value)} className="rounded border px-3 py-2" />
+            <select value={topFilters.course_id} onChange={(e) => updateTopFilter("course_id", e.target.value)} className="rounded border px-3 py-2">
+              <option value="">Të gjitha kurset</option>
+              {courses.map((course) => (
+                <option key={`${course.id}-${course.teacher_id || "none"}`} value={course.id}>{course.title}</option>
+              ))}
+            </select>
+            <select value={topFilters.status} onChange={(e) => updateTopFilter("status", e.target.value)} className="rounded border px-3 py-2">
+              <option value="">Të gjitha statuset</option>
+              {statusOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </select>
+            <button type="button" onClick={clearFilters} className="rounded border px-4 py-2">Pastro filtrat</button>
+
+            {activeTab === "income" && (
+              <input placeholder="Student name" value={incomeFilters.student} onChange={(e) => updateIncomeFilter("student", e.target.value)} className="rounded border px-3 py-2" />
+            )}
+            {activeTab === "expenses" && (
+              <>
+                <select value={expenseFilters.category} onChange={(e) => updateExpenseFilter("category", e.target.value)} className="rounded border px-3 py-2">
+                  <option value="">Të gjitha kategoritë</option>
+                  {expenseCategories.map((category) => <option key={category} value={category}>{labelFor(expenseCategoryLabels, category)}</option>)}
+                </select>
+                <input type="number" placeholder="Shuma minimale" value={expenseFilters.amount_min} onChange={(e) => updateExpenseFilter("amount_min", e.target.value)} className="rounded border px-3 py-2" />
+                <input type="number" placeholder="Shuma maksimale" value={expenseFilters.amount_max} onChange={(e) => updateExpenseFilter("amount_max", e.target.value)} className="rounded border px-3 py-2" />
+              </>
+            )}
+            {activeTab === "salaries" && (
+              <select value={salaryFilters.teacher_id} onChange={(e) => updateSalaryFilter("teacher_id", e.target.value)} className="rounded border px-3 py-2">
+                <option value="">Të gjithë mësimdhënësit</option>
+                {teachers.map((teacher) => <option key={teacher.id} value={teacher.id}>{teacher.name}</option>)}
+              </select>
+            )}
+          </div>
+        </div>
+
+        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
+          <div className="rounded border bg-white p-4 shadow-sm">
+            <p className="text-sm text-gray-600">Të ardhurat totale</p>
+            <strong className="text-2xl text-green-700">{money(summary.total_income)}</strong>
+          </div>
+          <div className="rounded border bg-white p-4 shadow-sm">
+            <p className="text-sm text-gray-600">Shpenzimet totale</p>
+            <strong className="text-2xl text-red-700">{money(summary.total_expenses)}</strong>
+          </div>
+          <div className="rounded border bg-white p-4 shadow-sm">
+            <p className="text-sm text-gray-600">Pagat e paguara të mësimdhënësve</p>
+            <strong className="text-2xl text-orange-700">{money(summary.total_teacher_salaries)}</strong>
+          </div>
+          <div className="rounded border bg-white p-4 shadow-sm">
+            <p className="text-sm text-gray-600">Fitimi / Humbja neto</p>
+            <strong className={Number(summary.net_profit) >= 0 ? "text-2xl text-green-700" : "text-2xl text-red-700"}>
+              {money(summary.net_profit)}
+            </strong>
+          </div>
+        </div>
+
+        {message.text && (
+          <p className={message.type === "success" ? "mb-4 text-green-600" : "mb-4 text-red-600"}>
+            {message.text}
+          </p>
+        )}
+
+        <div className="mb-5 flex flex-wrap gap-2">
+          {[
+            ["income", "Income"],
+            ["expenses", "Expenses"],
+            ["salaries", "Teacher Salaries"],
+          ].map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setActiveTab(key)}
+              className={`rounded border px-4 py-2 ${
+                activeTab === key ? "border-[#152259] bg-[#152259] text-white" : "border-gray-300 bg-white"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === "income" && (
+          <section>
+            <h2 className="mb-3 text-xl font-semibold">Të ardhurat nga pagesat e studentëve</h2>
+            <p className="mb-2 font-semibold">Të ardhurat e filtruara: {money(incomeTotal)}</p>
+            <table className="w-full border-collapse border">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="border p-2 text-left">Studenti</th>
+                  <th className="border p-2 text-left">Course</th>
+                  <th className="border p-2 text-left">Data</th>
+                  <th className="border p-2 text-left">Metoda</th>
+                  <th className="border p-2 text-left">Status</th>
+                  <th className="border p-2 text-right">Shuma</th>
+                </tr>
+              </thead>
+              <tbody>
+                {incomeRows.map((row) => (
+                  <tr key={row.id}>
+                    <td className="border p-2">{row.student_name}</td>
+                    <td className="border p-2">{row.course_title}</td>
+                    <td className="border p-2">{row.payment_date}</td>
+                    <td className="border p-2">{labelFor(paymentMethodLabels, row.payment_method)}</td>
+                    <td className="border p-2">{labelFor(paymentStatusLabels, row.payment_status)}</td>
+                    <td className="border p-2 text-right">{money(row.payment_amount)}</td>
+                  </tr>
+                ))}
+                {incomeRows.length === 0 && <tr><td colSpan="6" className="p-4 text-center text-gray-500">Nuk u gjetën të ardhura.</td></tr>}
+              </tbody>
+            </table>
+            <PaginationControls pagination={incomePagination} onPageChange={setIncomePage} />
+          </section>
+        )}
+
+        {activeTab === "expenses" && (
+          <section>
+            <h2 className="mb-3 text-xl font-semibold">Shpenzimet e kompanisë</h2>
+            <form onSubmit={saveExpense} className="mb-6 grid grid-cols-1 gap-3 rounded border bg-white p-4 md:grid-cols-2">
+              <input placeholder="Titulli i shpenzimit" value={expenseForm.title} onChange={(e) => updateExpenseForm("title", e.target.value)} className="rounded border px-3 py-2" required />
+              <input placeholder="Numri i faturës" value={expenseForm.bill_number} onChange={(e) => updateExpenseForm("bill_number", e.target.value)} className="rounded border px-3 py-2" />
+              <select value={expenseForm.category} onChange={(e) => updateExpenseForm("category", e.target.value)} className="rounded border px-3 py-2" required>
+                {expenseCategories.map((category) => <option key={category} value={category}>{labelFor(expenseCategoryLabels, category)}</option>)}
+              </select>
+              <input type="number" min="0" step="0.01" placeholder="Shuma" value={expenseForm.amount} onChange={(e) => updateExpenseForm("amount", e.target.value)} className="rounded border px-3 py-2" required />
+              <input type="date" value={expenseForm.expense_date} onChange={(e) => updateExpenseForm("expense_date", e.target.value)} className="rounded border px-3 py-2" required />
+              <input placeholder="Mënyra e pagesës" value={expenseForm.payment_method} onChange={(e) => updateExpenseForm("payment_method", e.target.value)} className="rounded border px-3 py-2" />
+              <textarea placeholder="Përshkrim / shënime" value={expenseForm.description} onChange={(e) => updateExpenseForm("description", e.target.value)} className="rounded border px-3 py-2 md:col-span-2" />
+              <div className="flex gap-2 md:col-span-2">
+                <button className="rounded bg-[#152259] px-4 py-2 text-white">{expenseForm.id ? "Përditëso shpenzimin" : "Create expense"}</button>
+                {expenseForm.id && <button type="button" onClick={() => setExpenseForm(emptyExpense)} className="rounded border px-4 py-2">Anulo ndryshimin</button>}
+              </div>
+            </form>
+            <p className="mb-2 font-semibold">Shpenzimet e filtruara: {money(expensesTotal)}</p>
+            <table className="w-full border-collapse border">
+              <thead className="bg-gray-100"><tr><th className="border p-2 text-left">Titulli</th><th className="border p-2">Data</th><th className="border p-2">Category</th><th className="border p-2">Fatura</th><th className="border p-2 text-right">Shuma</th><th className="border p-2">Veprimet</th></tr></thead>
+              <tbody>
+                {expenses.map((expense) => (
+                  <tr key={expense.id}>
+                    <td className="border p-2">{expense.title}</td>
+                    <td className="border p-2">{expense.expense_date}</td>
+                    <td className="border p-2">{labelFor(expenseCategoryLabels, expense.category)}</td>
+                    <td className="border p-2">{expense.bill_number || "-"}</td>
+                    <td className="border p-2 text-right">{money(expense.amount)}</td>
+                    <td className="border p-2"><button onClick={() => editExpense(expense)} className="mr-2 rounded bg-[#152259] px-3 py-1 text-white">Ndrysho</button><button onClick={() => deleteExpense(expense.id)} className="rounded bg-red-600 px-3 py-1 text-white">Fshi</button></td>
+                  </tr>
+                ))}
+                {expenses.length === 0 && <tr><td colSpan="6" className="p-4 text-center text-gray-500">Nuk u gjetën shpenzime.</td></tr>}
+              </tbody>
+            </table>
+            <PaginationControls pagination={expensePagination} onPageChange={setExpensePage} />
+          </section>
+        )}
+
+        {activeTab === "salaries" && (
+          <section>
+            <h2 className="mb-3 text-xl font-semibold">Pagesat e pagave të mësimdhënësve</h2>
+            <form onSubmit={saveSalaryPayment} className="mb-6 grid grid-cols-1 gap-3 rounded border bg-white p-4 md:grid-cols-2">
+              <select value={salaryForm.teacher_id} onChange={(e) => updateSalaryForm("teacher_id", e.target.value)} className="rounded border px-3 py-2" required>
+                <option value="">Zgjidh mësimdhënësin</option>
+                {teachers.map((teacher) => <option key={teacher.id} value={teacher.id}>{teacher.name}</option>)}
+              </select>
+              <select value={salaryForm.course_id} onChange={(e) => updateSalaryForm("course_id", e.target.value)} className="rounded border px-3 py-2" required>
+                <option value="">Zgjidh kursin e mësimdhënësit</option>
+                {relatedCourses.map((course) => <option key={course.id} value={course.id}>{course.title}</option>)}
+              </select>
+              <div className="grid gap-2 rounded border bg-gray-50 p-3 text-sm text-gray-700 md:col-span-2 md:grid-cols-2">
+                <p>
+                  <span className="font-semibold">Shuma e plotë e vendosur:</span>{" "}
+                  {expectedForProjection === "" ? "E pavendosur" : money(expectedForProjection)}
+                </p>
+                <p>
+                  <span className="font-semibold">Mbetur për t’u paguar:</span>{" "}
+                  {remainingBeforePayment === null ? "-" : money(remainingBeforePayment)}
+                </p>
+              </div>
+              <input type="number" min="0" step="0.01" placeholder={suggestedExpected ? `Full amount optional, previous ${suggestedExpected}` : "Shuma e plotë për t’u paguar (opsionale)"} value={salaryForm.expected_amount} onChange={(e) => updateSalaryForm("expected_amount", e.target.value)} className="rounded border px-3 py-2" />
+              <input type="number" min="0" step="0.01" placeholder="Paid amount" value={salaryForm.paid_amount} onChange={(e) => updateSalaryForm("paid_amount", e.target.value)} className="rounded border px-3 py-2" required />
+              <input type="date" value={salaryForm.payment_date} onChange={(e) => updateSalaryForm("payment_date", e.target.value)} className="rounded border px-3 py-2" required />
+              <textarea placeholder="Shënime" value={salaryForm.notes} onChange={(e) => updateSalaryForm("notes", e.target.value)} className="rounded border px-3 py-2 md:col-span-2" />
+              <button className="w-fit rounded bg-[#152259] px-4 py-2 text-white md:col-span-2">Regjistro pagesën e pagës</button>
+            </form>
+            <p className="mb-2 font-semibold">Pagat e filtruara të paguara: {money(salaryTotal)}</p>
+            <table className="w-full border-collapse border">
+              <thead className="bg-gray-100"><tr><th className="border p-2 text-left">Profesor</th><th className="border p-2 text-left">Course</th><th className="border p-2">Data</th><th className="border p-2 text-right">Expected</th><th className="border p-2 text-right">Paid</th><th className="border p-2">Status</th></tr></thead>
+              <tbody>
+                {salaryPayments.map((payment) => (
+                  <tr key={payment.id}>
+                    <td className="border p-2">{payment.teacher_name}</td>
+                    <td className="border p-2">{payment.course_title}</td>
+                    <td className="border p-2">{payment.payment_date}</td>
+                    <td className="border p-2 text-right">{optionalMoney(payment.expected_amount)}</td>
+                    <td className="border p-2 text-right">{money(payment.paid_amount)}</td>
+                    <td className="border p-2">{labelFor(salaryStatusLabels, payment.status)}</td>
+                  </tr>
+                ))}
+                {salaryPayments.length === 0 && <tr><td colSpan="6" className="p-4 text-center text-gray-500">Nuk u gjetën pagesa pagash.</td></tr>}
+              </tbody>
+            </table>
+            <PaginationControls pagination={salaryPagination} onPageChange={setSalaryPage} />
+          </section>
+        )}
+      </div>
+    </div>
+  );
+}

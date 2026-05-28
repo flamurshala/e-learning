@@ -684,3 +684,9 @@ Notification condition NOT met.
 Total sessions: 13
 Submitted sessions before: 6
 Notification condition NOT met.
+Total sessions: 13
+Submitted sessions before: 6
+Notification condition NOT met.
+Total sessions: 13
+Submitted sessions before: 7
+Notification condition NOT met.

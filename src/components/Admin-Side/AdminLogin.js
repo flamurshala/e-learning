@@ -11,6 +11,7 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const isAdministrataCode = /^\d{4}$/.test(username.trim());
 
   const handleLogin = async () => {
     try {
@@ -28,6 +29,7 @@ export default function AdminLogin() {
       if (data.success) {
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("userRole", data.user.role);
+        localStorage.setItem("lastActivity", Date.now().toString());
         navigate("/CreateCourse");
       } else {
         setError(data.message);
@@ -64,20 +66,27 @@ export default function AdminLogin() {
 
           <input
             type="text"
-            placeholder="Username"
+            placeholder="Username or 4-digit administrata code"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="block w-full mb-4 px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition rounded-lg"
             required
           />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="block w-full mb-6 px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition rounded-lg"
-            required
-          />
+          {!isAdministrataCode && (
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="block w-full mb-6 px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition rounded-lg"
+              required
+            />
+          )}
+          {isAdministrataCode && (
+            <p className="text-sm text-gray-600 mb-6">
+              Administrata code detected. Password is not required.
+            </p>
+          )}
           <button
             type="submit"
             className="w-full bg-[#152259] hover:bg-[#152250] text-white font-semibold py-3 rounded-lg transition"

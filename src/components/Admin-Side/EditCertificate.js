@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import AdminNav from "./AdminNav";
 import BackButton from "../BackButton";
@@ -24,6 +24,15 @@ export default function EditCertificate() {
     date: "",
     instructor: ""
   });
+
+  const getStudentName = (student) => {
+    const ready = student.student_name && String(student.student_name).trim();
+    if (ready) return ready;
+
+    const first = student.name && String(student.name).trim();
+    const last = student.surname && String(student.surname).trim();
+    return [first, last].filter(Boolean).join(" ") || `Student #${student.id}`;
+  };
 
   // Load courses
   useEffect(() => {
@@ -126,7 +135,7 @@ const handleSubmit = async (e) => {
               >
                 <option value="">-- Choose Student --</option>
                 {students.map(student => (
-                  <option key={student.id} value={student.id}>{student.name}</option>
+                  <option key={student.id} value={student.id}>{getStudentName(student)}</option>
                 ))}
               </select>
             </div>

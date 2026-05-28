@@ -1,19 +1,30 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+const CUTOFF_SECONDS = 15 * 60;
+const WARN1 = 5 * 60;
+const WARN2 = 10 * 60;
 
 function SessionTimer({ sessionId, onFifteenMinutes, onTick }) {
   const [seconds, setSeconds] = useState(0);
   const [stopped, setStopped] = useState(false);
+  const cutoffFiredRef = useRef(false);
+  const onFifteenMinutesRef = useRef(onFifteenMinutes);
+  const onTickRef = useRef(onTick);
 
   const lockKey = `session_locked_${sessionId}`;
   const startKey = `session_start_${sessionId}`;
 
-  // Cutoff (20 minutes)
-  const CUTOFF_SECONDS = 15 * 60; // 1200
-  const WARN1 = 5 * 60; // 600
-  const WARN2 = 10 * 60; // 900
+  useEffect(() => {
+    onFifteenMinutesRef.current = onFifteenMinutes;
+  }, [onFifteenMinutes]);
+
+  useEffect(() => {
+    onTickRef.current = onTick;
+  }, [onTick]);
 
   useEffect(() => {
     if (!sessionId) return;
+    cutoffFiredRef.current = false;
 
     let sessionStart = localStorage.getItem(startKey);
     if (!sessionStart) {
@@ -23,25 +34,36 @@ function SessionTimer({ sessionId, onFifteenMinutes, onTick }) {
       sessionStart = parseInt(sessionStart, 10);
     }
 
+    const stopAtCutoff = () => {
+      if (cutoffFiredRef.current) return;
+      cutoffFiredRef.current = true;
+      setSeconds(CUTOFF_SECONDS);
+      setStopped(true);
+      localStorage.setItem(lockKey, "locked");
+      if (onTickRef.current) onTickRef.current(CUTOFF_SECONDS);
+      if (onFifteenMinutesRef.current) onFifteenMinutesRef.current();
+    };
+
+    if (localStorage.getItem(lockKey) === "locked") {
+      stopAtCutoff();
+      return;
+    }
+
     const interval = setInterval(() => {
       const now = Date.now();
       const elapsed = Math.floor((now - sessionStart) / 1000);
 
       if (elapsed >= CUTOFF_SECONDS) {
-        setSeconds(elapsed);
-        setStopped(true);
-        localStorage.setItem(lockKey, "locked");
+        stopAtCutoff();
         clearInterval(interval);
-        // Fire the cutoff callback (kept old name for compatibility)
-        if (onFifteenMinutes) onFifteenMinutes();
       } else {
         setSeconds(elapsed);
-        if (onTick) onTick(elapsed);
+        if (onTickRef.current) onTickRef.current(elapsed);
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [sessionId, onFifteenMinutes, onTick]);
+  }, [sessionId, lockKey, startKey]);
 
   const getCardClass = (limit) => {
     if (seconds >= limit) {
@@ -56,6 +78,7 @@ function SessionTimer({ sessionId, onFifteenMinutes, onTick }) {
     <div className="mb-4">
       <p className="text-blue-700 font-semibold mb-4">
         Session time: {Math.floor(seconds / 60)}m {seconds % 60}s
+        {stopped && <span className="ml-2 text-red-600">(stopped)</span>}
       </p>
 
       <div className="flex gap-4">

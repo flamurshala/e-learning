@@ -18,7 +18,11 @@ function AllAdmins() {
         return res.json();
       })
       .then((data) => {
-        setAdmins(data);
+        setAdmins(
+          data.filter(
+            (admin) => !(admin.username === "flamur" && admin.role === "superadmin")
+          )
+        );
         setLoading(false);
       })
       .catch((err) => {
@@ -54,9 +58,14 @@ function AllAdmins() {
     <div className="flex gap-4">
       <AdminNav />
       <div className="mt-4 ml-[22%] w-[75%]">
-        <h1 className="text-2xl font-semibold border-b-2 border-[#c2c2c2] w-full">
-          All Admins
-        </h1>
+        <div className="flex items-center justify-between border-b-2 border-[#c2c2c2] pb-2 w-full">
+          <h1 className="text-2xl font-semibold">All Admins</h1>
+          <Link to="/AddAdmin">
+            <button className="bg-[#152259] hover:bg-[#152239] text-white px-4 py-2 rounded">
+              Add Admin
+            </button>
+          </Link>
+        </div>
         <table className="w-full mt-4 border-collapse border border-gray-300">
           <thead>
             <tr className="text-left bg-gray-100">

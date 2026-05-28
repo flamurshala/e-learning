@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import SessionTimer from "./SessionTimer";
 
 function AttendanceForm({ session, professorId, courseId }) {
+  const navigate = useNavigate();
   const [students, setStudents] = useState([]);
   const [attendance, setAttendance] = useState({});
   const [locked, setLocked] = useState(false); // lock only when timer finishes
   const [seconds, setSeconds] = useState(0);
   const [autoMarkedStudents, setAutoMarkedStudents] = useState([]);
-  const [canComplete, setCanComplete] = useState(false);
 
   // Display name for the session
   const sessionDisplayName =
@@ -58,20 +59,31 @@ function AttendanceForm({ session, professorId, courseId }) {
       .catch((err) => console.error("Error loading attendance:", err));
   }, [session?.id, courseId, professorId]);
 
-  // Check if course can be completed
-  useEffect(() => {
-    if (!courseId) return;
-    fetch(`${process.env.REACT_APP_API_URL}/can_complete_course.php?course_id=${courseId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setCanComplete(data.canComplete);
-      });
-  }, [courseId]);
-
   const updateAttendance = (studentId, status) => {
     if (locked) return; // prevent edits only when timer finished
     setAttendance((prev) => ({ ...prev, [studentId]: status }));
   };
+
+  const statusOptions = [
+    {
+      value: "present",
+      label: "Prezent",
+      className: "border-green-600 text-green-700 hover:bg-green-50",
+      activeClassName: "bg-green-600 text-white border-green-600",
+    },
+    {
+      value: "online",
+      label: "Online",
+      className: "border-blue-600 text-blue-700 hover:bg-blue-50",
+      activeClassName: "bg-blue-600 text-white border-blue-600",
+    },
+    {
+      value: "absent",
+      label: "Munges",
+      className: "border-red-600 text-red-700 hover:bg-red-50",
+      activeClassName: "bg-red-600 text-white border-red-600",
+    },
+  ];
 
   // When the timer hits the cutoff, auto-mark and lock the form
   const handleFifteenMinutes = () => {
@@ -124,27 +136,9 @@ function AttendanceForm({ session, professorId, courseId }) {
     const result = await res.json();
     if (res.ok && result.success) {
       alert("Attendance saved.");
-      // Do NOT lock here — fields remain editable until the timer finishes
+      navigate(`/professor/calendar/${courseId}`);
     } else {
       alert("Error saving attendance: " + (result.error || "Unknown"));
-    }
-  };
-
-  const completeCourse = async () => {
-    if (!window.confirm("Are you sure you want to complete this course?")) return;
-
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/complete_course.php`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ course_id: courseId }),
-    });
-    const result = await res.json();
-
-    if (result.success) {
-      alert("Course marked as completed!");
-      setCanComplete(false);
-    } else {
-      alert("Failed to complete course: " + (result.error || "Unknown error"));
     }
   };
 
@@ -174,19 +168,29 @@ function AttendanceForm({ session, professorId, courseId }) {
 
       <form onSubmit={handleSubmit}>
         {students.map((student) => (
-          <div key={student.student_id} className="flex justify-between items-center mb-3">
-            <span>{displayStudentName(student)}</span>
-            <select
-              value={attendance[student.student_id] || ""}
-              onChange={(e) => updateAttendance(student.student_id, e.target.value)}
-              disabled={locked}  // locked only after timer callback
-              className="border rounded p-1"
-            >
-              <option value="">Status</option>
-              <option value="present">Present</option>
-              <option value="absent">Absent</option>
-              <option value="online">Online</option>
-            </select>
+          <div
+            key={student.student_id}
+            className="flex flex-col gap-2 py-3 border-b last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <span className="font-medium text-gray-800">{displayStudentName(student)}</span>
+            <div className="flex flex-wrap gap-2">
+              {statusOptions.map((option) => {
+                const isActive = attendance[student.student_id] === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => updateAttendance(student.student_id, option.value)}
+                    disabled={locked}
+                    className={`min-w-[88px] rounded border px-3 py-1.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                      isActive ? option.activeClassName : option.className
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         ))}
         {/* Submit is always active */}

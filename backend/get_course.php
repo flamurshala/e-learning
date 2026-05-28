@@ -33,7 +33,12 @@ try {
 
         echo json_encode($course);
     } else {
-        $stmt = $conn->query("SELECT id, title FROM courses");
+        $activeOnly = isset($_GET['active_only']) && $_GET['active_only'] === '1';
+        $query = "SELECT id, title FROM courses";
+        if ($activeOnly) {
+            $query .= " WHERE completed = 0 OR completed IS NULL";
+        }
+        $stmt = $conn->query($query);
         $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
         echo json_encode($courses);
     }

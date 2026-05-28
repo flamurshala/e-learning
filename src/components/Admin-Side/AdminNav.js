@@ -2,10 +2,26 @@ import img from "../img/logo.png";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import LogOut from "./AdminLogOut";
+import {
+  FaBell,
+  FaBookOpen,
+  FaCertificate,
+  FaChalkboardTeacher,
+  FaChartLine,
+  FaClipboardList,
+  FaFileInvoiceDollar,
+  FaMoneyCheckAlt,
+  FaUniversity,
+  FaUserGraduate,
+  FaUsersCog,
+} from "react-icons/fa";
 
 function AdminNav() {
   const [notificationCount, setNotificationCount] = useState(0);
   const userRole = localStorage.getItem("userRole"); // Get the user's role
+  const canAccessWaitlist = ["administrator", "admin", "superadmin"].includes(userRole);
+  const navItemClass = "mb-[1rem] text-white font-bold gap-3 flex items-center";
+  const iconClass = "text-lg shrink-0";
 
   useEffect(() => {
     document.title = "Admin Dashboard - Tectigon Academy";
@@ -25,48 +41,65 @@ function AdminNav() {
             <img src={img} alt="logo w-[100%]" />
           </div>
           <ul>
-            <li className="mb-[1rem] text-white font-bold gap-3">
-              <Link to="/CreateCourse">Create Course</Link>
+            <li className={navItemClass}>
+              <FaUserGraduate className={iconClass} />
+              <Link to="/AllStudents">Students</Link>
             </li>
-            <li className="mb-[1rem] text-white font-bold gap-3">
-              <Link to="/AddUsers">Add Student</Link>
+            <li className={navItemClass}>
+              <FaBookOpen className={iconClass} />
+              <Link to="/AllCourses">Courses</Link>
             </li>
-            <li className="mb-[1rem] text-white font-bold gap-3">
-              <Link to="/AddProf">Add Professor</Link>
+            {/* {canAccessWaitlist && (
+              <li className={navItemClass}>
+                <FaClipboardList className={iconClass} />
+                <Link to="/Waitlist">Student Waitlist</Link>
+              </li>
+            )} */}
+            <li className={navItemClass}>
+              <FaChalkboardTeacher className={iconClass} />
+              <Link to="/AllProfessors">Professors</Link>
+            </li>
+            <li className={navItemClass}>
+              <FaCertificate className={iconClass} />
+              <Link to="/AllCertificates">Certificates</Link>
             </li>
 
             {/* Show only if user is superadmin */}
             {userRole === "superadmin" && (
-              <li className="mb-[1rem] text-white font-bold gap-3">
-                <Link to="/AddAdmin">Add Admin</Link>
-              </li>
-            )}
-              <li className="mb-[1rem] text-white font-bold gap-3">
-              <Link to="/CertificateForm">Generate Certificate</Link>
-            </li>
-            {/* Show only if user is superadmin */}
-            {userRole === "superadmin" && (
-              <li className="mb-[1rem] text-white font-bold gap-3">
-                <Link to="/AllAdmins">All Admins</Link>
+              <li className={navItemClass}>
+                <FaUsersCog className={iconClass} />
+                <Link to="/AllAdmins">Admins</Link>
               </li>
             )}
 
-            <li className="mb-[1rem] text-white font-bold gap-3">
-              <Link to="/AllStudents">All Students</Link>
+            <li className={navItemClass}>
+              <FaFileInvoiceDollar className={iconClass} />
+              <Link to={userRole === "superadmin" ? "/InvoiceList" : "/InvoiceForm"}>Invoices</Link>
             </li>
-            <li className="mb-[1rem] text-white font-bold gap-3">
-              <Link to="/AllProfessors">All Professors</Link>
+            <li className={navItemClass}>
+              <FaMoneyCheckAlt className={iconClass} />
+              <Link to={userRole === "superadmin" ? "/PaymentVerificationList" : "/PaymentVerificationForm"}>
+                Payment Verifications
+              </Link>
             </li>
-            <li className="mb-[1rem] text-white font-bold gap-3">
-              <Link to="/AllCourses">All Courses</Link>
-            </li>
-            
-            <li className="mb-[1rem] text-white font-bold gap-3">
-              <Link to="/AllCertificates">All Certificates</Link>
-            </li>
+            {userRole === "superadmin" && (
+              <>
+                <li className={navItemClass}>
+                  <FaUniversity className={iconClass} />
+                  <Link to="/CompanyFinance">Company Finance</Link>
+                </li>
+                <li className={navItemClass}>
+                  <FaChartLine className={iconClass} />
+                  <Link to="/Reports">Reports</Link>
+                </li>
+              </>
+            )}
 
             <li className="mb-[1rem] text-white font-bold gap-3 flex items-center justify-between">
-              <Link to="/admin/notifications">Notifications</Link>
+              <div className="flex items-center gap-3">
+                <FaBell className={iconClass} />
+                <Link to="/admin/notifications">Notifications</Link>
+              </div>
               {notificationCount > 0 && (
                 <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full ml-2">
                   {notificationCount}
@@ -74,7 +107,8 @@ function AdminNav() {
               )}
             </li>
 
-            <li className="mb-[1rem] text-white font-bold gap-3">
+            <li className={navItemClass}>
+              <FaCertificate className={iconClass} />
               <Link to="/CompletedCourse">Completed Courses</Link>
             </li>
           

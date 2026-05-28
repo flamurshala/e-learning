@@ -21,6 +21,7 @@ $payments = $data['payments'] ?? [];
 $amountPaidAll = $data['amountPaidAll'] ?? [];
 $amountPaidMonth1 = $data['amountPaidMonth1'] ?? [];
 $amountPaidMonth2 = $data['amountPaidMonth2'] ?? [];
+$allowedPaymentMethods = ['All', 'Divided', 'POS', 'Cash', 'Did not pay', 'Free'];
 
 if (!$student_id || !$name || !$email) {
     echo json_encode(["success" => false, "error" => "Missing core student data"]);
@@ -28,6 +29,14 @@ if (!$student_id || !$name || !$email) {
 }
 
 try {
+    foreach (['student_payments', 'student_course_payments'] as $paymentTable) {
+        try {
+            $conn->exec("ALTER TABLE `$paymentTable` MODIFY `payment_method` ENUM('All','Divided','POS','Cash','Did not pay','Free') NOT NULL");
+        } catch (PDOException $ignored) {
+            // Keep editing working even if an older optional table is missing.
+        }
+    }
+
     $conn->beginTransaction();
 
     // Update core student info
@@ -42,6 +51,9 @@ try {
     for ($i = 0; $i < count($courses); $i++) {
         $courseId = $courses[$i];
         $method = $payments[$i] ?? '';
+        if (!in_array($method, $allowedPaymentMethods, true)) {
+            throw new Exception('Invalid payment method');
+        }
         $all = $amountPaidAll[$i] !== '' ? floatval($amountPaidAll[$i]) : null;
         $m1 = $amountPaidMonth1[$i] !== '' ? floatval($amountPaidMonth1[$i]) : null;
         $m2 = $amountPaidMonth2[$i] !== '' ? floatval($amountPaidMonth2[$i]) : null;
@@ -53,12 +65,19 @@ try {
         // Insert into student_payments
         $conn->prepare("INSERT INTO student_payments (student_id, course_id, payment_method, amount_all, amount_month1, amount_month2)
             VALUES (?, ?, ?, ?, ?, ?)")
-            ->execute([$student_id, $courseId, $method, $all, $m1, $m2]);
+            ->execute([
+                $student_id,
+                $courseId,
+                $method,
+                in_array($method, ['All', 'POS', 'Cash'], true) ? $all : null,
+                $method === 'Divided' ? $m1 : null,
+                $method === 'Divided' ? $m2 : null,
+            ]);
     }
 
     $conn->commit();
     echo json_encode(["success" => true]);
-} catch (PDOException $e) {
+} catch (Exception $e) {
     $conn->rollBack();
     echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Loader from "./components/Loader";
 import LoginAs from "./components/LoginAs";
@@ -36,12 +37,46 @@ import StudentProgress from "./components/Admin-Side/StudentProgess";
 import CompletedCourses from "./components/Admin-Side/CompletedCourses";
 import AddAdmin from "./components/Admin-Side/AddAdmin";
 import AllAdmins from "./components/Admin-Side/AllAdmins";
+import EditAdmin from "./components/Admin-Side/EditAdmin";
 import CertificateForm from "./components/Admin-Side/CertificateForm";
 import AllCertificates from "./components/Admin-Side/AllCertificates";
 import EditCertificate from "./components/Admin-Side/EditCertificate";
 import BackButton from "./components/BackButton";
+import Waitlist from "./components/Admin-Side/Waitlist";
+import InvoiceForm from "./components/Admin-Side/InvoiceForm";
+import InvoiceSettings from "./components/Admin-Side/InvoiceSettings";
+import PaymentVerificationForm from "./components/Admin-Side/PaymentVerificationForm";
+import PaymentVerificationSettings from "./components/Admin-Side/PaymentVerificationSettings";
+import InvoiceList from "./components/Admin-Side/InvoiceList";
+import PaymentVerificationList from "./components/Admin-Side/PaymentVerificationList";
+import Reports from "./components/Admin-Side/Reports";
+import CompanyFinance from "./components/Admin-Side/CompanyFinance";
 
 function App() {
+  useEffect(() => {
+    const preventNumberInputWheel = (event) => {
+      const activeElement = document.activeElement;
+      if (
+        activeElement?.tagName === "INPUT" &&
+        activeElement.type === "number" &&
+        event.target === activeElement
+      ) {
+        event.preventDefault();
+      }
+    };
+
+    document.addEventListener("wheel", preventNumberInputWheel, {
+      passive: false,
+      capture: true,
+    });
+
+    return () => {
+      document.removeEventListener("wheel", preventNumberInputWheel, {
+        capture: true,
+      });
+    };
+  }, []);
+
   return (
     <div className="App ">
       <Router>
@@ -53,7 +88,44 @@ function App() {
           <Route path="/StudentLogin" element={<StudentLogin />} />
           <Route path="/AddAdmin" element={<AddAdmin />} />
           <Route path="/AllAdmins" element={<AllAdmins />} />
+          <Route path="/edit-admin/:id" element={<EditAdmin />} />
           <Route path="/CertificateForm" element={<CertificateForm />} />
+          <Route path="/InvoiceForm" element={<InvoiceForm />} />
+          <Route path="/InvoiceSettings" element={<InvoiceSettings />} />
+          <Route
+            path="/InvoiceList"
+            element={
+              <ProtectedRoute userType="user" allowedRoles={["superadmin"]}>
+                <InvoiceList />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/PaymentVerificationForm" element={<PaymentVerificationForm />} />
+          <Route path="/PaymentVerificationSettings" element={<PaymentVerificationSettings />} />
+          <Route
+            path="/PaymentVerificationList"
+            element={
+              <ProtectedRoute userType="user" allowedRoles={["superadmin"]}>
+                <PaymentVerificationList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Reports"
+            element={
+              <ProtectedRoute userType="user" allowedRoles={["superadmin"]}>
+                <Reports />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/CompanyFinance"
+            element={
+              <ProtectedRoute userType="user" allowedRoles={["superadmin"]}>
+                <CompanyFinance />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/AllCertificates" element={<AllCertificates />} />
           <Route path="/edit-certificate/:id" element={<EditCertificate />} />
           <Route path="/BackButton" element={<BackButton />} />
@@ -89,6 +161,17 @@ function App() {
             element={
               <ProtectedRoute userType="user">
                 <AddUsers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/Waitlist"
+            element={
+              <ProtectedRoute
+                userType="user"
+                allowedRoles={["administrator", "admin", "superadmin"]}
+              >
+                <Waitlist />
               </ProtectedRoute>
             }
           />

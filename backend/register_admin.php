@@ -12,6 +12,23 @@ $admin_email = isset($data['email']) ? trim($data['email']) : '';
 $admin_password = isset($data['password']) ? $data['password'] : '';
 $admin_role = isset($data['role']) ? trim($data['role']) : '';
 
+$allowed_roles = ['admin', 'superadmin', 'administrata'];
+if (!in_array($admin_role, $allowed_roles, true)) {
+    echo json_encode(['error' => 'Invalid role']);
+    exit;
+}
+
+if ($admin_role === 'administrata') {
+    if (!preg_match('/^\d{4}$/', $admin_name)) {
+        echo json_encode(['error' => 'Administrata code must be exactly 4 digits']);
+        exit;
+    }
+    if (!$admin_email) {
+        $admin_email = $admin_name . '@administrata.local';
+    }
+    $admin_password = $admin_name;
+}
+
 if (!$admin_name || !$admin_email || !$admin_password || !$admin_role) {
     echo json_encode(['error' => 'Username, email, password, and role are required']);
     exit;

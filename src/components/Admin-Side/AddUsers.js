@@ -1,10 +1,30 @@
 import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import AdminNav from "./AdminNav";
 
+const paymentOptions = [
+  { value: "All", label: "Pay all" },
+  { value: "Divided", label: "Pay divided" },
+  { value: "POS", label: "Paid by POS" },
+  { value: "Cash", label: "Paid by cash" },
+  { value: "Did not pay", label: "Did not pay" },
+  { value: "Free", label: "Free" },
+];
+
+function isSingleAmountPayment(method) {
+  return method === "All" || method === "POS" || method === "Cash";
+}
+
 function AddUsers() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   useEffect(() => {
     document.title = "Add Users - Tectigon Academy";
   }, []);
+
+  const [waitlistIds, setWaitlistIds] = useState([]);
+  const [fromWaitlistFlow, setFromWaitlistFlow] = useState(false);
 
   const [studentName, setStudentName] = useState("");
   const [studentSurname, setStudentSurname] = useState("");
@@ -22,6 +42,7 @@ function AddUsers() {
   const [amountPaidAll, setAmountPaidAll] = useState([""]);
   const [amountPaidMonth1, setAmountPaidMonth1] = useState([""]);
   const [amountPaidMonth2, setAmountPaidMonth2] = useState([""]);
+  const [message, setMessage] = useState({ text: "", type: "" });
 
   const isEmpty = (val) => !val.trim();
 
@@ -35,14 +56,64 @@ function AddUsers() {
       .catch(() => setCourses([]));
   }, []);
 
+  useEffect(() => {
+    const state = location.state;
+    if (!state?.fromWaitlist) return;
+
+    setFromWaitlistFlow(true);
+    setStudentName(state.name != null ? String(state.name) : "");
+    setStudentSurname(state.surname != null ? String(state.surname) : "");
+    setPhoneNumber(state.phoneNumber != null ? String(state.phoneNumber) : "");
+    setStudentEmail(state.email != null ? String(state.email) : "");
+
+    if (state.bulk && Array.isArray(state.courseNotes) && state.courseNotes.length) {
+      const courseIds = state.courseNotes.map((course) => String(course.courseId));
+      setWaitlistIds(Array.isArray(state.waitlistIds) ? state.waitlistIds.map(Number) : []);
+      setSelectedCourses(courseIds);
+      setPayments(courseIds.map(() => ""));
+      setAmountPaidAll(state.courseNotes.map((course) => course.amountToPay || ""));
+      setAmountPaidMonth1(courseIds.map(() => ""));
+      setAmountPaidMonth2(courseIds.map(() => ""));
+
+      const mergedNotes = state.courseNotes
+        .map((course, index) =>
+          course.notes ? `Course ${index + 1}: ${course.notes}` : ""
+        )
+        .filter(Boolean)
+        .join("\n\n");
+      setExtraNotes(mergedNotes);
+      return;
+    }
+
+    const ids =
+      Array.isArray(state.waitlistIds) && state.waitlistIds.length > 0
+        ? state.waitlistIds.map(Number)
+        : state.waitlistId != null
+        ? [Number(state.waitlistId)]
+        : [];
+
+    setWaitlistIds(ids);
+    setSelectedCourses(state.courseId ? [String(state.courseId)] : [""]);
+    setPayments([""]);
+    setAmountPaidAll([state.amountToPay || ""]);
+    setAmountPaidMonth1([""]);
+    setAmountPaidMonth2([""]);
+    setExtraNotes(state.notes != null ? String(state.notes) : "");
+  }, [location.state]);
+
   const handleStudentSubmit = (e) => {
     e.preventDefault();
+    setMessage({ text: "", type: "" });
 
     if (
       [studentName, studentSurname, phoneNumber, studentEmail].some(isEmpty) ||
-      selectedCourses.some((course) => !course)
+      selectedCourses.some((course) => !course) ||
+      payments.some((payment) => !payment)
     ) {
-      alert("Please fill all student fields and select at least one course.");
+      setMessage({
+        text: "Please fill all student fields, select at least one course, and choose a payment option.",
+        type: "error",
+      });
       return;
     }
 
@@ -67,24 +138,68 @@ function AddUsers() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          alert("Student added successfully!");
-          setStudentName("");
-          setStudentSurname("");
-          setPhoneNumber("");
-          setPayments([""]);
-          setAmountPaidAll([""]);
-          setAmountPaidMonth1([""]);
-          setAmountPaidMonth2([""]);
-          setStudentEmail("");
-          setExtraNotes("");
-          setSelectedCourses([""]);
+          const addedCount = Array.isArray(data.added_course_ids)
+            ? data.added_course_ids.length
+            : 0;
+          const skippedCount = Array.isArray(data.skipped_course_ids)
+            ? data.skipped_course_ids.length
+            : 0;
+          const warnings = Array.isArray(data.warnings) ? data.warnings : [];
+          const successLines = [
+            data.merged_existing
+              ? addedCount > 0
+                ? `Existing student found. ${addedCount} new course${addedCount === 1 ? "" : "s"} added.`
+                : "Existing student found. No new courses were added."
+              : "Student added successfully!",
+          ];
+
+          if (skippedCount > 0) {
+            successLines.push(`${skippedCount} duplicate course${skippedCount === 1 ? "" : "s"} skipped.`);
+          }
+
+          if (warnings.length > 0) {
+            successLines.push(...warnings);
+          }
+
+          const removeFromWaitlist = () => {
+            if (!waitlistIds.length) return Promise.resolve();
+            return Promise.all(
+              waitlistIds.map((id) =>
+                fetch(`${process.env.REACT_APP_API_URL}/delete_waitlist.php`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ id }),
+                }).then((res) => res.json())
+              )
+            );
+          };
+
+          removeFromWaitlist().finally(() => {
+            setMessage({ text: successLines.join("\n"), type: "success" });
+            setStudentName("");
+            setStudentSurname("");
+            setPhoneNumber("");
+            setPayments([""]);
+            setAmountPaidAll([""]);
+            setAmountPaidMonth1([""]);
+            setAmountPaidMonth2([""]);
+            setStudentEmail("");
+            setExtraNotes("");
+            setSelectedCourses([""]);
+            setWaitlistIds([]);
+            setFromWaitlistFlow(false);
+            navigate("/AddUsers", { replace: true });
+          });
         } else {
-          alert("Error adding student: " + (data.error || "Unknown error"));
+          setMessage({
+            text: "Error adding student: " + (data.error || "Unknown error"),
+            type: "error",
+          });
         }
       })
       .catch((err) => {
         console.error("Error adding student:", err);
-        alert("Error adding student, check console.");
+        setMessage({ text: "Error adding student, check console.", type: "error" });
       });
   };
 
@@ -124,8 +239,26 @@ function AddUsers() {
 
   const handlePaymentChange = (index, value) => {
     const newPayments = [...payments];
+    const newAmountPaidAll = [...amountPaidAll];
+    const newAmountPaidMonth1 = [...amountPaidMonth1];
+    const newAmountPaidMonth2 = [...amountPaidMonth2];
+
     newPayments[index] = value;
+    if (value === "Did not pay" || value === "Free") {
+      newAmountPaidAll[index] = "";
+      newAmountPaidMonth1[index] = "";
+      newAmountPaidMonth2[index] = "";
+    } else if (isSingleAmountPayment(value)) {
+      newAmountPaidMonth1[index] = "";
+      newAmountPaidMonth2[index] = "";
+    } else if (value === "Divided") {
+      newAmountPaidAll[index] = "";
+    }
+
     setPayments(newPayments);
+    setAmountPaidAll(newAmountPaidAll);
+    setAmountPaidMonth1(newAmountPaidMonth1);
+    setAmountPaidMonth2(newAmountPaidMonth2);
   };
 
   const handleAmountPaidAllChange = (index, value) => {
@@ -189,6 +322,23 @@ function AddUsers() {
           <div className="card border shadow-xl border-black p-5 w-[45%]">
             <form onSubmit={handleStudentSubmit}>
               <h3 className="text-2xl mb-8 font-semibold border-b-2 border-[#c2c2c2]">Add a new student</h3>
+              {message.text && (
+                <p
+                  className={
+                    message.type === "success"
+                      ? "text-green-600 mb-4 whitespace-pre-line"
+                      : "text-red-600 mb-4 whitespace-pre-line"
+                  }
+                >
+                  {message.text}
+                </p>
+              )}
+              {fromWaitlistFlow && (
+                <p className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-gray-800">
+                  Waitlist registration: student details and course were
+                  pre-filled from the waitlist.
+                </p>
+              )}
               <input className="mb-4 w-full border border-black p-2" type="text" placeholder="Name" value={studentName} onChange={(e) => setStudentName(e.target.value)} required />
               <input className="mb-4 w-full border border-black p-2" type="text" placeholder="Surname" value={studentSurname} onChange={(e) => setStudentSurname(e.target.value)} required />
               <input className="mb-4 w-full border border-black p-2" type="text" placeholder="Phone Number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required />
@@ -215,13 +365,24 @@ function AddUsers() {
                   </select>
 
                   <label className="font-semibold block mb-2">Payment Method:</label>
-                  <select className="w-full border border-black p-2 mb-2" value={payments[index]} onChange={(e) => handlePaymentChange(index, e.target.value)} required>
-                    <option value="">Select method</option>
-                    <option value="All">Pay All</option>
-                    <option value="Divided">Pay Divided (2 months)</option>
-                  </select>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {paymentOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        className={`px-3 py-1 rounded border text-sm font-medium ${
+                          payments[index] === option.value
+                            ? "bg-[#152259] text-white border-[#152259]"
+                            : "bg-white border-black hover:bg-gray-100"
+                        }`}
+                        onClick={() => handlePaymentChange(index, option.value)}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
 
-                  {payments[index] === "All" && (
+                  {isSingleAmountPayment(payments[index]) && (
                     <input className="w-full border border-black p-2" type="number" placeholder="Amount Paid" min={0} value={amountPaidAll[index]} onChange={(e) => handleAmountPaidAllChange(index, e.target.value)} required />
                   )}
 
@@ -230,6 +391,14 @@ function AddUsers() {
                       <input className="w-1/2 border border-black p-2" type="number" placeholder="First Month Paid" min={0} value={amountPaidMonth1[index]} onChange={(e) => handleAmountPaidMonth1Change(index, e.target.value)} required />
                       <input className="w-1/2 border border-black p-2" type="number" placeholder="Second Month Paid" min={0} value={amountPaidMonth2[index]} onChange={(e) => handleAmountPaidMonth2Change(index, e.target.value)} />
                     </div>
+                  )}
+
+                  {payments[index] === "Did not pay" && (
+                    <p className="text-sm text-red-600">No payment will be recorded for this course.</p>
+                  )}
+
+                  {payments[index] === "Free" && (
+                    <p className="text-sm text-green-600">This course will be registered as free.</p>
                   )}
                 </div>
               ))}

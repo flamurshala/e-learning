@@ -2,6 +2,19 @@ import AdminNav from "./AdminNav";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
+const paymentOptions = [
+  { value: "All", label: "Pay All" },
+  { value: "Divided", label: "Pay Divided (2 months)" },
+  { value: "POS", label: "Paid by POS" },
+  { value: "Cash", label: "Paid by Cash" },
+  { value: "Did not pay", label: "Did not pay" },
+  { value: "Free", label: "Free" },
+];
+
+function isSingleAmountPayment(method) {
+  return method === "All" || method === "POS" || method === "Cash";
+}
+
 function EditStudent() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -62,9 +75,28 @@ function EditStudent() {
   };
 
   const handlePaymentChange = (index, value) => {
-    const updated = [...payments];
-    updated[index] = value;
-    setPayments(updated);
+    const updatedPayments = [...payments];
+    const updatedAll = [...amountPaidAll];
+    const updatedMonth1 = [...amountPaidMonth1];
+    const updatedMonth2 = [...amountPaidMonth2];
+
+    updatedPayments[index] = value;
+
+    if (value === "Did not pay" || value === "Free") {
+      updatedAll[index] = "";
+      updatedMonth1[index] = "";
+      updatedMonth2[index] = "";
+    } else if (isSingleAmountPayment(value)) {
+      updatedMonth1[index] = "";
+      updatedMonth2[index] = "";
+    } else if (value === "Divided") {
+      updatedAll[index] = "";
+    }
+
+    setPayments(updatedPayments);
+    setAmountPaidAll(updatedAll);
+    setAmountPaidMonth1(updatedMonth1);
+    setAmountPaidMonth2(updatedMonth2);
   };
 
   const handleAmountPaidAllChange = (index, value) => {
@@ -184,11 +216,14 @@ function EditStudent() {
               <label className="block font-semibold mb-1">Payment Method</label>
               <select value={payments[index]} onChange={(e) => handlePaymentChange(index, e.target.value)} className="w-full mb-2 border p-2">
                 <option value="">Select method</option>
-                <option value="All">Pay All</option>
-                <option value="Divided">Pay Divided (2 months)</option>
+                {paymentOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
 
-              {payments[index] === "All" && (
+              {isSingleAmountPayment(payments[index]) && (
                 <div>
                   <label className="block font-semibold">Amount Paid</label>
                   <input type="number" placeholder="Amount Paid" className="w-full mb-2 border p-2" value={amountPaidAll[index]} onChange={(e) => handleAmountPaidAllChange(index, e.target.value)} />
@@ -206,6 +241,14 @@ function EditStudent() {
                     <input type="number" placeholder="Month 2 Paid" className="w-full border p-2" value={amountPaidMonth2[index]} onChange={(e) => handleAmountPaidMonth2Change(index, e.target.value)} />
                   </div>
                 </div>
+              )}
+
+              {payments[index] === "Did not pay" && (
+                <p className="text-sm text-red-600">No payment will be recorded for this course.</p>
+              )}
+
+              {payments[index] === "Free" && (
+                <p className="text-sm text-green-600">This course will be registered as free.</p>
               )}
             </div>
           ))}

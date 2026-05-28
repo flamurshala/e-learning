@@ -10,6 +10,8 @@ function AllStudents() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
+  const userRole = localStorage.getItem("userRole");
+  const canAccessWaitlist = ["administrator", "admin", "superadmin"].includes(userRole);
 
   useEffect(() => {
     document.title = "All Students - Tectigon Academy";
@@ -88,9 +90,23 @@ function AllStudents() {
     <div className="flex gap-4">
       <AdminNav />
       <div className="mt-4 ml-[22%] w-[75%]">
-        <h1 className="text-2xl font-semibold border-b-2 border-[#c2c2c2] w-[95%]">
-          All Students
-        </h1>
+        <div className="flex items-center justify-between border-b-2 border-[#c2c2c2] pb-2 w-[95%]">
+          <h1 className="text-2xl font-semibold">All Students</h1>
+          <div className="flex gap-2">
+            {canAccessWaitlist && (
+              <Link to="/Waitlist">
+                <button className="bg-white border border-[#152259] text-[#152259] hover:bg-gray-100 px-4 py-2 rounded">
+                  Student Waitlist
+                </button>
+              </Link>
+            )}
+            <Link to="/AddUsers">
+              <button className="bg-[#152259] hover:bg-[#152239] text-white px-4 py-2 rounded">
+                Add Student
+              </button>
+            </Link>
+          </div>
+        </div>
 
         <div className="my-4 flex justify-between">
           <div>
@@ -157,6 +173,12 @@ function AllStudents() {
                             ? `${c.amount_all} €`
                             : c.payment_method === "Divided"
                             ? `${c.amount_month1} € + ${c.amount_month2} €`
+                            : c.payment_method === "POS" || c.payment_method === "Cash"
+                            ? `${c.payment_method}: ${c.amount_all} EUR`
+                            : c.payment_method === "Did not pay"
+                            ? "Did not pay"
+                            : c.payment_method === "Free"
+                            ? "Free"
                             : "No payment info"}
                         </li>
                       ))}
