@@ -48,3 +48,4 @@ try {
     echo json_encode(["status" => "error", "message" => $e->getMessage()]);
 }
     
+// just a comment to trigger a commit
