@@ -41,6 +41,22 @@ function up_utf8_to1252(string $s): string {
     $upper = function_exists('mb_strtoupper') ? mb_strtoupper($s, 'UTF-8') : strtoupper($s);
     return to1252($upper);
 }
+
+function certificate_file_slug(string $name): string {
+    $name = trim($name);
+
+    if (function_exists('iconv')) {
+        $ascii = @iconv('UTF-8', 'ASCII//TRANSLIT', $name);
+        if ($ascii !== false) {
+            $name = $ascii;
+        }
+    }
+
+    $name = preg_replace('/[^A-Za-z0-9._-]+/', '-', $name);
+    $name = trim($name, '-._');
+
+    return $name !== '' ? $name : 'merged-certificates';
+}
 // ---------------------------------------------------------------
 
 // === PARSE INPUT ===
@@ -217,7 +233,8 @@ foreach ($students as $student) {
 }
 
 // === Merge all PDFs into one ===
-$mergedBaseName   = 'merged_' . time() . '.pdf';
+$mergedNameSource = $course_title ?: 'merged-certificates';
+$mergedBaseName   = certificate_file_slug($mergedNameSource) . '.pdf';
 $mergedFilePath   = $certDir . $mergedBaseName;
 $mergedPublicPath = 'certificates/' . $mergedBaseName;
 

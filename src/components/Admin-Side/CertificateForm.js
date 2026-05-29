@@ -62,6 +62,11 @@ export default function CertificateGenerator() {
     return combo || `Student #${s.id}`;
   };
 
+  const getAttendancePercentage = (student) => {
+    const percentage = Number(student.attendance_percentage || 0);
+    return Number.isFinite(percentage) ? percentage.toFixed(2) : "0.00";
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -119,13 +124,16 @@ export default function CertificateGenerator() {
             <div className="mb-4">
               <label className="block font-semibold mb-2">Select Students</label>
               {students.map((student) => (
-                <label key={student.id} className="block mb-1">
+                <label key={student.id} className="flex items-center gap-2 mb-1">
                   <input
                     type="checkbox"
                     checked={selectedStudents.includes(student.id)}
                     onChange={() => handleCheckboxChange(student.id)}
                   />
-                  <span className="ml-2">{getFullName(student)}</span>
+                  <span>{getFullName(student)}</span>
+                  <span className="text-sm text-gray-600">
+                    ({getAttendancePercentage(student)}% attendance)
+                  </span>
                 </label>
               ))}
               <button

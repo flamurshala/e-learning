@@ -11,7 +11,13 @@ function AllStudents() {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
   const userRole = localStorage.getItem("userRole");
-  const canAccessWaitlist = ["administrator", "admin", "superadmin"].includes(userRole);
+  const canAccessWaitlist = [
+    "administrator",
+    "administrata",
+    "administration",
+    "admin",
+    "superadmin",
+  ].includes(userRole);
 
   useEffect(() => {
     document.title = "All Students - Tectigon Academy";

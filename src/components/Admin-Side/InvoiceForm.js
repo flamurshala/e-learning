@@ -14,20 +14,20 @@ export default function InvoiceForm({ variant = "invoice" }) {
   const hasVerificationPrefill = Boolean(prefillDate);
   const config = isVerification
     ? {
-        title: "Gjenero verifikimin e pagesës",
-        settingsPath: "/PaymentVerificationCilësimet",
+        title: "Generate Payment Verification",
+        settingsPath: "/PaymentVerificationSettings",
         settingsEndpoint: "get_payment_verification_settings.php",
         nextNumberEndpoint: "get_next_payment_verification_number.php",
         generateEndpoint: "generate_payment_verification.php",
         numberLabel: "Verification Number",
       }
     : {
-        title: "Gjenero faturën",
-        settingsPath: "/InvoiceCilësimet",
+        title: "Generate Invoice",
+        settingsPath: "/InvoiceSettings",
         settingsEndpoint: "get_invoice_settings.php",
         nextNumberEndpoint: "get_next_invoice_number.php",
         generateEndpoint: "generate_invoice.php",
-        numberLabel: "Numri i faturës",
+        numberLabel: "Invoice Number",
       };
   const [students, setStudents] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState("");
@@ -64,7 +64,7 @@ export default function InvoiceForm({ variant = "invoice" }) {
     axios
       .get(`${process.env.REACT_APP_API_URL}/get_students_with_payments.php`)
       .then((res) => setStudents(Array.isArray(res.data) ? res.data : []))
-      .catch(() => setMessage({ text: "Nuk u arrit të ngarkohen studentët.", type: "error" }));
+      .catch(() => setMessage({ text: "Could not load students.", type: "error" }));
 
     axios
       .get(`${process.env.REACT_APP_API_URL}/${config.nextNumberEndpoint}`)
@@ -98,13 +98,13 @@ export default function InvoiceForm({ variant = "invoice" }) {
           courseIndex: "",
           courseId: item.course_id || null,
           courseTitle: item.course_title || "",
-          description: item.description || "",
+          description: item.description || descriptionOptions[0]?.label || "",
           unitPrice: item.unit_price || "",
           locked: true,
         }))
       );
     }
-  }, [prefillDate]);
+  }, [prefillDate, descriptionOptions]);
 
   useEffect(() => {
     if (!prefillDate || !selectedStudent) return;
@@ -178,7 +178,7 @@ export default function InvoiceForm({ variant = "invoice" }) {
               description:
                 item.description ||
                 descriptionOptions[0]?.label ||
-                (course?.title ? `TRAJNIMI per ${course.title}` : ""),
+                (course?.title ? `TRAINING for ${course.title}` : ""),
               unitPrice: getCourseAmount(course),
             }
           : item
@@ -213,7 +213,7 @@ export default function InvoiceForm({ variant = "invoice" }) {
       description:
         item.description ||
         descriptionOptions[0]?.label ||
-        (course?.title ? `TRAJNIMI per ${course.title}` : ""),
+        (course?.title ? `TRAINING for ${course.title}` : ""),
       unit_price: item.unitPrice,
     };
   });
@@ -236,14 +236,14 @@ export default function InvoiceForm({ variant = "invoice" }) {
           window.location.href = `${process.env.REACT_APP_API_URL}/${documentUrl}`;
         } else {
           setMessage({
-            text: res.data?.error || `Nuk u arrit të gjenerohet ${isVerification ? "verifikimi i pagesës" : "fatura"}.`,
+            text: res.data?.error || `Could not generate the ${isVerification ? "payment verification" : "invoice"}.`,
             type: "error",
           });
         }
       })
       .catch(() =>
         setMessage({
-          text: `Nuk u arrit të gjenerohet ${isVerification ? "verifikimi i pagesës" : "fatura"}.`,
+          text: `Could not generate the ${isVerification ? "payment verification" : "invoice"}.`,
           type: "error",
         })
       );
@@ -260,7 +260,7 @@ export default function InvoiceForm({ variant = "invoice" }) {
               to={config.settingsPath}
               className="rounded border border-[#152259] px-4 py-2 text-[#152259] hover:bg-[#eef2ff]"
             >
-              Cilësimet
+              Settings
             </Link>
           </div>
           {message.text && (
@@ -287,7 +287,7 @@ export default function InvoiceForm({ variant = "invoice" }) {
             </div>
 
             <div>
-              <label className="mb-2 block font-medium">Faturë për</label>
+              <label className="mb-2 block font-medium">Bill to</label>
               <div className="mb-3 flex gap-2">
                 <button
                   type="button"
@@ -322,7 +322,7 @@ export default function InvoiceForm({ variant = "invoice" }) {
                     value={studentSearch}
                     onChange={(e) => setStudentSearch(e.target.value)}
                     className="mb-2 w-full rounded border px-3 py-2 disabled:bg-gray-100"
-                    placeholder="Kërko studentin sipas emrit..."
+                    placeholder="Search student by name..."
                     disabled={hasVerificationPrefill}
                   />
                   <select
@@ -347,7 +347,7 @@ export default function InvoiceForm({ variant = "invoice" }) {
                   value={manualStudentName}
                   onChange={(e) => setManualStudentName(e.target.value)}
                   className="w-full rounded border px-3 py-2 disabled:bg-gray-100"
-                  placeholder="Write Name e studentit"
+                  placeholder="Write student name"
                   disabled={hasVerificationPrefill}
                   required
                 />
@@ -355,7 +355,7 @@ export default function InvoiceForm({ variant = "invoice" }) {
             </div>
 
             <div>
-              <label className="mb-1 block font-medium">Data e faturës</label>
+              <label className="mb-1 block font-medium">Invoice Date</label>
               <input
                 type="date"
                 value={formDate.invoiceDate}
@@ -369,14 +369,14 @@ export default function InvoiceForm({ variant = "invoice" }) {
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <label className="font-medium">Trajnimet</label>
+                <label className="font-medium">Trainings</label>
                 <button
                   type="button"
                   onClick={addItem}
                   disabled={hasVerificationPrefill}
                   className="rounded border border-[#152259] px-3 py-1 text-sm text-[#152259] hover:bg-[#eef2ff]"
                 >
-                  Shto tjetër
+                  Add another
                 </button>
               </div>
 
@@ -391,7 +391,7 @@ export default function InvoiceForm({ variant = "invoice" }) {
                         disabled={item.locked}
                         className="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-800"
                       >
-                        Hiq
+                        Remove
                       </button>
                     )}
                   </div>
@@ -421,14 +421,14 @@ export default function InvoiceForm({ variant = "invoice" }) {
                   )}
 
                   <div className="mb-3">
-                    <label className="mb-1 block font-medium">Përshkrimi</label>
+                    <label className="mb-1 block font-medium">Description</label>
                     <select
                       value={item.description}
                       onChange={(e) => updateItem(index, "description", e.target.value)}
                       className="w-full rounded border px-3 py-2"
                       required
                     >
-                      <option value="">-- Zgjidh përshkrimin --</option>
+                      <option value="">-- Select description --</option>
                       {descriptionOptions.map((option) => (
                         <option key={option.id} value={option.label}>
                           {option.label}
@@ -438,7 +438,7 @@ export default function InvoiceForm({ variant = "invoice" }) {
                   </div>
 
                   <div>
-                    <label className="mb-1 block font-medium">Shuma</label>
+                    <label className="mb-1 block font-medium">Amount</label>
                     <input
                       type="number"
                       min="0"
@@ -459,7 +459,7 @@ export default function InvoiceForm({ variant = "invoice" }) {
               type="submit"
               className="w-full rounded bg-[#152259] px-4 py-2 text-white hover:bg-[#152239]"
             >
-              Gjenero {isVerification ? "verifikimin e pagesës" : "faturën"}
+              Generate {isVerification ? "payment verification" : "invoice"}
             </button>
           </form>
         </div>

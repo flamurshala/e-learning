@@ -8,7 +8,6 @@ import {
   FaCertificate,
   FaChalkboardTeacher,
   FaChartLine,
-  FaClipboardList,
   FaFileInvoiceDollar,
   FaMoneyCheckAlt,
   FaUniversity,
@@ -19,7 +18,6 @@ import {
 function AdminNav() {
   const [notificationCount, setNotificationCount] = useState(0);
   const userRole = localStorage.getItem("userRole"); // Get the user's role
-  const canAccessWaitlist = ["administrator", "admin", "superadmin"].includes(userRole);
   const navItemClass = "mb-[1rem] text-white font-bold gap-3 flex items-center";
   const iconClass = "text-lg shrink-0";
 
@@ -49,12 +47,6 @@ function AdminNav() {
               <FaBookOpen className={iconClass} />
               <Link to="/AllCourses">Courses</Link>
             </li>
-            {/* {canAccessWaitlist && (
-              <li className={navItemClass}>
-                <FaClipboardList className={iconClass} />
-                <Link to="/Waitlist">Student Waitlist</Link>
-              </li>
-            )} */}
             <li className={navItemClass}>
               <FaChalkboardTeacher className={iconClass} />
               <Link to="/AllProfessors">Professors</Link>

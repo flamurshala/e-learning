@@ -5,39 +5,39 @@ import { getCurrentAdminActor, getCurrentAdminQueryString } from "../../utils/cu
 
 const expenseCategories = ["Rent", "Utilities", "Supplies", "Marketing", "Maintenance", "Software", "Other"];
 const expenseCategoryLabels = {
-  Rent: "Qira",
-  Utilities: "Shërbime komunale",
-  Supplies: "Furnizime",
+  Rent: "Rent",
+  Utilities: "Utilities",
+  Supplies: "Supplies",
   Marketing: "Marketing",
-  Maintenance: "Mirëmbajtje",
-  Software: "Softuer",
-  Other: "Tjetër",
+  Maintenance: "Maintenance",
+  Software: "Software",
+  Other: "Other",
 };
 const salaryStatuses = ["unpaid", "partially_paid", "paid"];
 const salaryStatusLabels = {
   unpaid: "Unpaid",
-  partially_paid: "Pjesërisht e paguar",
+  partially_paid: "Partially paid",
   paid: "Paid",
 };
 const paymentMethodLabels = {
-  All: "Pagesë e plotë",
-  Divided: "Pagesë me këste",
+  All: "Full payment",
+  Divided: "Installment payment",
   POS: "POS",
-  Cash: "Para në dorë",
+  Cash: "Cash",
   "Did not pay": "Did not pay",
 };
 const paymentStatusLabels = {
   paid: "Paid",
   unpaid: "Unpaid",
-  partially_paid: "Pjesërisht e paguar",
-  cash: "Paguar me para në dorë",
+  partially_paid: "Partially paid",
+  cash: "Paid by cash",
   pos: "Paid by POS",
 };
 const statusOptions = [
   ["paid", "Paid"],
   ["unpaid", "Unpaid"],
-  ["partially_paid", "Pjesërisht e paguar"],
-  ["cash", "Paguar me para në dorë"],
+  ["partially_paid", "Partially paid"],
+  ["cash", "Paid by cash"],
   ["pos", "Paid by POS"],
 ];
 const defaultPagination = { page: 1, limit: 50, total_rows: 0, total_pages: 1 };
@@ -89,7 +89,7 @@ function PaginationControls({ pagination, onPageChange }) {
   return (
     <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-sm text-gray-700">
       <span>
-        Duke shfaqur {start}-{end} nga {totalRows} rreshta
+        Showing {start}-{end} of {totalRows} rows
       </span>
       <div className="flex items-center gap-2">
         <button
@@ -98,10 +98,10 @@ function PaginationControls({ pagination, onPageChange }) {
           disabled={page <= 1}
           className="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Para
+          Previous
         </button>
         <span>
-          Faqja {page} nga {totalPages}
+          Page {page} of {totalPages}
         </span>
         <button
           type="button"
@@ -109,7 +109,7 @@ function PaginationControls({ pagination, onPageChange }) {
           disabled={page >= totalPages}
           className="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Pas
+          Next
         </button>
       </div>
     </div>
@@ -171,7 +171,7 @@ export default function CompanyFinance() {
   const [salaryForm, setSalaryForm] = useState(emptySalary);
 
   useEffect(() => {
-    document.title = "Financat e kompanisë - Tectigon Academy";
+    document.title = "Company Finance - Tectigon Academy";
   }, []);
 
   const loadSummary = useCallback(() => {
@@ -185,7 +185,7 @@ export default function CompanyFinance() {
           net_profit: 0,
         });
       })
-      .catch(() => setMessage({ text: "Nuk u arrit të ngarkohet përmbledhja financiare.", type: "error" }));
+      .catch(() => setMessage({ text: "Could not load the financial summary.", type: "error" }));
   }, [topFilters]);
 
   const loadOptions = useCallback(() => {
@@ -197,7 +197,7 @@ export default function CompanyFinance() {
           setTeachers(Array.isArray(res.data.teachers) ? res.data.teachers : []);
         }
       })
-      .catch(() => setMessage({ text: "Nuk u arrit të ngarkohen opsionet financiare.", type: "error" }));
+      .catch(() => setMessage({ text: "Could not load finance options.", type: "error" }));
   }, []);
 
   const loadIncome = useCallback(() => {
@@ -210,7 +210,7 @@ export default function CompanyFinance() {
           setIncomePagination(res.data.pagination || defaultPagination);
         }
       })
-      .catch(() => setMessage({ text: "Nuk u arrit të ngarkohen të ardhurat.", type: "error" }));
+      .catch(() => setMessage({ text: "Could not load income.", type: "error" }));
   }, [incomeFilters, incomePage, topFilters]);
 
   const loadExpenses = useCallback(() => {
@@ -228,7 +228,7 @@ export default function CompanyFinance() {
           setExpensePagination(res.data.pagination || defaultPagination);
         }
       })
-      .catch(() => setMessage({ text: "Nuk u arrit të ngarkohen shpenzimet.", type: "error" }));
+      .catch(() => setMessage({ text: "Could not load expenses.", type: "error" }));
   }, [expenseFilters, expensePage, topFilters.date_from, topFilters.date_to]);
 
   const loadSalaryPayments = useCallback(() => {
@@ -249,7 +249,7 @@ export default function CompanyFinance() {
           setSalaryPagination(res.data.pagination || defaultPagination);
         }
       })
-      .catch(() => setMessage({ text: "Nuk u arrit të ngarkohen pagat e mësimdhënësve.", type: "error" }));
+      .catch(() => setMessage({ text: "Could not load teacher salaries.", type: "error" }));
   }, [salaryFilters, salaryPage, topFilters]);
 
   useEffect(() => {
@@ -352,10 +352,10 @@ export default function CompanyFinance() {
           loadExpenses();
           loadSummary();
         } else {
-          setMessage({ text: res.data?.error || "Nuk u arrit të ruhet shpenzimi.", type: "error" });
+          setMessage({ text: res.data?.error || "Could not save the expense.", type: "error" });
         }
       })
-      .catch(() => setMessage({ text: "Nuk u arrit të ruhet shpenzimi.", type: "error" }));
+      .catch(() => setMessage({ text: "Could not save the expense.", type: "error" }));
   };
 
   const editExpense = (expense) => {
@@ -373,7 +373,7 @@ export default function CompanyFinance() {
   };
 
   const deleteExpense = (id) => {
-    if (!window.confirm("Të fshihet ky shpenzimë")) return;
+    if (!window.confirm("Delete this expense?")) return;
     axios
       .post(`${process.env.REACT_APP_API_URL}/delete_finance_expense.php`, {
         id,
@@ -384,10 +384,10 @@ export default function CompanyFinance() {
           loadExpenses();
           loadSummary();
         } else {
-          setMessage({ text: res.data?.error || "Nuk u arrit të fshihet shpenzimi.", type: "error" });
+          setMessage({ text: res.data?.error || "Could not delete the expense.", type: "error" });
         }
       })
-      .catch(() => setMessage({ text: "Nuk u arrit të fshihet shpenzimi.", type: "error" }));
+      .catch(() => setMessage({ text: "Could not delete the expense.", type: "error" }));
   };
 
   const saveSalaryPayment = (e) => {
@@ -401,17 +401,17 @@ export default function CompanyFinance() {
       .then((res) => {
         if (res.data?.success) {
           setMessage({
-            text: `Pagesa e pagës së mësimdhënësit u ruajt si ${labelFor(salaryStatusLabels, res.data.status)}.`,
+            text: `Teacher salary payment was saved as ${labelFor(salaryStatusLabels, res.data.status)}.`,
             type: "success",
           });
           setSalaryForm(emptySalary);
           loadSalaryPayments();
           loadSummary();
         } else {
-          setMessage({ text: res.data?.error || "Nuk u arrit të ruhet pagesa e pagës së mësimdhënësit.", type: "error" });
+          setMessage({ text: res.data?.error || "Could not save the teacher salary payment.", type: "error" });
         }
       })
-      .catch(() => setMessage({ text: "Nuk u arrit të ruhet pagesa e pagës së mësimdhënësit.", type: "error" }));
+      .catch(() => setMessage({ text: "Could not save the teacher salary payment.", type: "error" }));
   };
 
   return (
@@ -419,25 +419,25 @@ export default function CompanyFinance() {
       <AdminNav />
       <div className="ml-[22%] mt-6 w-[75%] pb-10">
         <h1 className="mb-4 border-b-2 border-[#c2c2c2] pb-2 text-2xl font-semibold">
-          Financat e kompanisë
+          Company Finance
         </h1>
 
         <div className="mb-6 rounded border bg-white p-4 shadow-sm">
-          <h2 className="mb-3 text-lg font-semibold">Filtrat</h2>
+          <h2 className="mb-3 text-lg font-semibold">Filters</h2>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
             <input type="date" value={topFilters.date_from} onChange={(e) => updateTopFilter("date_from", e.target.value)} className="rounded border px-3 py-2" />
             <input type="date" value={topFilters.date_to} onChange={(e) => updateTopFilter("date_to", e.target.value)} className="rounded border px-3 py-2" />
             <select value={topFilters.course_id} onChange={(e) => updateTopFilter("course_id", e.target.value)} className="rounded border px-3 py-2">
-              <option value="">Të gjitha kurset</option>
+              <option value="">All courses</option>
               {courses.map((course) => (
                 <option key={`${course.id}-${course.teacher_id || "none"}`} value={course.id}>{course.title}</option>
               ))}
             </select>
             <select value={topFilters.status} onChange={(e) => updateTopFilter("status", e.target.value)} className="rounded border px-3 py-2">
-              <option value="">Të gjitha statuset</option>
+              <option value="">All statuses</option>
               {statusOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </select>
-            <button type="button" onClick={clearFilters} className="rounded border px-4 py-2">Pastro filtrat</button>
+            <button type="button" onClick={clearFilters} className="rounded border px-4 py-2">Clear Filters</button>
 
             {activeTab === "income" && (
               <input placeholder="Student name" value={incomeFilters.student} onChange={(e) => updateIncomeFilter("student", e.target.value)} className="rounded border px-3 py-2" />
@@ -445,16 +445,16 @@ export default function CompanyFinance() {
             {activeTab === "expenses" && (
               <>
                 <select value={expenseFilters.category} onChange={(e) => updateExpenseFilter("category", e.target.value)} className="rounded border px-3 py-2">
-                  <option value="">Të gjitha kategoritë</option>
+                  <option value="">All categories</option>
                   {expenseCategories.map((category) => <option key={category} value={category}>{labelFor(expenseCategoryLabels, category)}</option>)}
                 </select>
-                <input type="number" placeholder="Shuma minimale" value={expenseFilters.amount_min} onChange={(e) => updateExpenseFilter("amount_min", e.target.value)} className="rounded border px-3 py-2" />
-                <input type="number" placeholder="Shuma maksimale" value={expenseFilters.amount_max} onChange={(e) => updateExpenseFilter("amount_max", e.target.value)} className="rounded border px-3 py-2" />
+                <input type="number" placeholder="Minimum amount" value={expenseFilters.amount_min} onChange={(e) => updateExpenseFilter("amount_min", e.target.value)} className="rounded border px-3 py-2" />
+                <input type="number" placeholder="Maximum amount" value={expenseFilters.amount_max} onChange={(e) => updateExpenseFilter("amount_max", e.target.value)} className="rounded border px-3 py-2" />
               </>
             )}
             {activeTab === "salaries" && (
               <select value={salaryFilters.teacher_id} onChange={(e) => updateSalaryFilter("teacher_id", e.target.value)} className="rounded border px-3 py-2">
-                <option value="">Të gjithë mësimdhënësit</option>
+                <option value="">All teachers</option>
                 {teachers.map((teacher) => <option key={teacher.id} value={teacher.id}>{teacher.name}</option>)}
               </select>
             )}
@@ -463,19 +463,19 @@ export default function CompanyFinance() {
 
         <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
           <div className="rounded border bg-white p-4 shadow-sm">
-            <p className="text-sm text-gray-600">Të ardhurat totale</p>
+            <p className="text-sm text-gray-600">Total Income</p>
             <strong className="text-2xl text-green-700">{money(summary.total_income)}</strong>
           </div>
           <div className="rounded border bg-white p-4 shadow-sm">
-            <p className="text-sm text-gray-600">Shpenzimet totale</p>
+            <p className="text-sm text-gray-600">Total Expenses</p>
             <strong className="text-2xl text-red-700">{money(summary.total_expenses)}</strong>
           </div>
           <div className="rounded border bg-white p-4 shadow-sm">
-            <p className="text-sm text-gray-600">Pagat e paguara të mësimdhënësve</p>
+            <p className="text-sm text-gray-600">Paid Teacher Salaries</p>
             <strong className="text-2xl text-orange-700">{money(summary.total_teacher_salaries)}</strong>
           </div>
           <div className="rounded border bg-white p-4 shadow-sm">
-            <p className="text-sm text-gray-600">Fitimi / Humbja neto</p>
+            <p className="text-sm text-gray-600">Net Profit / Loss</p>
             <strong className={Number(summary.net_profit) >= 0 ? "text-2xl text-green-700" : "text-2xl text-red-700"}>
               {money(summary.net_profit)}
             </strong>
@@ -509,17 +509,17 @@ export default function CompanyFinance() {
 
         {activeTab === "income" && (
           <section>
-            <h2 className="mb-3 text-xl font-semibold">Të ardhurat nga pagesat e studentëve</h2>
-            <p className="mb-2 font-semibold">Të ardhurat e filtruara: {money(incomeTotal)}</p>
+            <h2 className="mb-3 text-xl font-semibold">Income from Student Payments</h2>
+            <p className="mb-2 font-semibold">Filtered income: {money(incomeTotal)}</p>
             <table className="w-full border-collapse border">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="border p-2 text-left">Studenti</th>
+                  <th className="border p-2 text-left">Student</th>
                   <th className="border p-2 text-left">Course</th>
-                  <th className="border p-2 text-left">Data</th>
-                  <th className="border p-2 text-left">Metoda</th>
+                  <th className="border p-2 text-left">Date</th>
+                  <th className="border p-2 text-left">Method</th>
                   <th className="border p-2 text-left">Status</th>
-                  <th className="border p-2 text-right">Shuma</th>
+                  <th className="border p-2 text-right">Amount</th>
                 </tr>
               </thead>
               <tbody>
@@ -533,7 +533,7 @@ export default function CompanyFinance() {
                     <td className="border p-2 text-right">{money(row.payment_amount)}</td>
                   </tr>
                 ))}
-                {incomeRows.length === 0 && <tr><td colSpan="6" className="p-4 text-center text-gray-500">Nuk u gjetën të ardhura.</td></tr>}
+                {incomeRows.length === 0 && <tr><td colSpan="6" className="p-4 text-center text-gray-500">No income found.</td></tr>}
               </tbody>
             </table>
             <PaginationControls pagination={incomePagination} onPageChange={setIncomePage} />
@@ -542,25 +542,25 @@ export default function CompanyFinance() {
 
         {activeTab === "expenses" && (
           <section>
-            <h2 className="mb-3 text-xl font-semibold">Shpenzimet e kompanisë</h2>
+            <h2 className="mb-3 text-xl font-semibold">Company Expenses</h2>
             <form onSubmit={saveExpense} className="mb-6 grid grid-cols-1 gap-3 rounded border bg-white p-4 md:grid-cols-2">
-              <input placeholder="Titulli i shpenzimit" value={expenseForm.title} onChange={(e) => updateExpenseForm("title", e.target.value)} className="rounded border px-3 py-2" required />
-              <input placeholder="Numri i faturës" value={expenseForm.bill_number} onChange={(e) => updateExpenseForm("bill_number", e.target.value)} className="rounded border px-3 py-2" />
+              <input placeholder="Expense title" value={expenseForm.title} onChange={(e) => updateExpenseForm("title", e.target.value)} className="rounded border px-3 py-2" required />
+              <input placeholder="Invoice number" value={expenseForm.bill_number} onChange={(e) => updateExpenseForm("bill_number", e.target.value)} className="rounded border px-3 py-2" />
               <select value={expenseForm.category} onChange={(e) => updateExpenseForm("category", e.target.value)} className="rounded border px-3 py-2" required>
                 {expenseCategories.map((category) => <option key={category} value={category}>{labelFor(expenseCategoryLabels, category)}</option>)}
               </select>
-              <input type="number" min="0" step="0.01" placeholder="Shuma" value={expenseForm.amount} onChange={(e) => updateExpenseForm("amount", e.target.value)} className="rounded border px-3 py-2" required />
+              <input type="number" min="0" step="0.01" placeholder="Amount" value={expenseForm.amount} onChange={(e) => updateExpenseForm("amount", e.target.value)} className="rounded border px-3 py-2" required />
               <input type="date" value={expenseForm.expense_date} onChange={(e) => updateExpenseForm("expense_date", e.target.value)} className="rounded border px-3 py-2" required />
-              <input placeholder="Mënyra e pagesës" value={expenseForm.payment_method} onChange={(e) => updateExpenseForm("payment_method", e.target.value)} className="rounded border px-3 py-2" />
-              <textarea placeholder="Përshkrim / shënime" value={expenseForm.description} onChange={(e) => updateExpenseForm("description", e.target.value)} className="rounded border px-3 py-2 md:col-span-2" />
+              <input placeholder="Payment method" value={expenseForm.payment_method} onChange={(e) => updateExpenseForm("payment_method", e.target.value)} className="rounded border px-3 py-2" />
+              <textarea placeholder="Description / notes" value={expenseForm.description} onChange={(e) => updateExpenseForm("description", e.target.value)} className="rounded border px-3 py-2 md:col-span-2" />
               <div className="flex gap-2 md:col-span-2">
-                <button className="rounded bg-[#152259] px-4 py-2 text-white">{expenseForm.id ? "Përditëso shpenzimin" : "Create expense"}</button>
-                {expenseForm.id && <button type="button" onClick={() => setExpenseForm(emptyExpense)} className="rounded border px-4 py-2">Anulo ndryshimin</button>}
+                <button className="rounded bg-[#152259] px-4 py-2 text-white">{expenseForm.id ? "Update expense" : "Create expense"}</button>
+                {expenseForm.id && <button type="button" onClick={() => setExpenseForm(emptyExpense)} className="rounded border px-4 py-2">Cancel edit</button>}
               </div>
             </form>
-            <p className="mb-2 font-semibold">Shpenzimet e filtruara: {money(expensesTotal)}</p>
+            <p className="mb-2 font-semibold">Filtered expenses: {money(expensesTotal)}</p>
             <table className="w-full border-collapse border">
-              <thead className="bg-gray-100"><tr><th className="border p-2 text-left">Titulli</th><th className="border p-2">Data</th><th className="border p-2">Category</th><th className="border p-2">Fatura</th><th className="border p-2 text-right">Shuma</th><th className="border p-2">Veprimet</th></tr></thead>
+              <thead className="bg-gray-100"><tr><th className="border p-2 text-left">Title</th><th className="border p-2">Date</th><th className="border p-2">Category</th><th className="border p-2">Invoice</th><th className="border p-2 text-right">Amount</th><th className="border p-2">Actions</th></tr></thead>
               <tbody>
                 {expenses.map((expense) => (
                   <tr key={expense.id}>
@@ -569,10 +569,10 @@ export default function CompanyFinance() {
                     <td className="border p-2">{labelFor(expenseCategoryLabels, expense.category)}</td>
                     <td className="border p-2">{expense.bill_number || "-"}</td>
                     <td className="border p-2 text-right">{money(expense.amount)}</td>
-                    <td className="border p-2"><button onClick={() => editExpense(expense)} className="mr-2 rounded bg-[#152259] px-3 py-1 text-white">Ndrysho</button><button onClick={() => deleteExpense(expense.id)} className="rounded bg-red-600 px-3 py-1 text-white">Fshi</button></td>
+                    <td className="border p-2"><button onClick={() => editExpense(expense)} className="mr-2 rounded bg-[#152259] px-3 py-1 text-white">Edit</button><button onClick={() => deleteExpense(expense.id)} className="rounded bg-red-600 px-3 py-1 text-white">Delete</button></td>
                   </tr>
                 ))}
-                {expenses.length === 0 && <tr><td colSpan="6" className="p-4 text-center text-gray-500">Nuk u gjetën shpenzime.</td></tr>}
+                {expenses.length === 0 && <tr><td colSpan="6" className="p-4 text-center text-gray-500">No expenses found.</td></tr>}
               </tbody>
             </table>
             <PaginationControls pagination={expensePagination} onPageChange={setExpensePage} />
@@ -581,35 +581,35 @@ export default function CompanyFinance() {
 
         {activeTab === "salaries" && (
           <section>
-            <h2 className="mb-3 text-xl font-semibold">Pagesat e pagave të mësimdhënësve</h2>
+            <h2 className="mb-3 text-xl font-semibold">Teacher Salary Payments</h2>
             <form onSubmit={saveSalaryPayment} className="mb-6 grid grid-cols-1 gap-3 rounded border bg-white p-4 md:grid-cols-2">
               <select value={salaryForm.teacher_id} onChange={(e) => updateSalaryForm("teacher_id", e.target.value)} className="rounded border px-3 py-2" required>
-                <option value="">Zgjidh mësimdhënësin</option>
+                <option value="">Select teacher</option>
                 {teachers.map((teacher) => <option key={teacher.id} value={teacher.id}>{teacher.name}</option>)}
               </select>
               <select value={salaryForm.course_id} onChange={(e) => updateSalaryForm("course_id", e.target.value)} className="rounded border px-3 py-2" required>
-                <option value="">Zgjidh kursin e mësimdhënësit</option>
+                <option value="">Select teacher course</option>
                 {relatedCourses.map((course) => <option key={course.id} value={course.id}>{course.title}</option>)}
               </select>
               <div className="grid gap-2 rounded border bg-gray-50 p-3 text-sm text-gray-700 md:col-span-2 md:grid-cols-2">
                 <p>
-                  <span className="font-semibold">Shuma e plotë e vendosur:</span>{" "}
-                  {expectedForProjection === "" ? "E pavendosur" : money(expectedForProjection)}
+                  <span className="font-semibold">Set full amount:</span>{" "}
+                  {expectedForProjection === "" ? "Not set" : money(expectedForProjection)}
                 </p>
                 <p>
-                  <span className="font-semibold">Mbetur për t’u paguar:</span>{" "}
+                  <span className="font-semibold">Remaining to pay:</span>{" "}
                   {remainingBeforePayment === null ? "-" : money(remainingBeforePayment)}
                 </p>
               </div>
-              <input type="number" min="0" step="0.01" placeholder={suggestedExpected ? `Full amount optional, previous ${suggestedExpected}` : "Shuma e plotë për t’u paguar (opsionale)"} value={salaryForm.expected_amount} onChange={(e) => updateSalaryForm("expected_amount", e.target.value)} className="rounded border px-3 py-2" />
+              <input type="number" min="0" step="0.01" placeholder={suggestedExpected ? `Full amount optional, previous ${suggestedExpected}` : "Full amount to pay (optional)"} value={salaryForm.expected_amount} onChange={(e) => updateSalaryForm("expected_amount", e.target.value)} className="rounded border px-3 py-2" />
               <input type="number" min="0" step="0.01" placeholder="Paid amount" value={salaryForm.paid_amount} onChange={(e) => updateSalaryForm("paid_amount", e.target.value)} className="rounded border px-3 py-2" required />
               <input type="date" value={salaryForm.payment_date} onChange={(e) => updateSalaryForm("payment_date", e.target.value)} className="rounded border px-3 py-2" required />
-              <textarea placeholder="Shënime" value={salaryForm.notes} onChange={(e) => updateSalaryForm("notes", e.target.value)} className="rounded border px-3 py-2 md:col-span-2" />
-              <button className="w-fit rounded bg-[#152259] px-4 py-2 text-white md:col-span-2">Regjistro pagesën e pagës</button>
+              <textarea placeholder="Notes" value={salaryForm.notes} onChange={(e) => updateSalaryForm("notes", e.target.value)} className="rounded border px-3 py-2 md:col-span-2" />
+              <button className="w-fit rounded bg-[#152259] px-4 py-2 text-white md:col-span-2">Register salary payment</button>
             </form>
-            <p className="mb-2 font-semibold">Pagat e filtruara të paguara: {money(salaryTotal)}</p>
+            <p className="mb-2 font-semibold">Filtered paid salaries: {money(salaryTotal)}</p>
             <table className="w-full border-collapse border">
-              <thead className="bg-gray-100"><tr><th className="border p-2 text-left">Profesor</th><th className="border p-2 text-left">Course</th><th className="border p-2">Data</th><th className="border p-2 text-right">Expected</th><th className="border p-2 text-right">Paid</th><th className="border p-2">Status</th></tr></thead>
+              <thead className="bg-gray-100"><tr><th className="border p-2 text-left">Professor</th><th className="border p-2 text-left">Course</th><th className="border p-2">Date</th><th className="border p-2 text-right">Expected</th><th className="border p-2 text-right">Paid</th><th className="border p-2">Status</th></tr></thead>
               <tbody>
                 {salaryPayments.map((payment) => (
                   <tr key={payment.id}>
@@ -621,7 +621,7 @@ export default function CompanyFinance() {
                     <td className="border p-2">{labelFor(salaryStatusLabels, payment.status)}</td>
                   </tr>
                 ))}
-                {salaryPayments.length === 0 && <tr><td colSpan="6" className="p-4 text-center text-gray-500">Nuk u gjetën pagesa pagash.</td></tr>}
+                {salaryPayments.length === 0 && <tr><td colSpan="6" className="p-4 text-center text-gray-500">No salary payments found.</td></tr>}
               </tbody>
             </table>
             <PaginationControls pagination={salaryPagination} onPageChange={setSalaryPage} />

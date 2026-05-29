@@ -15,6 +15,18 @@ function isSingleAmountPayment(method) {
   return method === "All" || method === "POS" || method === "Cash";
 }
 
+function getPaidAmount(method, allAmount, month1Amount, month2Amount) {
+  if (isSingleAmountPayment(method)) {
+    return Number(allAmount || 0);
+  }
+
+  if (method === "Divided") {
+    return Number(month1Amount || 0) + Number(month2Amount || 0);
+  }
+
+  return 0;
+}
+
 function AddUsers() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -34,9 +46,6 @@ function AddUsers() {
 
   const [courses, setCourses] = useState([]);
   const [selectedCourses, setSelectedCourses] = useState([""]);
-
-  const [professorName, setProfessorName] = useState("");
-  const [professorEmail, setProfessorEmail] = useState("");
 
   const [payments, setPayments] = useState([""]);
   const [amountPaidAll, setAmountPaidAll] = useState([""]);
@@ -130,6 +139,34 @@ function AddUsers() {
       courses: selectedCourses,
     };
 
+    const selectedCourseDetails = selectedCourses.map((courseId) =>
+      courses.find((course) => String(course.id) === String(courseId))
+    );
+
+    const paidVerificationItems = selectedCourses
+      .map((courseId, index) => {
+        const paymentMethod = payments[index];
+        const paidAmount = getPaidAmount(
+          paymentMethod,
+          amountPaidAll[index],
+          amountPaidMonth1[index],
+          amountPaidMonth2[index]
+        );
+
+        if (paidAmount <= 0 || paymentMethod === "Did not pay" || paymentMethod === "Free") {
+          return null;
+        }
+
+        const course = selectedCourseDetails[index];
+        return {
+          course_id: courseId,
+          course_title: course?.title || "",
+          description: "",
+          unit_price: paidAmount.toFixed(2),
+        };
+      })
+      .filter(Boolean);
+
     fetch(`${process.env.REACT_APP_API_URL}/add_students.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -161,6 +198,13 @@ function AddUsers() {
             successLines.push(...warnings);
           }
 
+          const addedCourseIds = Array.isArray(data.added_course_ids)
+            ? data.added_course_ids.map(String)
+            : [];
+          const addedPaidVerificationItems = paidVerificationItems.filter((item) =>
+            addedCourseIds.includes(String(item.course_id))
+          );
+
           const removeFromWaitlist = () => {
             if (!waitlistIds.length) return Promise.resolve();
             return Promise.all(
@@ -175,6 +219,18 @@ function AddUsers() {
           };
 
           removeFromWaitlist().finally(() => {
+            if (addedPaidVerificationItems.length > 0) {
+              navigate("/PaymentVerificationForm", {
+                state: {
+                  prefillPaymentVerification: true,
+                  studentId: data.student_id,
+                  studentName: [studentName, studentSurname].filter(Boolean).join(" "),
+                  items: addedPaidVerificationItems,
+                },
+              });
+              return;
+            }
+
             setMessage({ text: successLines.join("\n"), type: "success" });
             setStudentName("");
             setStudentSurname("");
@@ -277,40 +333,6 @@ function AddUsers() {
     const newAmounts = [...amountPaidMonth2];
     newAmounts[index] = value;
     setAmountPaidMonth2(newAmounts);
-  };
-
-  const handleProfessorSubmit = (e) => {
-    e.preventDefault();
-
-    if ([professorName, professorEmail].some(isEmpty)) {
-      alert("Please enter all professor fields.");
-      return;
-    }
-
-    const payload = {
-      name: professorName,
-      email: professorEmail,
-    };
-
-    fetch(`${process.env.REACT_APP_API_URL}/add_professors.php`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          alert("Professor added successfully!");
-          setProfessorName("");
-          setProfessorEmail("");
-        } else {
-          alert("Error adding professor: " + (data.error || "Unknown error"));
-        }
-      })
-      .catch((err) => {
-        console.error("Professor error:", err);
-        alert("Error adding professor. Check console.");
-      });
   };
 
   return (

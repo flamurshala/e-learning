@@ -17,6 +17,7 @@ try {
         // Get courses and payment info per student (newest-first by course id)
         $stmtCourses = $conn->prepare("
             SELECT 
+                c.id AS course_id,
                 c.title,
                 sp.payment_method,
                 sp.amount_all,

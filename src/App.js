@@ -169,7 +169,7 @@ function App() {
             element={
               <ProtectedRoute
                 userType="user"
-                allowedRoles={["administrator", "admin", "superadmin"]}
+                allowedRoles={["administrator", "administrata", "administration", "admin", "superadmin"]}
               >
                 <Waitlist />
               </ProtectedRoute>

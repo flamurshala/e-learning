@@ -3,18 +3,18 @@ import axios from "axios";
 import AdminNav from "./AdminNav";
 
 const REPORT_SECTIONS = [
-  { value: "", label: "Të gjitha raportet" },
-  { value: "students", label: "Studentët" },
-  { value: "payments", label: "Pagesat" },
-  { value: "expenses", label: "Shpenzimet" },
-  { value: "teacher_salaries", label: "Pagat e mësimdhënësve" },
-  { value: "invoices", label: "Faturat" },
+  { value: "", label: "All Reports" },
+  { value: "students", label: "Students" },
+  { value: "payments", label: "Payments" },
+  { value: "expenses", label: "Expenses" },
+  { value: "teacher_salaries", label: "Teacher Salaries" },
+  { value: "invoices", label: "Invoices" },
   { value: "payment_verifications", label: "Payment verifications" },
   { value: "waitlist", label: "Waitlist" },
-  { value: "courses", label: "Kurset" },
-  { value: "admins", label: "Administratorët" },
-  { value: "professors", label: "Profesorët" },
-  { value: "certificates", label: "Certifikatat" },
+  { value: "courses", label: "Courses" },
+  { value: "admins", label: "Admins" },
+  { value: "professors", label: "Professors" },
+  { value: "certificates", label: "Certificates" },
 ];
 
 export default function Reports() {
@@ -37,7 +37,7 @@ export default function Reports() {
   }, [filters]);
 
   useEffect(() => {
-    document.title = "Raportet - Tectigon Academy";
+    document.title = "Reports - Tectigon Academy";
   }, []);
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export default function Reports() {
       .then((res) => {
         if (res.data?.success === false) {
           setLogs([]);
-          setMessage({ text: res.data.error || "Nuk u arrit të ngarkohen raportet.", type: "error" });
+          setMessage({ text: res.data.error || "Could not load reports.", type: "error" });
           return;
         }
         setLogs(Array.isArray(res.data?.logs) ? res.data.logs : []);
@@ -55,7 +55,7 @@ export default function Reports() {
       })
       .catch(() => {
         setLogs([]);
-        setMessage({ text: "Nuk u arrit të ngarkohen raportet.", type: "error" });
+        setMessage({ text: "Could not load reports.", type: "error" });
       });
   }, [queryString]);
 
@@ -74,13 +74,13 @@ export default function Reports() {
       <AdminNav />
       <div className="ml-[22%] mt-6 w-[75%] pb-10">
         <div className="mb-4 flex items-center justify-between border-b-2 border-[#c2c2c2] pb-2">
-          <h1 className="text-2xl font-semibold">Raportet</h1>
+          <h1 className="text-2xl font-semibold">Reports</h1>
           <button
             type="button"
             onClick={clearFilters}
             className="rounded border border-[#152259] px-4 py-2 text-[#152259] hover:bg-[#eef2ff]"
           >
-            Pastro filtrat
+            Clear Filters
           </button>
         </div>
 
@@ -101,13 +101,13 @@ export default function Reports() {
           </label>
 
           <label className="font-medium">
-            Përdoruesi
+            User
             <select
               value={filters.actor_id}
               onChange={(e) => updateFilter("actor_id", e.target.value)}
               className="mt-1 w-full rounded border px-3 py-2"
             >
-              <option value="">Të gjithë përdoruesit</option>
+              <option value="">All users</option>
               {admins.map((admin) => (
                 <option key={admin.id} value={admin.id}>
                   {admin.username} ({admin.role})
@@ -161,14 +161,14 @@ export default function Reports() {
         )}
 
         <h2 className="mb-3 text-xl font-semibold">
-          {selectedSection?.label || "Të gjitha raportet"}
+          {selectedSection?.label || "All Reports"}
         </h2>
 
         <table className="w-full border-collapse border border-gray-300 text-sm">
           <thead className="bg-gray-100">
             <tr>
-              <th className="border p-2 text-left">Data</th>
-              <th className="border p-2 text-left">Përdoruesi</th>
+              <th className="border p-2 text-left">Date</th>
+              <th className="border p-2 text-left">User</th>
               <th className="border p-2 text-left">Section</th>
               <th className="border p-2 text-left">Action</th>
               <th className="border p-2 text-left">Target</th>
@@ -195,7 +195,7 @@ export default function Reports() {
             ) : (
               <tr>
                 <td colSpan="6" className="p-4 text-center text-gray-500">
-                  Nuk u gjetën të dhëna raporti.
+                  No report records found.
                 </td>
               </tr>
             )}

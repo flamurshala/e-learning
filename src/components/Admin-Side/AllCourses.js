@@ -182,6 +182,7 @@ function AllCourses() {
               <th className="p-2 border">Professor</th>
               <th className="p-2 border">Students</th>
               <th className="p-2 border">Attendance</th>
+              <th className="p-2 border">Certificates</th>
               {canForceCompleteCourse && <th className="p-2 border">Complete</th>}
               <th className="p-2 border">Delete</th>
               <th className="p-2 border">Edit</th>
@@ -203,7 +204,7 @@ function AllCourses() {
                     >
                       {openDropdown === course.id
                         ? "Hide Students"
-                        : "View Students"}
+                        : "Students"}
                     </button>
                     {openDropdown === course.id && (
                       <ul className="mt-2 list-disc ml-4 text-sm text-gray-700">
@@ -225,8 +226,27 @@ function AllCourses() {
                         navigate(`/course-attendance/${course.id}`)
                       }
                     >
-                      View Attendance
+                      Attendance
                     </button>
+                  </td>
+                  <td className="p-2 border text-center">
+                    {course.merged_certificate_file ? (
+                      <a
+                        href={`${process.env.REACT_APP_API_URL}/download_merged_certificate.php?course_id=${course.id}`}
+                        download={course.merged_certificate_file}
+                        className="inline-block bg-[#152259] hover:bg-[#152239] text-white px-3 py-1 rounded"
+                      >
+                        Download
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled
+                        className="bg-gray-300 text-gray-600 px-3 py-1 rounded cursor-not-allowed"
+                      >
+                        No Certificates
+                      </button>
+                    )}
                   </td>
                   {canForceCompleteCourse && (
                     <td className="p-2 border text-center">
@@ -261,7 +281,7 @@ function AllCourses() {
             ) : (
               <tr>
                 <td
-                  colSpan={canForceCompleteCourse ? 8 : 7}
+                  colSpan={canForceCompleteCourse ? 9 : 8}
                   className="text-center p-4 text-gray-500"
                 >
                   No courses found.

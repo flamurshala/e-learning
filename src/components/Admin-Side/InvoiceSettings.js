@@ -8,22 +8,22 @@ export default function InvoiceSettings({ variant = "invoice" }) {
   const isVerification = variant === "verification";
   const config = isVerification
     ? {
-        title: "Cilësimet e verifikimit të pagesës",
+        title: "Payment Verification Settings",
         settingsEndpoint: "get_payment_verification_settings.php",
         nextNumberEndpoint: "get_next_payment_verification_number.php",
         updateSequenceEndpoint: "update_payment_verification_sequence.php",
         addOptionEndpoint: "add_payment_verification_description_option.php",
         deleteOptionEndpoint: "delete_payment_verification_description_option.php",
-        numberLabel: "Numri i ardhshëm i verifikimit",
+        numberLabel: "Next Verification Number",
       }
     : {
-        title: "Cilësimet e faturës",
+        title: "Invoice Settings",
         settingsEndpoint: "get_invoice_settings.php",
         nextNumberEndpoint: "get_next_invoice_number.php",
         updateSequenceEndpoint: "update_invoice_sequence.php",
         addOptionEndpoint: "add_invoice_description_option.php",
         deleteOptionEndpoint: "delete_invoice_description_option.php",
-        numberLabel: "Numri i ardhshëm i faturës",
+        numberLabel: "Next Invoice Number",
       };
   const [options, setOptions] = useState([]);
   const [newOption, setNewOption] = useState("");
@@ -37,7 +37,7 @@ export default function InvoiceSettings({ variant = "invoice" }) {
         setOptions(res.data?.description_options || []);
       })
       .catch(() =>
-        setMessage({ text: "Nuk u arrit të ngarkohen cilësimet e faturës.", type: "error" })
+        setMessage({ text: "Could not load settings.", type: "error" })
       );
 
     axios
@@ -48,7 +48,7 @@ export default function InvoiceSettings({ variant = "invoice" }) {
         }
       })
       .catch(() =>
-        setMessage({ text: "Nuk u arrit të ngarkohet numri i ardhshëm i faturës.", type: "error" })
+        setMessage({ text: "Could not load the next number.", type: "error" })
       );
   }, [config.nextNumberEndpoint, config.settingsEndpoint]);
 
@@ -68,7 +68,7 @@ export default function InvoiceSettings({ variant = "invoice" }) {
       .then((res) => {
         if (res.data?.success) {
           setNewOption("");
-          setMessage({ text: "Opsioni u shtua.", type: "success" });
+          setMessage({ text: "Option added.", type: "success" });
           loadSettings();
         } else {
           setMessage({
@@ -77,11 +77,11 @@ export default function InvoiceSettings({ variant = "invoice" }) {
           });
         }
       })
-      .catch(() => setMessage({ text: "Nuk u arrit të shtohet opsioni.", type: "error" }));
+      .catch(() => setMessage({ text: "Could not add option.", type: "error" }));
   };
 
   const deleteOption = (id) => {
-    if (!window.confirm("Të hiqet ky opsion nga lista e faturësë")) return;
+    if (!window.confirm("Remove this option from the list?")) return;
     setMessage({ text: "", type: "" });
 
     axios
@@ -90,7 +90,7 @@ export default function InvoiceSettings({ variant = "invoice" }) {
       })
       .then((res) => {
         if (res.data?.success) {
-          setMessage({ text: "Opsioni u hoq.", type: "success" });
+          setMessage({ text: "Option removed.", type: "success" });
           loadSettings();
         } else {
           setMessage({
@@ -100,7 +100,7 @@ export default function InvoiceSettings({ variant = "invoice" }) {
         }
       })
       .catch(() =>
-        setMessage({ text: "Nuk u arrit të hiqet opsioni.", type: "error" })
+        setMessage({ text: "Could not remove option.", type: "error" })
       );
   };
 
@@ -124,7 +124,7 @@ export default function InvoiceSettings({ variant = "invoice" }) {
         }
       })
       .catch(() =>
-        setMessage({ text: "Nuk u arrit të përditësohet numri i faturës.", type: "error" })
+        setMessage({ text: "Could not update the number.", type: "error" })
       );
   };
 
@@ -140,7 +140,7 @@ export default function InvoiceSettings({ variant = "invoice" }) {
               onClick={() => navigate(-1)}
               className="rounded bg-[#152259] px-4 py-2 text-white hover:bg-[#152239]"
             >
-              Kthehu
+              Back
             </button>
           </div>
 
@@ -171,26 +171,26 @@ export default function InvoiceSettings({ variant = "invoice" }) {
                 type="submit"
                 className="rounded bg-[#152259] px-4 py-2 text-white hover:bg-[#152239]"
               >
-                Ruaj
+                Save
               </button>
             </div>
           </form>
 
-          <h2 className="mb-3 text-lg font-semibold">Opsionet e përshkrimit të faturës</h2>
+          <h2 className="mb-3 text-lg font-semibold">Description Options</h2>
           <form onSubmit={addOption} className="mb-6 flex gap-3">
             <input
               type="text"
               value={newOption}
               onChange={(e) => setNewOption(e.target.value)}
               className="flex-1 rounded border px-3 py-2"
-              placeholder="Shto opsion për përshkrimin e faturës"
+              placeholder="Add a description option"
               required
             />
             <button
               type="submit"
               className="rounded bg-[#152259] px-4 py-2 text-white hover:bg-[#152239]"
             >
-              Shto
+              Add
             </button>
           </form>
 
@@ -209,7 +209,7 @@ export default function InvoiceSettings({ variant = "invoice" }) {
                     onClick={() => deleteOption(option.id)}
                     className="rounded bg-red-600 px-3 py-1 text-white hover:bg-red-800"
                   >
-                    Hiq
+                    Remove
                   </button>
                 </div>
               ))

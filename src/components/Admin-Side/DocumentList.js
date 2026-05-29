@@ -4,19 +4,19 @@ import { Link } from "react-router-dom";
 import AdminNav from "./AdminNav";
 
 const MONTHS = [
-  { value: "", label: "Të gjithë muajt" },
-  { value: "1", label: "Janar" },
-  { value: "2", label: "Shkurt" },
-  { value: "3", label: "Mars" },
-  { value: "4", label: "Prill" },
-  { value: "5", label: "Maj" },
-  { value: "6", label: "Qershor" },
-  { value: "7", label: "Korrik" },
-  { value: "8", label: "Gusht" },
-  { value: "9", label: "Shtator" },
-  { value: "10", label: "Tetor" },
-  { value: "11", label: "Nëntor" },
-  { value: "12", label: "Dhjetor" },
+  { value: "", label: "All months" },
+  { value: "1", label: "January" },
+  { value: "2", label: "February" },
+  { value: "3", label: "March" },
+  { value: "4", label: "April" },
+  { value: "5", label: "May" },
+  { value: "6", label: "June" },
+  { value: "7", label: "July" },
+  { value: "8", label: "August" },
+  { value: "9", label: "September" },
+  { value: "10", label: "October" },
+  { value: "11", label: "November" },
+  { value: "12", label: "December" },
 ];
 
 export default function DocumentList({ variant = "invoice" }) {
@@ -31,12 +31,12 @@ export default function DocumentList({ variant = "invoice" }) {
         addLabel: "Add payment verification",
       }
     : {
-        title: "Faturat",
+        title: "Invoices",
         endpoint: "get_invoices_list.php",
-        numberLabel: "Nr. i faturës",
+        numberLabel: "Invoice No.",
         folder: "invoices",
         formPath: "/InvoiceForm",
-        addLabel: "Shto faturë",
+        addLabel: "Add invoice",
       };
 
   const [documents, setDocuments] = useState([]);
@@ -84,7 +84,7 @@ export default function DocumentList({ variant = "invoice" }) {
       .get(`${process.env.REACT_APP_API_URL}/${config.endpoint}${queryString ? `?${queryString}` : ""}`)
       .then((res) => {
         if (res.data?.success === false) {
-          setMessage({ text: res.data.error || "Nuk u arrit të ngarkohen dokumentet.", type: "error" });
+          setMessage({ text: res.data.error || "Could not load documents.", type: "error" });
           setDocuments([]);
           return;
         }
@@ -92,7 +92,7 @@ export default function DocumentList({ variant = "invoice" }) {
       })
       .catch(() => {
         setDocuments([]);
-        setMessage({ text: "Nuk u arrit të ngarkohen dokumentet.", type: "error" });
+        setMessage({ text: "Could not load documents.", type: "error" });
       });
   }, [config.endpoint, queryString]);
 
@@ -121,14 +121,14 @@ export default function DocumentList({ variant = "invoice" }) {
               onClick={resetFilters}
               className="rounded border border-[#152259] px-4 py-2 text-[#152259] hover:bg-[#eef2ff]"
             >
-              Pastro filtrat
+              Clear Filters
             </button>
           </div>
         </div>
 
         <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-5">
           <label className="font-medium">
-            Viti
+            Year
             <select
               value={filters.year}
               onChange={(e) => updateFilter("year", e.target.value)}
@@ -144,7 +144,7 @@ export default function DocumentList({ variant = "invoice" }) {
           </label>
 
           <label className="font-medium">
-            Muaji
+            Month
             <select
               value={filters.month}
               onChange={(e) => updateFilter("month", e.target.value)}
@@ -159,27 +159,27 @@ export default function DocumentList({ variant = "invoice" }) {
           </label>
 
           <div className="font-medium">
-            Intervali i datave
+            Date range
             <div className="mt-1 grid grid-cols-2 gap-2 rounded border p-2">
               <input
                 type="date"
                 value={filters.date_from}
                 onChange={(e) => updateFilter("date_from", e.target.value)}
                 className="w-full rounded border px-2 py-1"
-                aria-label="Data nga"
+                aria-label="Date from"
               />
               <input
                 type="date"
                 value={filters.date_to}
                 onChange={(e) => updateFilter("date_to", e.target.value)}
                 className="w-full rounded border px-2 py-1"
-                aria-label="Data deri"
+                aria-label="Date to"
               />
             </div>
           </div>
 
           <label className="font-medium">
-            Kërko emrin
+            Search name
             <input
               type="text"
               value={filters.name}
@@ -190,13 +190,13 @@ export default function DocumentList({ variant = "invoice" }) {
           </label>
 
           <label className="font-medium">
-            Trajnimi
+            Training
             <select
               value={filters.course_id}
               onChange={(e) => updateFilter("course_id", e.target.value)}
               className="mt-1 w-full rounded border px-3 py-2"
             >
-              <option value="">Të gjitha trajnimet</option>
+              <option value="">All trainings</option>
               {courses.map((course) => (
                 <option key={course.id} value={course.id}>
                   {course.title}
@@ -216,10 +216,10 @@ export default function DocumentList({ variant = "invoice" }) {
           <thead className="bg-gray-100">
             <tr>
               <th className="border p-2 text-left">{config.numberLabel}</th>
-              <th className="border p-2 text-left">Data</th>
-              <th className="border p-2 text-left">Studenti</th>
-              <th className="border p-2 text-left">Trajnimi</th>
-              <th className="border p-2 text-left">Përshkrimi</th>
+              <th className="border p-2 text-left">Date</th>
+              <th className="border p-2 text-left">Student</th>
+              <th className="border p-2 text-left">Training</th>
+              <th className="border p-2 text-left">Description</th>
               <th className="border p-2 text-right">Total</th>
               <th className="border p-2 text-left">PDF</th>
             </tr>
@@ -231,7 +231,7 @@ export default function DocumentList({ variant = "invoice" }) {
                   <td className="border p-2">{document.document_number}</td>
                   <td className="border p-2">{document.document_date}</td>
                   <td className="border p-2">{document.student_name || "Manual student"}</td>
-                  <td className="border p-2">{document.course_title || "E paspecifikuar"}</td>
+                  <td className="border p-2">{document.course_title || "Unspecified"}</td>
                   <td className="border p-2">{document.description}</td>
                   <td className="border p-2 text-right">
                     {Number(document.total || 0).toFixed(2)} €
@@ -243,7 +243,7 @@ export default function DocumentList({ variant = "invoice" }) {
                       rel="noreferrer"
                       className="text-[#152259] underline"
                     >
-                      Shiko
+                      View
                     </a>
                   </td>
                 </tr>
@@ -251,7 +251,7 @@ export default function DocumentList({ variant = "invoice" }) {
             ) : (
               <tr>
                 <td colSpan="7" className="p-4 text-center text-gray-500">
-                  Nuk u gjetën dokumente.
+                  No documents found.
                 </td>
               </tr>
             )}
