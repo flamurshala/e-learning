@@ -5,6 +5,10 @@ header("Access-Control-Allow-Headers: *");
 
 include "db.php";
 
+function ensure_admin_role_enum(PDO $conn): void {
+    $conn->exec("ALTER TABLE admins MODIFY role ENUM('admin','superadmin','administrata') NOT NULL DEFAULT 'admin'");
+}
+
 $data = json_decode(file_get_contents('php://input'), true);
 
 $admin_name = isset($data['username']) ? trim($data['username']) : '';
@@ -35,6 +39,8 @@ if (!$admin_name || !$admin_email || !$admin_password || !$admin_role) {
 }
 
 try {
+    ensure_admin_role_enum($conn);
+
     $hashed_password = password_hash($admin_password, PASSWORD_DEFAULT);
 
     $stmt = $conn->prepare("INSERT INTO admins (username, email, password, role) VALUES (?, ?, ?, ?)");

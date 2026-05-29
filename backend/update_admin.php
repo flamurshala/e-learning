@@ -6,6 +6,10 @@ header('Access-Control-Allow-Headers: *');
 include 'db.php';
 include 'audit_helpers.php';
 
+function ensure_admin_role_enum(PDO $conn): void {
+    $conn->exec("ALTER TABLE admins MODIFY role ENUM('admin','superadmin','administrata') NOT NULL DEFAULT 'admin'");
+}
+
 $data = json_decode(file_get_contents('php://input'), true);
 $actor = audit_actor_from_payload($data ?: []);
 
@@ -46,6 +50,8 @@ if (!$username || !$email || !$role) {
 }
 
 try {
+    ensure_admin_role_enum($conn);
+
     if ($password !== '') {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
         $stmt = $conn->prepare("UPDATE admins SET username = ?, email = ?, password = ?, role = ? WHERE id = ?");

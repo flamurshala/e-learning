@@ -72,7 +72,7 @@ function AllAdmins() {
               <th className="border border-gray-300 p-2">Username</th>
               <th className="border border-gray-300 p-2">Email</th>
               <th className="border border-gray-300 p-2">Role</th>
-              {/* <th className="border border-gray-300 p-2">Edit</th> */}
+              <th className="border border-gray-300 p-2">Edit</th>
               <th className="border border-gray-300 p-2">Delete</th>
             </tr>
           </thead>
@@ -82,13 +82,13 @@ function AllAdmins() {
                 <td className="p-2">{admin.username}</td>
                 <td className="p-2">{admin.email}</td>
                 <td className="p-2 capitalize">{admin.role}</td>
-                {/* <td className="p-2">
+                <td className="p-2">
                   <Link to={`/edit-admin/${admin.id}`}>
                     <button className="bg-[#152259] hover:bg-[#152239] text-white py-1 px-3 rounded">
                       Edit
                     </button>
                   </Link>
-                </td> */}
+                </td>
                 <td className="p-2">
                   <button
                     onClick={() => handleDelete(admin.id)}

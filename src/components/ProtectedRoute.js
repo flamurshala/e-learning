@@ -15,7 +15,7 @@ const ProtectedRoute = ({ children, userType, allowedRoles }) => {
     ? "studentId"
     : null;
 
-  useInactivityLogout(currentType === "user", "/AdminLogin");
+  useInactivityLogout(currentType === "user", "/AdminLogin", userRole);
 
   const allowed =
     Array.isArray(userType)
