@@ -3,16 +3,16 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 const paymentOptions = [
-  { value: "All", label: "Pay All" },
-  { value: "Divided", label: "Pay Divided (2 months)" },
-  { value: "POS", label: "Paid by POS" },
   { value: "Cash", label: "Paid by Cash" },
+  { value: "POS", label: "Paid by POS" },
+  { value: "Bank", label: "Bank" },
+  { value: "Divided", label: "Pay Divided (2 months)" },
   { value: "Did not pay", label: "Did not pay" },
   { value: "Free", label: "Free" },
 ];
 
 function isSingleAmountPayment(method) {
-  return method === "All" || method === "POS" || method === "Cash";
+  return method === "Bank" || method === "All" || method === "POS" || method === "Cash";
 }
 
 function EditStudent() {
@@ -221,6 +221,9 @@ function EditStudent() {
                     {option.label}
                   </option>
                 ))}
+                {payments[index] === "All" && (
+                  <option value="All">Pay All (old)</option>
+                )}
               </select>
 
               {isSingleAmountPayment(payments[index]) && (

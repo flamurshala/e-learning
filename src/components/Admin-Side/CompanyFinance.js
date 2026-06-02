@@ -4,6 +4,7 @@ import AdminNav from "./AdminNav";
 import { getCurrentAdminActor, getCurrentAdminQueryString } from "../../utils/currentAdmin";
 
 const expenseCategories = ["Rent", "Utilities", "Supplies", "Marketing", "Maintenance", "Software", "Other"];
+const expensePaymentMethods = ["Bank", "Cash"];
 const expenseCategoryLabels = {
   Rent: "Rent",
   Utilities: "Utilities",
@@ -20,19 +21,14 @@ const salaryStatusLabels = {
   paid: "Paid",
 };
 const paymentMethodLabels = {
-  All: "Full payment",
+  Bank: "Bank",
+  All: "Pay all",
   Divided: "Installment payment",
   POS: "POS",
   Cash: "Cash",
   "Did not pay": "Did not pay",
 };
-const paymentStatusLabels = {
-  paid: "Paid",
-  unpaid: "Unpaid",
-  partially_paid: "Partially paid",
-  cash: "Paid by cash",
-  pos: "Paid by POS",
-};
+const incomePaymentMethodOptions = ["Bank", "All", "Divided", "POS", "Cash", "Did not pay", "Free"];
 const statusOptions = [
   ["paid", "Paid"],
   ["unpaid", "Unpaid"],
@@ -58,6 +54,7 @@ const emptyExpense = {
   description: "",
 };
 const emptySalary = {
+  id: "",
   teacher_id: "",
   course_id: "",
   expected_amount: "",
@@ -76,6 +73,14 @@ function optionalMoney(value) {
 
 function labelFor(map, value) {
   return map[value] || value || "-";
+}
+
+function incomeAmountDisplay(row) {
+  if (row.payment_method === "Divided") {
+    return `${money(row.amount_month1)} + ${money(row.amount_month2)}`;
+  }
+
+  return money(row.payment_amount);
 }
 
 function PaginationControls({ pagination, onPageChange }) {
@@ -160,6 +165,7 @@ export default function CompanyFinance() {
     student: "",
   });
   const [expenseFilters, setExpenseFilters] = useState({
+    title: "",
     category: "",
     amount_min: "",
     amount_max: "",
@@ -326,8 +332,12 @@ export default function CompanyFinance() {
     resetPages();
     setTopFilters({ date_from: "", date_to: "", course_id: "", status: "" });
     setIncomeFilters({ student: "" });
-    setExpenseFilters({ category: "", amount_min: "", amount_max: "" });
+    setExpenseFilters({ title: "", category: "", amount_min: "", amount_max: "" });
     setSalaryFilters({ teacher_id: "" });
+  };
+  const changeTab = (tab) => {
+    setActiveTab(tab);
+    clearFilters();
   };
   const updateSalaryForm = (key, value) => {
     setSalaryForm((prev) => {
@@ -414,6 +424,41 @@ export default function CompanyFinance() {
       .catch(() => setMessage({ text: "Could not save the teacher salary payment.", type: "error" }));
   };
 
+  const editSalaryPayment = (payment) => {
+    setSalaryForm({
+      id: payment.id || "",
+      teacher_id: payment.teacher_id || "",
+      course_id: payment.course_id || "",
+      expected_amount: payment.expected_amount || "",
+      paid_amount: payment.paid_amount || "",
+      payment_date: payment.payment_date || new Date().toISOString().slice(0, 10),
+      notes: payment.notes || "",
+    });
+    setActiveTab("salaries");
+  };
+
+  const deleteSalaryPayment = (id) => {
+    if (!window.confirm("Delete this teacher salary payment?")) return;
+    setMessage({ text: "", type: "" });
+
+    axios
+      .post(`${process.env.REACT_APP_API_URL}/delete_teacher_salary_payment.php`, {
+        id,
+        actor: getCurrentAdminActor(),
+      })
+      .then((res) => {
+        if (res.data?.success) {
+          setMessage({ text: "Teacher salary payment deleted.", type: "success" });
+          if (String(salaryForm.id) === String(id)) setSalaryForm(emptySalary);
+          loadSalaryPayments();
+          loadSummary();
+        } else {
+          setMessage({ text: res.data?.error || "Could not delete the teacher salary payment.", type: "error" });
+        }
+      })
+      .catch(() => setMessage({ text: "Could not delete the teacher salary payment.", type: "error" }));
+  };
+
   return (
     <div className="flex gap-4">
       <AdminNav />
@@ -433,17 +478,29 @@ export default function CompanyFinance() {
                 <option key={`${course.id}-${course.teacher_id || "none"}`} value={course.id}>{course.title}</option>
               ))}
             </select>
-            <select value={topFilters.status} onChange={(e) => updateTopFilter("status", e.target.value)} className="rounded border px-3 py-2">
-              <option value="">All statuses</option>
-              {statusOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-            </select>
-            <button type="button" onClick={clearFilters} className="rounded border px-4 py-2">Clear Filters</button>
-
+            {activeTab !== "expenses" && (
+              <select value={topFilters.status} onChange={(e) => updateTopFilter("status", e.target.value)} className="rounded border px-3 py-2">
+                {activeTab === "income" ? (
+                  <>
+                    <option value="">All payment methods</option>
+                    {incomePaymentMethodOptions.map((method) => (
+                      <option key={method} value={method}>{labelFor(paymentMethodLabels, method)}</option>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    <option value="">All statuses</option>
+                    {statusOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                  </>
+                )}
+              </select>
+            )}
             {activeTab === "income" && (
               <input placeholder="Student name" value={incomeFilters.student} onChange={(e) => updateIncomeFilter("student", e.target.value)} className="rounded border px-3 py-2" />
             )}
             {activeTab === "expenses" && (
               <>
+                <input placeholder="Search by title" value={expenseFilters.title} onChange={(e) => updateExpenseFilter("title", e.target.value)} className="rounded border px-3 py-2" />
                 <select value={expenseFilters.category} onChange={(e) => updateExpenseFilter("category", e.target.value)} className="rounded border px-3 py-2">
                   <option value="">All categories</option>
                   {expenseCategories.map((category) => <option key={category} value={category}>{labelFor(expenseCategoryLabels, category)}</option>)}
@@ -458,6 +515,7 @@ export default function CompanyFinance() {
                 {teachers.map((teacher) => <option key={teacher.id} value={teacher.id}>{teacher.name}</option>)}
               </select>
             )}
+            <button type="button" onClick={clearFilters} className="rounded border px-4 py-2">Clear Filters</button>
           </div>
         </div>
 
@@ -497,7 +555,7 @@ export default function CompanyFinance() {
             <button
               key={key}
               type="button"
-              onClick={() => setActiveTab(key)}
+              onClick={() => changeTab(key)}
               className={`rounded border px-4 py-2 ${
                 activeTab === key ? "border-[#152259] bg-[#152259] text-white" : "border-gray-300 bg-white"
               }`}
@@ -518,7 +576,6 @@ export default function CompanyFinance() {
                   <th className="border p-2 text-left">Course</th>
                   <th className="border p-2 text-left">Date</th>
                   <th className="border p-2 text-left">Method</th>
-                  <th className="border p-2 text-left">Status</th>
                   <th className="border p-2 text-right">Amount</th>
                 </tr>
               </thead>
@@ -529,11 +586,10 @@ export default function CompanyFinance() {
                     <td className="border p-2">{row.course_title}</td>
                     <td className="border p-2">{row.payment_date}</td>
                     <td className="border p-2">{labelFor(paymentMethodLabels, row.payment_method)}</td>
-                    <td className="border p-2">{labelFor(paymentStatusLabels, row.payment_status)}</td>
-                    <td className="border p-2 text-right">{money(row.payment_amount)}</td>
+                    <td className="border p-2 text-right">{incomeAmountDisplay(row)}</td>
                   </tr>
                 ))}
-                {incomeRows.length === 0 && <tr><td colSpan="6" className="p-4 text-center text-gray-500">No income found.</td></tr>}
+                {incomeRows.length === 0 && <tr><td colSpan="5" className="p-4 text-center text-gray-500">No income found.</td></tr>}
               </tbody>
             </table>
             <PaginationControls pagination={incomePagination} onPageChange={setIncomePage} />
@@ -551,7 +607,25 @@ export default function CompanyFinance() {
               </select>
               <input type="number" min="0" step="0.01" placeholder="Amount" value={expenseForm.amount} onChange={(e) => updateExpenseForm("amount", e.target.value)} className="rounded border px-3 py-2" required />
               <input type="date" value={expenseForm.expense_date} onChange={(e) => updateExpenseForm("expense_date", e.target.value)} className="rounded border px-3 py-2" required />
-              <input placeholder="Payment method" value={expenseForm.payment_method} onChange={(e) => updateExpenseForm("payment_method", e.target.value)} className="rounded border px-3 py-2" />
+              <div className="rounded border px-3 py-2">
+                <span className="mb-2 block text-sm font-medium text-gray-700">Payment method</span>
+                <div className="flex gap-2">
+                  {expensePaymentMethods.map((method) => (
+                    <button
+                      key={method}
+                      type="button"
+                      onClick={() => updateExpenseForm("payment_method", method)}
+                      className={`rounded border px-4 py-1 text-sm font-medium ${
+                        expenseForm.payment_method === method
+                          ? "border-[#152259] bg-[#152259] text-white"
+                          : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      {method}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <textarea placeholder="Description / notes" value={expenseForm.description} onChange={(e) => updateExpenseForm("description", e.target.value)} className="rounded border px-3 py-2 md:col-span-2" />
               <div className="flex gap-2 md:col-span-2">
                 <button className="rounded bg-[#152259] px-4 py-2 text-white">{expenseForm.id ? "Update expense" : "Create expense"}</button>
@@ -568,7 +642,14 @@ export default function CompanyFinance() {
                     <td className="border p-2">{expense.expense_date}</td>
                     <td className="border p-2">{labelFor(expenseCategoryLabels, expense.category)}</td>
                     <td className="border p-2">{expense.bill_number || "-"}</td>
-                    <td className="border p-2 text-right">{money(expense.amount)}</td>
+                    <td className="border p-2 text-right">
+                      {money(expense.amount)}
+                      {expense.payment_method ? (
+                        <span className="ml-1 text-sm text-gray-600">
+                          ({expense.payment_method})
+                        </span>
+                      ) : null}
+                    </td>
                     <td className="border p-2"><button onClick={() => editExpense(expense)} className="mr-2 rounded bg-[#152259] px-3 py-1 text-white">Edit</button><button onClick={() => deleteExpense(expense.id)} className="rounded bg-red-600 px-3 py-1 text-white">Delete</button></td>
                   </tr>
                 ))}
@@ -605,11 +686,20 @@ export default function CompanyFinance() {
               <input type="number" min="0" step="0.01" placeholder="Paid amount" value={salaryForm.paid_amount} onChange={(e) => updateSalaryForm("paid_amount", e.target.value)} className="rounded border px-3 py-2" required />
               <input type="date" value={salaryForm.payment_date} onChange={(e) => updateSalaryForm("payment_date", e.target.value)} className="rounded border px-3 py-2" required />
               <textarea placeholder="Notes" value={salaryForm.notes} onChange={(e) => updateSalaryForm("notes", e.target.value)} className="rounded border px-3 py-2 md:col-span-2" />
-              <button className="w-fit rounded bg-[#152259] px-4 py-2 text-white md:col-span-2">Register salary payment</button>
+              <div className="flex gap-2 md:col-span-2">
+                <button className="w-fit rounded bg-[#152259] px-4 py-2 text-white">
+                  {salaryForm.id ? "Update salary payment" : "Register salary payment"}
+                </button>
+                {salaryForm.id && (
+                  <button type="button" onClick={() => setSalaryForm(emptySalary)} className="rounded border px-4 py-2">
+                    Cancel edit
+                  </button>
+                )}
+              </div>
             </form>
             <p className="mb-2 font-semibold">Filtered paid salaries: {money(salaryTotal)}</p>
             <table className="w-full border-collapse border">
-              <thead className="bg-gray-100"><tr><th className="border p-2 text-left">Professor</th><th className="border p-2 text-left">Course</th><th className="border p-2">Date</th><th className="border p-2 text-right">Expected</th><th className="border p-2 text-right">Paid</th><th className="border p-2">Status</th></tr></thead>
+              <thead className="bg-gray-100"><tr><th className="border p-2 text-left">Professor</th><th className="border p-2 text-left">Course</th><th className="border p-2">Date</th><th className="border p-2 text-right">Expected</th><th className="border p-2 text-right">Paid</th><th className="border p-2">Status</th><th className="border p-2">Actions</th></tr></thead>
               <tbody>
                 {salaryPayments.map((payment) => (
                   <tr key={payment.id}>
@@ -619,9 +709,13 @@ export default function CompanyFinance() {
                     <td className="border p-2 text-right">{optionalMoney(payment.expected_amount)}</td>
                     <td className="border p-2 text-right">{money(payment.paid_amount)}</td>
                     <td className="border p-2">{labelFor(salaryStatusLabels, payment.status)}</td>
+                    <td className="border p-2">
+                      <button onClick={() => editSalaryPayment(payment)} className="mr-2 rounded bg-[#152259] px-3 py-1 text-white">Edit</button>
+                      <button onClick={() => deleteSalaryPayment(payment.id)} className="rounded bg-red-600 px-3 py-1 text-white">Delete</button>
+                    </td>
                   </tr>
                 ))}
-                {salaryPayments.length === 0 && <tr><td colSpan="6" className="p-4 text-center text-gray-500">No salary payments found.</td></tr>}
+                {salaryPayments.length === 0 && <tr><td colSpan="7" className="p-4 text-center text-gray-500">No salary payments found.</td></tr>}
               </tbody>
             </table>
             <PaginationControls pagination={salaryPagination} onPageChange={setSalaryPage} />

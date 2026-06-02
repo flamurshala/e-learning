@@ -108,7 +108,7 @@ function ensure_finance_tables(PDO $conn): void {
 function finance_income_amount_sql(string $alias = "sp"): string {
     return "
         CASE
-            WHEN {$alias}.payment_method IN ('All','POS','Cash') THEN COALESCE({$alias}.amount_all, 0)
+            WHEN {$alias}.payment_method IN ('Bank','All','POS','Cash') THEN COALESCE({$alias}.amount_all, 0)
             WHEN {$alias}.payment_method = 'Divided' THEN COALESCE({$alias}.amount_month1, 0) + COALESCE({$alias}.amount_month2, 0)
             ELSE 0
         END
@@ -138,14 +138,9 @@ function finance_totals(PDO $conn, array $filters = []): array {
         $incomeWhere[] = "sp.course_id = ?";
         $incomeParams[] = $courseId;
     }
-    if ($status === "paid") {
-        $incomeWhere[] = "({$incomeAmount}) > 0";
-    } elseif ($status === "unpaid") {
-        $incomeWhere[] = "({$incomeAmount}) <= 0";
-    } elseif ($status === "cash") {
-        $incomeWhere[] = "sp.payment_method = 'Cash'";
-    } elseif ($status === "pos") {
-        $incomeWhere[] = "sp.payment_method = 'POS'";
+    if (in_array($status, ["Bank", "All", "Divided", "POS", "Cash", "Did not pay", "Free"], true)) {
+        $incomeWhere[] = "sp.payment_method = ?";
+        $incomeParams[] = $status;
     }
     $incomeSql = "SELECT COALESCE(SUM({$incomeAmount}), 0) FROM student_payments sp";
     if ($incomeWhere) {

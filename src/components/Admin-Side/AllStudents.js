@@ -175,8 +175,10 @@ function AllStudents() {
                       {student.courses.map((c, idx) => (
                         <li key={idx} className="mb-1">
                           <strong>{c.title}:</strong>{" "}
-                          {c.payment_method === "All"
-                            ? `${c.amount_all} €`
+                          {c.payment_method === "Bank"
+                            ? `Bank: ${c.amount_all} EUR`
+                            : c.payment_method === "All"
+                            ? `Pay all: ${c.amount_all} EUR`
                             : c.payment_method === "Divided"
                             ? `${c.amount_month1} € + ${c.amount_month2} €`
                             : c.payment_method === "POS" || c.payment_method === "Cash"

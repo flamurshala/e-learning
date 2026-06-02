@@ -11,8 +11,9 @@ function ProfessorCompletedCourses() {
 
   useEffect(() => {
     document.title = "Completed Courses - Tectigon Academy";
+    const professorId = localStorage.getItem("professorId");
 
-    fetch(`${process.env.REACT_APP_API_URL}/get_completed_courses.php`)
+    fetch(`${process.env.REACT_APP_API_URL}/get_completed_courses.php?professor_id=${professorId || ""}`)
       .then((res) => {
         if (!res.ok) throw new Error("Network response was not ok");
         return res.json();

@@ -3,16 +3,16 @@ import { useLocation, useNavigate } from "react-router-dom";
 import AdminNav from "./AdminNav";
 
 const paymentOptions = [
-  { value: "All", label: "Pay all" },
-  { value: "Divided", label: "Pay divided" },
-  { value: "POS", label: "Paid by POS" },
   { value: "Cash", label: "Paid by cash" },
+  { value: "POS", label: "Paid by POS" },
+  { value: "Bank", label: "Bank" },
+  { value: "Divided", label: "Pay divided" },
   { value: "Did not pay", label: "Did not pay" },
   { value: "Free", label: "Free" },
 ];
 
 function isSingleAmountPayment(method) {
-  return method === "All" || method === "POS" || method === "Cash";
+  return method === "Bank" || method === "All" || method === "POS" || method === "Cash";
 }
 
 function getPaidAmount(method, allAmount, month1Amount, month2Amount) {

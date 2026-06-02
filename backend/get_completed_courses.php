@@ -5,6 +5,9 @@ header("Content-Type: application/json");
 include "db.php";
 
 try {
+    $professorId = isset($_GET['professor_id']) ? (int)$_GET['professor_id'] : 0;
+    $professorWhere = $professorId > 0 ? "AND (c.professor_id = :professor_id OR cp.professor_id = :professor_id)" : "";
+
     // Query to get completed courses with professor name and enrolled students
     $stmt = $conn->prepare("
         SELECT 
@@ -18,13 +21,18 @@ try {
             GROUP_CONCAT(s.name SEPARATOR ', ') AS students
         FROM courses c
         LEFT JOIN professors p ON c.professor_id = p.id
+        LEFT JOIN course_professor cp ON cp.course_id = c.id
         LEFT JOIN course_student sc ON sc.course_id = c.id
         LEFT JOIN students s ON s.id = sc.student_id
         WHERE c.completed = 1
+        {$professorWhere}
         GROUP BY c.id
         ORDER BY c.created_at DESC
     ");
 
+    if ($professorId > 0) {
+        $stmt->bindValue(':professor_id', $professorId, PDO::PARAM_INT);
+    }
     $stmt->execute();
     $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

@@ -20,6 +20,7 @@ try {
     $params = [];
     $dateFrom = trim($_GET["date_from"] ?? "");
     $dateTo = trim($_GET["date_to"] ?? "");
+    $title = trim($_GET["title"] ?? "");
     $category = trim($_GET["category"] ?? "");
     $amountMin = trim($_GET["amount_min"] ?? "");
     $amountMax = trim($_GET["amount_max"] ?? "");
@@ -38,6 +39,10 @@ try {
     if ($category !== "") {
         $where[] = "category = ?";
         $params[] = $category;
+    }
+    if ($title !== "") {
+        $where[] = "e.title LIKE ?";
+        $params[] = "%" . $title . "%";
     }
     if ($amountMin !== "") {
         $where[] = "amount >= ?";

@@ -45,14 +45,9 @@ try {
         $where[] = "TRIM(CONCAT(COALESCE(s.name, ''), ' ', COALESCE(s.surname, ''))) LIKE ?";
         $params[] = "%" . $student . "%";
     }
-    if ($status === "paid") {
-        $where[] = "({$amountSql}) > 0";
-    } elseif ($status === "unpaid") {
-        $where[] = "({$amountSql}) <= 0";
-    } elseif ($status === "cash") {
-        $where[] = "sp.payment_method = 'Cash'";
-    } elseif ($status === "pos") {
-        $where[] = "sp.payment_method = 'POS'";
+    if (in_array($status, ["Bank", "All", "Divided", "POS", "Cash", "Did not pay", "Free"], true)) {
+        $where[] = "sp.payment_method = ?";
+        $params[] = $status;
     }
 
     $fromSql = "
@@ -79,8 +74,10 @@ try {
             TRIM(CONCAT(COALESCE(s.name, ''), ' ', COALESCE(s.surname, ''))) AS student_name,
             c.title AS course_title,
             sp.payment_method,
+            sp.amount_all,
+            sp.amount_month1,
+            sp.amount_month2,
             {$amountSql} AS payment_amount,
-            CASE WHEN ({$amountSql}) > 0 THEN 'paid' ELSE 'unpaid' END AS payment_status,
             DATE(sp.created_at) AS payment_date,
             sp.created_at
         {$fromSql}

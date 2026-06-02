@@ -18,6 +18,7 @@ try {
     $actor = finance_actor($conn, $data);
     ensure_finance_tables($conn);
 
+    $paymentId = isset($data["id"]) ? (int)$data["id"] : 0;
     $teacherId = isset($data["teacher_id"]) ? (int)$data["teacher_id"] : 0;
     $courseId = isset($data["course_id"]) ? (int)$data["course_id"] : 0;
     $expectedRaw = trim((string)($data["expected_amount"] ?? ""));
@@ -56,19 +57,34 @@ try {
         exit;
     }
 
+    if ($paymentId > 0) {
+        $existingPaymentStmt = $conn->prepare("SELECT id FROM teacher_salary_payments WHERE id = ? LIMIT 1");
+        $existingPaymentStmt->execute([$paymentId]);
+        if (!$existingPaymentStmt->fetchColumn()) {
+            echo json_encode(["success" => false, "error" => "Teacher salary payment not found."]);
+            exit;
+        }
+    }
+
     $expectedStmt = $conn->prepare("
         SELECT expected_amount
         FROM teacher_salary_payments
         WHERE teacher_id = ? AND course_id = ? AND expected_amount IS NOT NULL
+          AND (? = 0 OR id <> ?)
         ORDER BY id DESC
         LIMIT 1
     ");
-    $expectedStmt->execute([$teacherId, $courseId]);
+    $expectedStmt->execute([$teacherId, $courseId, $paymentId, $paymentId]);
     $previousExpected = $expectedStmt->fetchColumn();
     $effectiveExpected = $expectedAmount ?? ($previousExpected !== false ? (float)$previousExpected : null);
 
-    $existingStmt = $conn->prepare("SELECT COALESCE(SUM(paid_amount), 0) FROM teacher_salary_payments WHERE teacher_id = ? AND course_id = ?");
-    $existingStmt->execute([$teacherId, $courseId]);
+    $existingStmt = $conn->prepare("
+        SELECT COALESCE(SUM(paid_amount), 0)
+        FROM teacher_salary_payments
+        WHERE teacher_id = ? AND course_id = ?
+          AND (? = 0 OR id <> ?)
+    ");
+    $existingStmt->execute([$teacherId, $courseId, $paymentId, $paymentId]);
     $alreadyPaid = (float)$existingStmt->fetchColumn();
     $totalPaidAfter = $alreadyPaid + $paidAmount;
 
@@ -90,34 +106,59 @@ try {
         }
     }
 
-    $stmt = $conn->prepare("
-        INSERT INTO teacher_salary_payments
-        (teacher_id, course_id, expected_amount, paid_amount, remaining_amount, status, payment_date, notes, created_by, updated_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ");
-    $stmt->execute([
-        $teacherId,
-        $courseId,
-        $effectiveExpected,
-        $paidAmount,
-        $remaining,
-        $status,
-        $paymentDate,
-        $notes ?: null,
-        $actor["id"],
-        $actor["id"],
-    ]);
-    $paymentId = (int)$conn->lastInsertId();
+    if ($paymentId > 0) {
+        $stmt = $conn->prepare("
+            UPDATE teacher_salary_payments
+            SET teacher_id = ?, course_id = ?, expected_amount = ?, paid_amount = ?,
+                remaining_amount = ?, status = ?, payment_date = ?, notes = ?, updated_by = ?
+            WHERE id = ?
+        ");
+        $stmt->execute([
+            $teacherId,
+            $courseId,
+            $effectiveExpected,
+            $paidAmount,
+            $remaining,
+            $status,
+            $paymentDate,
+            $notes ?: null,
+            $actor["id"],
+            $paymentId,
+        ]);
+        $auditAction = "teacher_salary_payment_updated";
+        $auditDescription = "Updated teacher salary payment for {$teacherName} / {$courseTitle}";
+    } else {
+        $stmt = $conn->prepare("
+            INSERT INTO teacher_salary_payments
+            (teacher_id, course_id, expected_amount, paid_amount, remaining_amount, status, payment_date, notes, created_by, updated_by)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        $stmt->execute([
+            $teacherId,
+            $courseId,
+            $effectiveExpected,
+            $paidAmount,
+            $remaining,
+            $status,
+            $paymentDate,
+            $notes ?: null,
+            $actor["id"],
+            $actor["id"],
+        ]);
+        $paymentId = (int)$conn->lastInsertId();
+        $auditAction = "teacher_salary_payment_created";
+        $auditDescription = "Registered teacher salary payment for {$teacherName} / {$courseTitle}";
+    }
 
     record_audit_log(
         $conn,
         $actor,
         "teacher_salaries",
-        "teacher_salary_payment_created",
+        $auditAction,
         "teacher_salary_payment",
         $paymentId,
         $teacherName,
-        "Registered teacher salary payment for {$teacherName} / {$courseTitle}",
+        $auditDescription,
         [
             "teacher_id" => $teacherId,
             "course_id" => $courseId,

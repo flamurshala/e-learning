@@ -1,6 +1,6 @@
 <?php
 /**
- * Creates student_waitlist table and extends payment_method enum for POS/Cash/unpaid/free.
+ * Creates student_waitlist table and extends payment_method enum for bank/POS/cash/unpaid/free.
  */
 include "db.php";
 
@@ -39,7 +39,7 @@ foreach (
     ] as $table => $key
 ) {
     try {
-        $conn->exec("ALTER TABLE `$table` MODIFY `payment_method` ENUM('All','Divided','POS','Cash','Did not pay','Free') NOT NULL");
+        $conn->exec("ALTER TABLE `$table` MODIFY `payment_method` ENUM('Bank','All','Divided','POS','Cash','Did not pay','Free') NOT NULL");
         $out[$key] = true;
     } catch (PDOException $e) {
         $out[$key . "_error"] = $e->getMessage();

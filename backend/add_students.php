@@ -25,7 +25,7 @@ try {
     $amountAll = $data['amountPaidAll'] ?? [];
     $amountMonth1 = $data['amountPaidMonth1'] ?? [];
     $amountMonth2 = $data['amountPaidMonth2'] ?? [];
-    $allowedPaymentMethods = ['All', 'Divided', 'POS', 'Cash', 'Did not pay', 'Free'];
+    $allowedPaymentMethods = ['Bank', 'All', 'Divided', 'POS', 'Cash', 'Did not pay', 'Free'];
 
     if (!$name || !$surname || !$phone  || !$email || empty($courses)) {
         echo json_encode(['success' => false, 'error' => 'Missing fields or courses']);
@@ -34,7 +34,7 @@ try {
 
     foreach (['student_payments', 'student_course_payments'] as $paymentTable) {
         try {
-            $conn->exec("ALTER TABLE `$paymentTable` MODIFY `payment_method` ENUM('All','Divided','POS','Cash','Did not pay','Free') NOT NULL");
+            $conn->exec("ALTER TABLE `$paymentTable` MODIFY `payment_method` ENUM('Bank','All','Divided','POS','Cash','Did not pay','Free') NOT NULL");
         } catch (PDOException $ignored) {
             // Keep registration working even if an older optional table is missing.
         }
@@ -111,7 +111,7 @@ try {
             $student_id,
             $courseId,
             $paymentMethod,
-            in_array($paymentMethod, ['All', 'POS', 'Cash'], true) ? $all : null,
+            in_array($paymentMethod, ['Bank', 'All', 'POS', 'Cash'], true) ? $all : null,
             $paymentMethod === 'Divided' ? $m1 : null,
             $paymentMethod === 'Divided' ? $m2 : null,
         ]);
