@@ -24,6 +24,7 @@ export default function Waitlist() {
   const [filterName, setFilterName] = useState("");
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   const [removingIds, setRemovingIds] = useState(() => new Set());
+  const [cancelingIds, setCancelingIds] = useState(() => new Set());
   const [waitlistMsg, setWaitlistMsg] = useState("");
   const [waitlistMsgType, setWaitlistMsgType] = useState("");
 
@@ -194,6 +195,55 @@ export default function Waitlist() {
       })
       .finally(() => {
         setRemovingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(entry.id);
+          return next;
+        });
+      });
+  };
+
+  const cancelWaitlistEntry = (entry) => {
+    const fullName = `${entry.name || ""} ${entry.surname || ""}`.trim();
+    if (
+      !window.confirm(
+        `Save ${fullName || "this student"} to the canceled list and remove them from the waitlist?`
+      )
+    ) {
+      return;
+    }
+
+    setWaitlistMsg("");
+    setWaitlistMsgType("");
+    setCancelingIds((prev) => new Set(prev).add(entry.id));
+
+    fetch(`${api}/cancel_waitlist_student.php`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: entry.id, actor: getCurrentAdminActor() }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.success) {
+          setWaitlistMsg(data.error || "Could not save the student to the canceled list.");
+          setWaitlistMsgType("error");
+          return;
+        }
+
+        setRows((prev) => prev.filter((row) => row.id !== entry.id));
+        setSelectedIds((prev) => {
+          const next = new Set(prev);
+          next.delete(entry.id);
+          return next;
+        });
+        setWaitlistMsg(`${fullName || "Student"} was saved to the canceled list.`);
+        setWaitlistMsgType("success");
+      })
+      .catch(() => {
+        setWaitlistMsg("Network error while saving the student to the canceled list.");
+        setWaitlistMsgType("error");
+      })
+      .finally(() => {
+        setCancelingIds((prev) => {
           const next = new Set(prev);
           next.delete(entry.id);
           return next;
@@ -482,6 +532,14 @@ export default function Waitlist() {
                             onClick={() => goRegister(r)}
                           >
                            Regjistro
+                          </button>
+                          <button
+                            type="button"
+                            className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-xs font-semibold disabled:opacity-50"
+                            disabled={cancelingIds.has(r.id)}
+                            onClick={() => cancelWaitlistEntry(r)}
+                          >
+                            {cancelingIds.has(r.id) ? "Saving..." : "Anuluar"}
                           </button>
                           <button
                             type="button"

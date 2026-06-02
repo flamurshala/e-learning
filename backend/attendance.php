@@ -79,10 +79,11 @@ try {
         "UPDATE training_sessions
          SET submitted_at = UTC_TIMESTAMP(),
              session_date = UTC_TIMESTAMP(),
-             submitted_after_seconds = ?
+             submitted_after_seconds = ?,
+             submitted_by_professor_id = ?
          WHERE id = ?"
     );
-    $stmtUpdate->execute([$submitted_after_seconds, $session_id]);
+    $stmtUpdate->execute([$submitted_after_seconds, $professor_id, $session_id]);
 
     // Notify admin if your condition is met (left as-is)
     if ($course_id && $submittedSessionsBefore === $totalSessions - 4) {
@@ -105,7 +106,8 @@ try {
     $stmtTs = $conn->prepare(
         "SELECT
             DATE_FORMAT(submitted_at, '%Y-%m-%d %H:%i:%s') AS submitted_at,
-            DATE_FORMAT(session_date, '%Y-%m-%d %H:%i:%s') AS session_date
+            DATE_FORMAT(session_date, '%Y-%m-%d %H:%i:%s') AS session_date,
+            submitted_by_professor_id
          FROM training_sessions WHERE id = ?"
     );
     $stmtTs->execute([$session_id]);

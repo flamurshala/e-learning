@@ -100,11 +100,18 @@ function AllStudents() {
           <h1 className="text-2xl font-semibold">All Students</h1>
           <div className="flex gap-2">
             {canAccessWaitlist && (
-              <Link to="/Waitlist">
-                <button className="bg-white border border-[#152259] text-[#152259] hover:bg-gray-100 px-4 py-2 rounded">
-                  Student Waitlist
-                </button>
-              </Link>
+              <>
+                <Link to="/Waitlist">
+                  <button className="bg-white border border-[#152259] text-[#152259] hover:bg-gray-100 px-4 py-2 rounded">
+                    Student Waitlist
+                  </button>
+                </Link>
+                <Link to="/CanceledStudents">
+                  <button className="bg-white border border-[#152259] text-[#152259] hover:bg-gray-100 px-4 py-2 rounded">
+                    Canceled Students
+                  </button>
+                </Link>
+              </>
             )}
             <Link to="/AddUsers">
               <button className="bg-[#152259] hover:bg-[#152239] text-white px-4 py-2 rounded">

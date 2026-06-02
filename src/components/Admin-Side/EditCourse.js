@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AdminNav from "./AdminNav";
-import { color } from "framer-motion";
 
 function EditCourse() {
   const { id } = useParams();
@@ -10,14 +9,11 @@ function EditCourse() {
   const [course, setCourse] = useState({
     title: "",
     description: "",
-    professor_id: "",
+    professor_ids: [],
     training_hours: "",
-    student_ids: [],
   });
 
   const [professors, setProfessors] = useState([]);
-  const [students, setStudents] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
   const [originalTrainingHours, setOriginalTrainingHours] = useState(0); // 🆕
 
   useEffect(() => {
@@ -30,9 +26,10 @@ function EditCourse() {
         setCourse({
           title: data.title,
           description: data.description,
-          professor_id: data.professor_id,
+          professor_ids:
+            data.professor_ids?.map(String) ||
+            (data.professor_id ? [String(data.professor_id)] : []),
           training_hours: data.training_hours || "",
-          student_ids: data.student_ids?.map(String) || [],
         });
         setOriginalTrainingHours(Number(data.training_hours) || 0); // 🆕
       });
@@ -41,26 +38,21 @@ function EditCourse() {
     fetch(`${process.env.REACT_APP_API_URL}/get_professors.php`)
       .then((res) => res.json())
       .then(setProfessors);
-
-    // Get all students
-    fetch(`${process.env.REACT_APP_API_URL}/get_students.php`)
-      .then((res) => res.json())
-      .then(setStudents);
   }, [id]);
 
   const handleChange = (e) => {
     setCourse({ ...course, [e.target.name]: e.target.value });
   };
 
-  const handleStudentCheckboxChange = (e) => {
-    const id = e.target.value;
+  const handleProfessorCheckboxChange = (e) => {
+    const professorId = e.target.value;
     const checked = e.target.checked;
 
     setCourse((prev) => ({
       ...prev,
-      student_ids: checked
-        ? [...prev.student_ids, id]
-        : prev.student_ids.filter((sid) => sid !== id),
+      professor_ids: checked
+        ? [...prev.professor_ids, professorId]
+        : prev.professor_ids.filter((pid) => pid !== professorId),
     }));
   };
 
@@ -68,6 +60,11 @@ function EditCourse() {
     e.preventDefault();
 
     const newHours = Number(course.training_hours);
+
+    if (course.professor_ids.length === 0) {
+      alert("Please select at least one professor.");
+      return;
+    }
 
     // If reducing session count, show a warning
     if (newHours < originalTrainingHours) {
@@ -82,7 +79,11 @@ function EditCourse() {
     fetch(`${process.env.REACT_APP_API_URL}/update_course.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...course, id }),
+      body: JSON.stringify({
+        ...course,
+        id,
+        professor_id: course.professor_ids[0],
+      }),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -96,14 +97,6 @@ function EditCourse() {
   };
 
   // 🔧 Now searches by name, surname, and "name surname"
-  const filteredStudents = students.filter((s) => {
-    const name = (s.name || "").toLowerCase();
-    const surname = (s.surname || "").toLowerCase();
-    const full = `${name} ${surname}`.trim();
-    const term = (searchTerm || "").toLowerCase();
-    return name.includes(term) || surname.includes(term) || full.includes(term);
-  });
-
   return (
     <div className="flex gap-5">
       <AdminNav />
@@ -136,19 +129,26 @@ function EditCourse() {
             className="w-full border p-2 rounded"
           ></textarea>
 
-          <select
-            name="professor_id"
-            value={course.professor_id}
-            onChange={handleChange}
-            className="w-full border p-2 rounded"
-          >
-            <option value="">-- Select Professor --</option>
-            {professors.map((prof) => (
-              <option key={prof.id} value={prof.id}>
-                {prof.name}
-              </option>
-            ))}
-          </select>
+          <div>
+            <p className="font-semibold mb-2">Select Professors:</p>
+            <div className="max-h-48 overflow-y-auto border p-2 rounded">
+              {professors.length > 0 ? (
+                professors.map((prof) => (
+                  <label key={prof.id} className="flex items-center gap-2 mb-1">
+                    <input
+                      type="checkbox"
+                      value={String(prof.id)}
+                      checked={course.professor_ids.includes(String(prof.id))}
+                      onChange={handleProfessorCheckboxChange}
+                    />
+                    <span>{prof.name}</span>
+                  </label>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No professors found.</p>
+              )}
+            </div>
+          </div>
        
             
           <input
@@ -161,35 +161,6 @@ function EditCourse() {
             className="w-full border p-2 rounded"
           />
           <label className="text-gray-400">(Add 3 extra hours for informative session and the extra 2 at the end)</label>
-
-          <div>
-            <p className="font-semibold">Select Students:</p>
-            <input
-              type="text"
-              placeholder="Search students..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full border p-2 mb-2 rounded"
-            />
-
-            <div className="max-h-48 overflow-y-auto border p-2 rounded">
-              {filteredStudents.map((s) => {
-                const label = [s.name, s.surname].filter(Boolean).join(" ");
-                return (
-                  <label key={s.id} className="block">
-                    <input
-                      type="checkbox"
-                      value={s.id}
-                      checked={course.student_ids.includes(String(s.id))}
-                      onChange={handleStudentCheckboxChange}
-                      className="mr-2"
-                    />
-                    {label}
-                  </label>
-                );
-              })}
-            </div>
-          </div>
 
           <button
             type="submit"

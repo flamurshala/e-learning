@@ -19,8 +19,26 @@ $data = json_decode(file_get_contents("php://input"), true);
 $course_id    = isset($data['id']) ? (int)$data['id'] : 0;
 $title        = trim($data['title'] ?? '');
 $description  = trim($data['description'] ?? '');
-$professor_id = isset($data['professor_id']) ? (int)$data['professor_id'] : 0;
-$student_ids  = is_array($data['student_ids'] ?? null) ? $data['student_ids'] : [];
+$professor_ids = [];
+if (isset($data['professor_ids']) && is_array($data['professor_ids'])) {
+  foreach ($data['professor_ids'] as $pid) {
+    $pid = (int)$pid;
+    if ($pid > 0 && !in_array($pid, $professor_ids, true)) {
+      $professor_ids[] = $pid;
+    }
+  }
+}
+
+if (empty($professor_ids) && isset($data['professor_id'])) {
+  $legacy_professor_id = (int)$data['professor_id'];
+  if ($legacy_professor_id > 0) {
+    $professor_ids[] = $legacy_professor_id;
+  }
+}
+
+$professor_id = $professor_ids[0] ?? 0;
+$should_sync_students = array_key_exists('student_ids', $data);
+$student_ids = $should_sync_students && is_array($data['student_ids']) ? $data['student_ids'] : [];
 $total_sessions = isset($data['training_hours']) ? max(1, (int)$data['training_hours']) : 0; // ← exactly what user typed
 
 if (!$course_id || !$title || !$professor_id || $total_sessions < 1) {
@@ -41,14 +59,18 @@ try {
   // 2) Sync course_professor
   $conn->prepare("DELETE FROM course_professor WHERE course_id = ?")->execute([$course_id]);
   $stmtMap = $conn->prepare("INSERT INTO course_professor (course_id, professor_id) VALUES (?, ?)");
-  $stmtMap->execute([$course_id, $professor_id]);
+  foreach ($professor_ids as $assigned_professor_id) {
+    $stmtMap->execute([$course_id, $assigned_professor_id]);
+  }
 
-  // 3) Sync students
-  $conn->prepare("DELETE FROM course_student WHERE course_id = ?")->execute([$course_id]);
-  if (!empty($student_ids)) {
-    $insStudent = $conn->prepare("INSERT INTO course_student (course_id, student_id) VALUES (?, ?)");
-    foreach ($student_ids as $sid) {
-      $insStudent->execute([$course_id, (int)$sid]);
+  // 3) Sync students only when a caller explicitly sends student_ids.
+  if ($should_sync_students) {
+    $conn->prepare("DELETE FROM course_student WHERE course_id = ?")->execute([$course_id]);
+    if (!empty($student_ids)) {
+      $insStudent = $conn->prepare("INSERT INTO course_student (course_id, student_id) VALUES (?, ?)");
+      foreach ($student_ids as $sid) {
+        $insStudent->execute([$course_id, (int)$sid]);
+      }
     }
   }
 

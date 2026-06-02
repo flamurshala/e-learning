@@ -23,12 +23,22 @@ try {
         $stmtStudents->execute([$id]);
         $studentIds = $stmtStudents->fetchAll(PDO::FETCH_COLUMN);
 
+        // Fetch assigned professor IDs
+        $stmtProfessors = $conn->prepare("SELECT professor_id FROM course_professor WHERE course_id = ?");
+        $stmtProfessors->execute([$id]);
+        $professorIds = $stmtProfessors->fetchAll(PDO::FETCH_COLUMN);
+
+        if (empty($professorIds) && !empty($course['professor_id'])) {
+            $professorIds = [$course['professor_id']];
+        }
+
         // Fetch training hours (count of sessions)
         $stmtHours = $conn->prepare("SELECT COUNT(*) FROM training_sessions WHERE course_id = ?");
         $stmtHours->execute([$id]);
         $trainingHours = $stmtHours->fetchColumn();
 
         $course['student_ids'] = $studentIds;
+        $course['professor_ids'] = $professorIds;
         $course['training_hours'] = $trainingHours;
 
         echo json_encode($course);

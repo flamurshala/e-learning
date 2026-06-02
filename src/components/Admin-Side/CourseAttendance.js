@@ -2,18 +2,23 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import AdminNav from "./AdminNav";
 import ProffesorNav from "../Professor-Dashboard/ProffesorNav";
+import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 function CourseAttendance() {
   const { courseId } = useParams();
   const [attendanceData, setAttendanceData] = useState([]);
   const [attendanceSummary, setAttendanceSummary] = useState(null);
   const [summaryError, setSummaryError] = useState("");
+  const [selectedPdfStudentId, setSelectedPdfStudentId] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
   // ✅ Check if professor is logged in
   const isProfessor = localStorage.getItem("professorId");
+  const currentAdmin = getCurrentAdminActor();
+  const canGenerateAttendancePdf =
+    !isProfessor && ["admin", "superadmin", "administrata"].includes(currentAdmin.role);
 
   // Format any ISO/"YYYY-MM-DD HH:MM:SS" as Europe/Belgrade
   const formatBelgrade = (s) => {
@@ -34,6 +39,7 @@ function CourseAttendance() {
     setLoading(true);
     setError("");
     setSummaryError("");
+    setSelectedPdfStudentId("all");
 
     Promise.all([
       fetch(`${process.env.REACT_APP_API_URL}/get_attendance.php?course_id=${courseId}`).then((res) =>
@@ -71,10 +77,14 @@ function CourseAttendance() {
       acc[key] = {
         records: [],
         submittedAt: r.submitted_at || null,
+        submittedByProfessor: r.submitted_by_professor_name || null,
         sessionTitle: r.session_title || null,
       };
     }
     if (r.submitted_at) acc[key].submittedAt = r.submitted_at;
+    if (r.submitted_by_professor_name) {
+      acc[key].submittedByProfessor = r.submitted_by_professor_name;
+    }
     if (r.session_title) acc[key].sessionTitle = r.session_title;
     acc[key].records.push(r);
     return acc;
@@ -88,6 +98,19 @@ function CourseAttendance() {
     const last = row.surname ? String(row.surname).trim() : "";
     const combo = [first, last].filter(Boolean).join(" ");
     return combo || `Student #${row.student_id}`;
+  };
+
+  const generateAttendancePdf = () => {
+    const params = new URLSearchParams({
+      course_id: courseId,
+      student_id: selectedPdfStudentId,
+    });
+    const link = document.createElement("a");
+    link.href = `${process.env.REACT_APP_API_URL}/generate_attendance_pdf.php?${params.toString()}`;
+    link.download = "";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -108,6 +131,33 @@ function CourseAttendance() {
 
         {loading && <p className="mt-4">Loading attendance...</p>}
         {error && <p className="mt-4 text-red-600">{error}</p>}
+
+        {canGenerateAttendancePdf && !loading && !summaryError && attendanceSummary && (
+          <div className="mb-6 flex flex-wrap items-end gap-3 rounded border bg-white p-4 shadow-sm">
+            <div>
+              <label className="mb-1 block text-sm font-medium">Attendance PDF</label>
+              <select
+                value={selectedPdfStudentId}
+                onChange={(e) => setSelectedPdfStudentId(e.target.value)}
+                className="min-w-[240px] rounded border px-3 py-2"
+              >
+                <option value="all">All Students</option>
+                {attendanceSummary.students?.map((student) => (
+                  <option key={student.student_id} value={student.student_id}>
+                    {student.student_name || `Student #${student.student_id}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={generateAttendancePdf}
+              className="rounded bg-[#152259] px-4 py-2 text-white hover:bg-[#152239]"
+            >
+              Generate PDF
+            </button>
+          </div>
+        )}
 
         {!loading && !summaryError && attendanceSummary && (
           <div className="mb-6 rounded border bg-white p-4 shadow-sm">
@@ -161,7 +211,7 @@ function CourseAttendance() {
 
         {!loading && !error && (
           <>
-            {Object.entries(grouped).map(([sessionNumber, { records, submittedAt, sessionTitle }]) => {
+            {Object.entries(grouped).map(([sessionNumber, { records, submittedAt, submittedByProfessor, sessionTitle }]) => {
               const displayName =
                 (sessionTitle && String(sessionTitle).trim()) || `Session ${sessionNumber}`;
               return (
@@ -171,6 +221,12 @@ function CourseAttendance() {
                   <p className={`mb-2 ${submittedAt ? "text-gray-600" : "text-red-600 italic"}`}>
                     {submittedAt ? `📅 ${formatBelgrade(submittedAt)}` : "Not submitted yet"}
                   </p>
+
+                  {submittedByProfessor && (
+                    <p className="mb-2 text-sm text-gray-600">
+                      Submitted by: {submittedByProfessor}
+                    </p>
+                  )}
 
                   {records[0]?.submitted_after_seconds !== null &&
                   records[0]?.submitted_after_seconds !== undefined ? (

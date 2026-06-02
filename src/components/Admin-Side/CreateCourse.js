@@ -9,47 +9,38 @@ function CreateCourse() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [professors, setProfessors] = useState([]);
-  const [students, setStudents] = useState([]);
-  const [professorId, setProfessorId] = useState("");
-  const [selectedStudentIds, setSelectedStudentIds] = useState([]);
+  const [selectedProfessorIds, setSelectedProfessorIds] = useState([]);
   const [trainingHours, setTrainingHours] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_URL}/get_professors.php`)
       .then((res) => res.json())
       .then(setProfessors)
       .catch((err) => console.error("Error fetching professors:", err));
-
-    fetch(`${process.env.REACT_APP_API_URL}/get_students.php`)
-      .then((res) => res.json())
-      .then(setStudents)
-      .catch((err) => console.error("Error fetching students:", err));
   }, []);
 
-  const handleStudentCheckboxChange = (e) => {
-    const id = e.target.value; // keep as string for stable comparison
+  const handleProfessorCheckboxChange = (e) => {
+    const id = e.target.value;
     if (e.target.checked) {
-      setSelectedStudentIds((prev) => [...prev, id]);
+      setSelectedProfessorIds((prev) => [...prev, id]);
     } else {
-      setSelectedStudentIds((prev) => prev.filter((sid) => sid !== id));
+      setSelectedProfessorIds((prev) => prev.filter((pid) => pid !== id));
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!title.trim() || !professorId) {
-      alert("Please enter course title and select a professor.");
+    if (!title.trim() || selectedProfessorIds.length === 0) {
+      alert("Please enter course title and select at least one professor.");
       return;
     }
 
     const payload = {
       title,
       description,
-      professor_id: professorId,
-      // backend can cast to int if needed
-      student_ids: selectedStudentIds,
+      professor_id: selectedProfessorIds[0],
+      professor_ids: selectedProfessorIds,
       training_hours: Number(trainingHours),
     };
 
@@ -64,10 +55,8 @@ function CreateCourse() {
           alert("Course created successfully!");
           setTitle("");
           setDescription("");
-          setProfessorId("");
-          setSelectedStudentIds([]);
+          setSelectedProfessorIds([]);
           setTrainingHours("");
-          setSearchTerm("");
         } else {
           alert("Error creating course: " + (data.error || "Unknown error"));
         }
@@ -79,19 +68,6 @@ function CreateCourse() {
   };
 
   // 🔍 search by name OR surname
-  const lcQuery = searchTerm.toLowerCase();
-  const filteredStudents = students.filter((s) => {
-    const full = `${s.name || ""} ${s.surname || ""}`.trim().toLowerCase();
-    return full.includes(lcQuery);
-  });
-
-  // optional: sort alphabetically by full name
-  filteredStudents.sort((a, b) => {
-    const fa = `${a.name || ""} ${a.surname || ""}`.trim().toLowerCase();
-    const fb = `${b.name || ""} ${b.surname || ""}`.trim().toLowerCase();
-    return fa.localeCompare(fb);
-  });
-
   return (
     <div className="flex gap-5 bg-white rounded shadow">
       <AdminNav />
@@ -117,19 +93,26 @@ function CreateCourse() {
             className="w-full border border-gray-300 rounded px-4 py-2"
           />
 
-          <select
-            value={professorId}
-            onChange={(e) => setProfessorId(e.target.value)}
-            required
-            className="w-full border border-gray-300 rounded px-4 py-2"
-          >
-            <option value="">Select Professor</option>
-            {professors.map((prof) => (
-              <option key={prof.id} value={prof.id}>
-                {prof.name}
-              </option>
-            ))}
-          </select>
+          <div>
+            <p className="font-semibold mb-2">Select Professors:</p>
+            <div className="max-h-48 overflow-auto border border-gray-300 rounded p-2">
+              {professors.length > 0 ? (
+                professors.map((prof) => (
+                  <label key={prof.id} className="flex items-center gap-2 mb-1">
+                    <input
+                      type="checkbox"
+                      value={String(prof.id)}
+                      checked={selectedProfessorIds.includes(String(prof.id))}
+                      onChange={handleProfessorCheckboxChange}
+                    />
+                    <span>{prof.name}</span>
+                  </label>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No professors found.</p>
+              )}
+            </div>
+          </div>
 
           <input
             type="number"
@@ -140,41 +123,6 @@ function CreateCourse() {
             required
             className="w-full border border-gray-300 rounded px-4 py-2"
           />
-
-          <div>
-            <p className="font-semibold mb-2">Select Students:</p>
-
-            {/* Search Bar */}
-            <input
-              type="text"
-              placeholder="Search students..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full border border-gray-300 rounded px-4 py-2 mb-2"
-            />
-
-            {/* Student List */}
-            <div className="max-h-64 overflow-auto border border-gray-300 rounded p-2">
-              {filteredStudents.length > 0 ? (
-                filteredStudents.map((s) => {
-                  const fullName = `${s.name || ""} ${s.surname || ""}`.trim();
-                  return (
-                    <label key={s.id} className="flex items-center gap-2 mb-1">
-                      <input
-                        type="checkbox"
-                        value={String(s.id)}
-                        checked={selectedStudentIds.includes(String(s.id))}
-                        onChange={handleStudentCheckboxChange}
-                      />
-                      <span>{fullName || "(No name)"}</span>
-                    </label>
-                  );
-                })
-              ) : (
-                <p className="text-sm text-gray-500">No students found.</p>
-              )}
-            </div>
-          </div>
 
           <button
             type="submit"

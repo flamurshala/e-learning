@@ -347,6 +347,38 @@ export default function CompanyFinance() {
     });
   };
 
+  const generateCsv = () => {
+    const params = {
+      tab: activeTab,
+      date_from: topFilters.date_from,
+      date_to: topFilters.date_to,
+    };
+
+    if (activeTab === "income") {
+      Object.assign(params, {
+        course_id: topFilters.course_id,
+        status: topFilters.status,
+        student: incomeFilters.student,
+      });
+    } else if (activeTab === "expenses") {
+      Object.assign(params, expenseFilters);
+    } else {
+      Object.assign(params, {
+        course_id: topFilters.course_id,
+        status: salaryStatuses.includes(topFilters.status) ? topFilters.status : "",
+        teacher_id: salaryFilters.teacher_id,
+      });
+    }
+
+    const url = apiUrl("finance_export_csv.php", params);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const saveExpense = (e) => {
     e.preventDefault();
     setMessage({ text: "", type: "" });
@@ -515,6 +547,7 @@ export default function CompanyFinance() {
                 {teachers.map((teacher) => <option key={teacher.id} value={teacher.id}>{teacher.name}</option>)}
               </select>
             )}
+            <button type="button" onClick={generateCsv} className="rounded bg-[#152259] px-4 py-2 text-white hover:bg-[#152239]">Generate CSV</button>
             <button type="button" onClick={clearFilters} className="rounded border px-4 py-2">Clear Filters</button>
           </div>
         </div>

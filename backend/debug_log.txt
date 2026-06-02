@@ -708,3 +708,9 @@ Notification condition NOT met.
 Total sessions: 32
 Submitted sessions before: 1
 Notification condition NOT met.
+Total sessions: 32
+Submitted sessions before: 1
+Notification condition NOT met.
+Total sessions: 13
+Submitted sessions before: 8
+Notification condition NOT met.

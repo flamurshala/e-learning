@@ -19,7 +19,9 @@ function AllCourses() {
 
   const navigate = useNavigate();
   const currentAdmin = getCurrentAdminActor();
-  const canForceCompleteCourse = ["admin", "superadmin"].includes(currentAdmin.role);
+  const canForceCompleteCourse = ["admin", "superadmin", "administrator"].includes(
+    currentAdmin.role
+  );
 
   useEffect(() => {
     setLoading(true);

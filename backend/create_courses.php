@@ -15,7 +15,24 @@ $data = json_decode(file_get_contents("php://input"), true);
 // ✅ Required fields
 $title        = $data['title'] ?? '';
 $description  = $data['description'] ?? '';
-$professor_id = isset($data['professor_id']) ? (int)$data['professor_id'] : 0;
+$professor_ids = [];
+if (isset($data['professor_ids']) && is_array($data['professor_ids'])) {
+  foreach ($data['professor_ids'] as $pid) {
+    $pid = (int)$pid;
+    if ($pid > 0 && !in_array($pid, $professor_ids, true)) {
+      $professor_ids[] = $pid;
+    }
+  }
+}
+
+if (empty($professor_ids) && isset($data['professor_id'])) {
+  $legacy_professor_id = (int)$data['professor_id'];
+  if ($legacy_professor_id > 0) {
+    $professor_ids[] = $legacy_professor_id;
+  }
+}
+
+$professor_id = $professor_ids[0] ?? 0;
 $student_ids  = $data['student_ids'] ?? [];
 $base_hours   = isset($data['training_hours']) ? max(1, (int)$data['training_hours']) : 0;
 
@@ -36,9 +53,11 @@ try {
   $stmt->execute([$title, $description, $professor_id]);
   $course_id = (int)$conn->lastInsertId();
 
-  // Map professor
+  // Map professors
   $stmt2 = $conn->prepare("INSERT INTO course_professor (course_id, professor_id) VALUES (?, ?)");
-  $stmt2->execute([$course_id, $professor_id]);
+  foreach ($professor_ids as $assigned_professor_id) {
+    $stmt2->execute([$course_id, $assigned_professor_id]);
+  }
 
   // Enroll students
   if (!empty($student_ids)) {

@@ -43,6 +43,7 @@ import AllCertificates from "./components/Admin-Side/AllCertificates";
 import EditCertificate from "./components/Admin-Side/EditCertificate";
 import BackButton from "./components/BackButton";
 import Waitlist from "./components/Admin-Side/Waitlist";
+import CanceledStudents from "./components/Admin-Side/CanceledStudents";
 import InvoiceForm from "./components/Admin-Side/InvoiceForm";
 import InvoiceSettings from "./components/Admin-Side/InvoiceSettings";
 import PaymentVerificationForm from "./components/Admin-Side/PaymentVerificationForm";
@@ -172,6 +173,17 @@ function App() {
                 allowedRoles={["administrator", "administrata", "administration", "admin", "superadmin"]}
               >
                 <Waitlist />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/CanceledStudents"
+            element={
+              <ProtectedRoute
+                userType="user"
+                allowedRoles={["administrator", "administrata", "administration", "admin", "superadmin"]}
+              >
+                <CanceledStudents />
               </ProtectedRoute>
             }
           />

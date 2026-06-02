@@ -45,7 +45,9 @@ try {
 
             DATE_FORMAT(ts.session_date,  '%Y-%m-%d %H:%i:%s') AS session_date,
             DATE_FORMAT(ts.submitted_at, '%Y-%m-%d %H:%i:%s') AS submitted_at,
-            ts.submitted_after_seconds
+            ts.submitted_after_seconds,
+            ts.submitted_by_professor_id,
+            p.name AS submitted_by_professor_name
         FROM training_sessions ts
         JOIN (
             SELECT course_id, MAX(session_number) AS max_sn
@@ -55,6 +57,7 @@ try {
         ) mx ON mx.course_id = ts.course_id
         LEFT JOIN attendance a ON a.session_id = ts.id
         LEFT JOIN students   s ON s.id = a.student_id
+        LEFT JOIN professors p ON p.id = ts.submitted_by_professor_id
         WHERE ts.course_id = ?
         ORDER BY ts.session_number ASC, s.name ASC, s.surname ASC, a.id ASC
     ";

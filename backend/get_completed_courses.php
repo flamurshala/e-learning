@@ -17,11 +17,15 @@ try {
             c.created_at,
             c.professor_id,
             c.completed,
-            p.name AS professor_name,
-            GROUP_CONCAT(s.name SEPARATOR ', ') AS students
+            COALESCE(
+                NULLIF(GROUP_CONCAT(DISTINCT cp_prof.name ORDER BY cp_prof.name SEPARATOR ', '), ''),
+                p.name
+            ) AS professor_name,
+            GROUP_CONCAT(DISTINCT s.name SEPARATOR ', ') AS students
         FROM courses c
         LEFT JOIN professors p ON c.professor_id = p.id
         LEFT JOIN course_professor cp ON cp.course_id = c.id
+        LEFT JOIN professors cp_prof ON cp_prof.id = cp.professor_id
         LEFT JOIN course_student sc ON sc.course_id = c.id
         LEFT JOIN students s ON s.id = sc.student_id
         WHERE c.completed = 1

@@ -14,8 +14,16 @@ try {
             p.password,
             c.title     AS course_title
         FROM professors p
-        LEFT JOIN courses c 
-            ON c.professor_id = p.id 
+        LEFT JOIN (
+            SELECT course_id, professor_id
+            FROM course_professor
+            UNION
+            SELECT id AS course_id, professor_id
+            FROM courses
+            WHERE professor_id IS NOT NULL
+        ) pc ON pc.professor_id = p.id
+        LEFT JOIN courses c
+            ON c.id = pc.course_id
             AND (c.completed = 0 OR c.completed IS NULL)
         ORDER BY p.name ASC, c.title ASC
     ");
@@ -38,7 +46,7 @@ try {
             ];
         }
 
-        if (!empty($row['course_title'])) {
+        if (!empty($row['course_title']) && !in_array($row['course_title'], $professors[$id]['courses'], true)) {
             $professors[$id]['courses'][] = $row['course_title'];
         }
     }
