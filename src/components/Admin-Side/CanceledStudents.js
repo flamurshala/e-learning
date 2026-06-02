@@ -7,6 +7,8 @@ export default function CanceledStudents() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [courseFilter, setCourseFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 50;
 
   useEffect(() => {
     document.title = "Canceled Students - Tectigon Academy";
@@ -53,6 +55,25 @@ export default function CanceledStudents() {
     });
   }, [rows, search, courseFilter]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, courseFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / rowsPerPage));
+  const paginatedRows = filteredRows.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
+  const generateCsv = () => {
+    const link = document.createElement("a");
+    link.href = `${process.env.REACT_APP_API_URL}/export_canceled_students_csv.php`;
+    link.download = "";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="flex gap-4">
       <AdminNav />
@@ -86,6 +107,13 @@ export default function CanceledStudents() {
               className="min-w-[260px] rounded border px-3 py-2"
             />
           </div>
+          <button
+            type="button"
+            onClick={generateCsv}
+            className="rounded bg-[#152259] px-4 py-2 text-white hover:bg-[#152239]"
+          >
+            Generate CSV
+          </button>
         </div>
 
         {loading ? (
@@ -115,7 +143,7 @@ export default function CanceledStudents() {
                     </td>
                   </tr>
                 ) : (
-                  filteredRows.map((row) => (
+                  paginatedRows.map((row) => (
                     <tr key={row.id}>
                       <td className="border p-2">
                         {[row.name, row.surname].filter(Boolean).join(" ")}
@@ -142,6 +170,35 @@ export default function CanceledStudents() {
                 )}
               </tbody>
             </table>
+            {filteredRows.length > 0 && (
+              <div className="flex items-center justify-between gap-3 border-t bg-white px-3 py-3 text-sm">
+                <span>
+                  Showing {(currentPage - 1) * rowsPerPage + 1}-
+                  {Math.min(currentPage * rowsPerPage, filteredRows.length)} of {filteredRows.length}
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={currentPage <= 1}
+                    onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                    className="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <span>
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={currentPage >= totalPages}
+                    onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                    className="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
