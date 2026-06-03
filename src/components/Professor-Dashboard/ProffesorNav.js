@@ -2,13 +2,42 @@ import img from "../img/logo.png";
 import daIcon from "../img/dashboardIcon.png";
 import assignmentsIcon from "../img/\uD83E\uDD86 icon _assignments_.png";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { FaBars, FaTimes } from "react-icons/fa";
 import LogOut from "../Professor-Dashboard/ProfessorLogOut";
 
 function ProffesorNav() {
+  const [isOpen, setIsOpen] = useState(false);
   const professorCourseId = localStorage.getItem("professorCourseId") || "0";
+  const closeMenu = () => setIsOpen(false);
 
   return (
-    <div className="fixed flex flex-col justify-between p-5 items-start top-0 left-0 h-screen w-[17%] bg-[#152259] z-50">
+    <>
+      <button
+        type="button"
+        className={`app-menu-button rounded p-3 shadow-lg ${
+          isOpen ? "bg-white text-[#152259]" : "bg-[#152259] text-white"
+        }`}
+        onClick={() => setIsOpen((open) => !open)}
+        aria-label={isOpen ? "Close menu" : "Open menu"}
+      >
+        {isOpen ? <FaTimes /> : <FaBars />}
+      </button>
+
+      {isOpen && (
+        <button
+          type="button"
+          className="app-menu-overlay bg-black/40"
+          onClick={closeMenu}
+          aria-label="Close menu overlay"
+        />
+      )}
+
+      <div
+        className={`app-sidebar flex flex-col items-start justify-between overflow-y-auto bg-[#152259] p-5 ${
+          isOpen ? "app-sidebar-open" : ""
+        }`}
+      >
       <div className="flex flex-col items-start h-full">
         <div className="logo w-[65%] mb-[2rem]">
           <img src={img} alt="logo" className="w-full" />
@@ -21,19 +50,20 @@ function ProffesorNav() {
 
           <li className="flex items-center text-white font-bold gap-3 px-4">
             <img src={assignmentsIcon} alt="calendar" />
-            <Link to={`/professor/calendar/${professorCourseId}`}>Courses</Link>
+            <Link to={`/professor/calendar/${professorCourseId}`} onClick={closeMenu}>Courses</Link>
           </li>
 
           <li className="flex items-center text-white font-bold gap-3 px-4">
             <img src={daIcon} alt="CompletedCourse" />
-            <Link to="/professor/completed-courses">Completed Courses</Link>
+            <Link to="/professor/completed-courses" onClick={closeMenu}>Completed Courses</Link>
           </li>
         </ul>
       </div>
       <div className="px-4">
         <LogOut />
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 
