@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Certificate Download API Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 650px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 16px;
+      cursor: pointer;
+    }
+
+    pre {
+      background: #f4f4f4;
+      padding: 12px;
+      margin-top: 20px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Certificate Download API Local Test</h2>
+
+  <label>API Key</label>
+  <input id="apiKey" type="text" value="your-private-api-key" />
+
+  <label>Full Name</label>
+  <input id="fullName" type="text" value="Ensar Muriqi" />
+
+  <label>Certificate ID</label>
+  <input id="certificateId" type="text" value="25260001" />
+
+  <button onclick="downloadCertificate()">Test Download</button>
+  <button onclick="testWrongName()">Test Wrong Name</button>
+  <button onclick="testUppercaseName()">Test Uppercase Name</button>
+  <button onclick="testExtraSpaces()">Test Extra Spaces</button>
+
+  <pre id="result">Result will appear here...</pre>
+
+  <script>
+    async function callApi(fullName, certificateId, apiKey) {
+      const resultBox = document.getElementById("result");
+
+      resultBox.textContent = "Testing...";
+
+      try {
+        const response = await fetch("/backend/download_certificate_by_identity.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-KEY": apiKey,
+          },
+          body: JSON.stringify({
+            fullName: fullName,
+            certificateId: certificateId,
+          }),
+        });
+
+        const contentType = response.headers.get("Content-Type") || "";
+
+        if (!response.ok) {
+          let errorMessage = "Unknown error";
+
+          if (contentType.includes("application/json")) {
+            const error = await response.json();
+            errorMessage = error.error;
+          } else {
+            errorMessage = await response.text();
+          }
+
+          resultBox.textContent =
+            "FAILED\n\n" +
+            "Status: " + response.status + "\n" +
+            "Message: " + errorMessage;
+
+          return;
+        }
+
+        const blob = await response.blob();
+
+        if (!blob || blob.size === 0) {
+          resultBox.textContent = "FAILED\n\nThe response was successful, but the PDF file is empty.";
+          return;
+        }
+
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "certificate.pdf";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        URL.revokeObjectURL(url);
+
+        resultBox.textContent =
+          "SUCCESS\n\n" +
+          "Status: " + response.status + "\n" +
+          "PDF size: " + blob.size + " bytes\n" +
+          "The certificate download should have started.";
+      } catch (error) {
+        resultBox.textContent =
+          "REQUEST ERROR\n\n" +
+          error.message;
+      }
+    }
+
+    function downloadCertificate() {
+      const apiKey = document.getElementById("apiKey").value.trim();
+      const fullName = document.getElementById("fullName").value.trim();
+      const certificateId = document.getElementById("certificateId").value.trim();
+
+      callApi(fullName, certificateId, apiKey);
+    }
+
+    function testWrongName() {
+      const apiKey = document.getElementById("apiKey").value.trim();
+      const certificateId = document.getElementById("certificateId").value.trim();
+
+      callApi("Wrong Name", certificateId, apiKey);
+    }
+
+    function testUppercaseName() {
+      const apiKey = document.getElementById("apiKey").value.trim();
+      const fullName = document.getElementById("fullName").value.trim();
+      const certificateId = document.getElementById("certificateId").value.trim();
+
+      callApi(fullName.toUpperCase(), certificateId, apiKey);
+    }
+
+    function testExtraSpaces() {
+      const apiKey = document.getElementById("apiKey").value.trim();
+      const fullName = document.getElementById("fullName").value.trim();
+      const certificateId = document.getElementById("certificateId").value.trim();
+
+      callApi(fullName.replace(/\s+/g, "     "), certificateId, apiKey);
+    }
+  </script>
+
+</body>
+</html>

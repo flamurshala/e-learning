@@ -83,7 +83,7 @@ function AllProfessors() {
           <thead>
             <tr className="text-left bg-gray-100">
               <th className="border border-gray-300 p-2">Name</th>
-              <th className="border border-gray-300 p-2">Username</th> {/* NEW */}
+              <th className="border border-gray-300 p-2">Username</th>
               <th className="border border-gray-300 p-2">Email</th>
               <th className="border border-gray-300 p-2">Courses</th>
               <th className="border border-gray-300 p-2">Edit</th>
