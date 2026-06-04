@@ -116,6 +116,7 @@ function CompletedCourses() {
               <th className="p-2 border">Professor</th>
               <th className="p-2 border">Students</th>
               <th className="p-2 border">Attendance</th>
+              <th className="p-2 border">Certificates</th>
             </tr>
           </thead>
           <tbody>
@@ -159,11 +160,30 @@ function CompletedCourses() {
                       View Attendance
                     </button>
                   </td>
+                  <td className="p-2 border text-center">
+                    {course.merged_certificate_file ? (
+                      <a
+                        href={`${process.env.REACT_APP_API_URL}/download_merged_certificate.php?course_id=${course.id}`}
+                        download={course.merged_certificate_file}
+                        className="inline-block bg-[#152259] hover:bg-[#152239] text-white px-3 py-1 rounded"
+                      >
+                        Download
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled
+                        className="bg-gray-300 text-gray-600 px-3 py-1 rounded cursor-not-allowed"
+                      >
+                        No Certificates
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="5" className="text-center p-4 text-gray-500">
+                <td colSpan="6" className="text-center p-4 text-gray-500">
                   No completed courses found.
                 </td>
               </tr>

@@ -4,6 +4,22 @@ header("Content-Type: application/json");
 
 include "db.php";
 
+function certificate_file_slug(string $name): string {
+    $name = trim($name);
+
+    if (function_exists('iconv')) {
+        $ascii = @iconv('UTF-8', 'ASCII//TRANSLIT', $name);
+        if ($ascii !== false) {
+            $name = $ascii;
+        }
+    }
+
+    $name = preg_replace('/[^A-Za-z0-9._-]+/', '-', $name);
+    $name = trim($name, '-._');
+
+    return $name !== '' ? $name : 'merged-certificates';
+}
+
 try {
     $professorId = isset($_GET['professor_id']) ? (int)$_GET['professor_id'] : 0;
     $professorWhere = $professorId > 0 ? "AND (c.professor_id = :professor_id OR cp.professor_id = :professor_id)" : "";
@@ -47,6 +63,10 @@ try {
         } else {
             $course['students'] = [];
         }
+
+        $mergedCertificateFile = certificate_file_slug($course['title'] ?? '') . '.pdf';
+        $mergedCertificatePath = __DIR__ . '/certificates/' . $mergedCertificateFile;
+        $course['merged_certificate_file'] = file_exists($mergedCertificatePath) ? $mergedCertificateFile : null;
     }
 
     echo json_encode($courses);

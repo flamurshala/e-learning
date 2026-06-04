@@ -52,6 +52,7 @@ import InvoiceList from "./components/Admin-Side/InvoiceList";
 import PaymentVerificationList from "./components/Admin-Side/PaymentVerificationList";
 import Reports from "./components/Admin-Side/Reports";
 import CompanyFinance from "./components/Admin-Side/CompanyFinance";
+import TemporaryCanceledStudent from "./components/Admin-Side/TemporaryCanceledStudent";
 
 function App() {
   useEffect(() => {
@@ -166,6 +167,14 @@ function App() {
             }
           />
           <Route
+            path="/TemporaryAddStudent"
+            element={
+              <ProtectedRoute userType="user" allowedRoles={["superadmin"]}>
+                <AddUsers temporaryRegistration />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/Waitlist"
             element={
               <ProtectedRoute
@@ -184,6 +193,14 @@ function App() {
                 allowedRoles={["administrator", "administrata", "administration", "admin", "superadmin"]}
               >
                 <CanceledStudents />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/TemporaryCanceledStudent"
+            element={
+              <ProtectedRoute userType="user" allowedRoles={["superadmin"]}>
+                <TemporaryCanceledStudent />
               </ProtectedRoute>
             }
           />

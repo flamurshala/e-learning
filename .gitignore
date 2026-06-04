@@ -11,6 +11,11 @@
 # production
 /build
 
+/backend/certificates
+/backend/payment_verifications
+/backend/invoices
+
+
 # misc
 .DS_Store
 .env.local

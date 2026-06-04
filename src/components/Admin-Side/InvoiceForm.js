@@ -3,6 +3,11 @@ import axios from "axios";
 import { Link, useLocation } from "react-router-dom";
 import AdminNav from "./AdminNav";
 import { getCurrentAdminActor } from "../../utils/currentAdmin";
+import {
+  displayDateToIso,
+  isoDateToDisplay,
+  todayDisplayDate,
+} from "./DatePickerDDMMYYYY";
 
 export default function InvoiceForm({ variant = "invoice" }) {
   const location = useLocation();
@@ -37,7 +42,7 @@ export default function InvoiceForm({ variant = "invoice" }) {
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [descriptionOptions, setDescriptionOptions] = useState([]);
   const [formDate, setFormDate] = useState({
-    invoiceDate: new Date().toISOString().slice(0, 10),
+    invoiceDate: todayDisplayDate(),
   });
   const [items, setItems] = useState([
     { courseIndex: "", courseId: null, courseTitle: "", description: "", unitPrice: "", locked: false },
@@ -90,6 +95,10 @@ export default function InvoiceForm({ variant = "invoice" }) {
     } else if (prefillDate.studentName) {
       setStudentMode("manual");
       setManualStudentName(prefillDate.studentName);
+    }
+
+    if (prefillDate.invoiceDate) {
+      setFormDate({ invoiceDate: isoDateToDisplay(prefillDate.invoiceDate) });
     }
 
     if (Array.isArray(prefillDate.items) && prefillDate.items.length > 0) {
@@ -221,12 +230,21 @@ export default function InvoiceForm({ variant = "invoice" }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     setMessage({ text: "", type: "" });
+    const invoiceDateIso = displayDateToIso(formDate.invoiceDate);
+
+    if (!invoiceDateIso) {
+      setMessage({
+        text: "Please enter the date in dd/mm/yyyy format.",
+        type: "error",
+      });
+      return;
+    }
 
     axios
       .post(`${process.env.REACT_APP_API_URL}/${config.generateEndpoint}`, {
         student_id: studentMode === "select" ? selectedStudentId : null,
         manual_student_name: studentMode === "manual" ? manualStudentName : "",
-        invoice_date: formDate.invoiceDate,
+        invoice_date: invoiceDateIso,
         items: invoiceItems,
         actor: getCurrentAdminActor(),
       })
@@ -357,7 +375,9 @@ export default function InvoiceForm({ variant = "invoice" }) {
             <div>
               <label className="mb-1 block font-medium">Invoice Date</label>
               <input
-                type="date"
+                type="text"
+                placeholder="dd/mm/yyyy"
+                pattern="\d{2}/\d{2}/\d{4}"
                 value={formDate.invoiceDate}
                 onChange={(e) =>
                   setFormDate((prev) => ({ ...prev, invoiceDate: e.target.value }))

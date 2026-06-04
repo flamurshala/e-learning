@@ -1,6 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminNav from "./AdminNav";
 
+function formatDisplayDate(value) {
+  if (!value) return "-";
+
+  const date = new Date(String(value).replace(" ", "T"));
+  if (Number.isNaN(date.getTime())) return "-";
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${day}/${month}/${date.getFullYear()}`;
+}
+
 export default function CanceledStudents() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -162,7 +173,7 @@ export default function CanceledStudents() {
                         {row.extra_note || "-"}
                       </td>
                       <td className="border p-2 whitespace-nowrap">
-                        {row.canceled_at ? new Date(row.canceled_at).toLocaleString() : "-"}
+                        {formatDisplayDate(row.canceled_at)}
                       </td>
                       <td className="border p-2">{row.canceled_by_username || "-"}</td>
                     </tr>

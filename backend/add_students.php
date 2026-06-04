@@ -10,6 +10,7 @@ header("Content-Type: application/json");
 include "db.php";
 
 try {
+    $isTemporaryStudentRegistration = !empty($temporaryStudentRegistration);
     $data = json_decode(file_get_contents("php://input"), true);
 
     // Student info
@@ -18,6 +19,27 @@ try {
     $phone = trim($data['phoneNumber'] ?? '');
     $email = trim($data['email'] ?? '');
     $notes = trim($data['notes'] ?? '');
+    $registrationDate = trim($data['registrationDate'] ?? '');
+    $registrationDateTime = null;
+
+    if ($isTemporaryStudentRegistration && $registrationDate === '') {
+        echo json_encode(['success' => false, 'error' => 'Registration date is required']);
+        exit;
+    }
+
+    if ($registrationDate !== '') {
+        $date = DateTime::createFromFormat('Y-m-d', $registrationDate);
+        $dateErrors = DateTime::getLastErrors();
+        if (
+            !$date ||
+            ($dateErrors !== false && ($dateErrors['warning_count'] > 0 || $dateErrors['error_count'] > 0))
+        ) {
+            echo json_encode(['success' => false, 'error' => 'Invalid registration date']);
+            exit;
+        }
+
+        $registrationDateTime = $date->format('Y-m-d') . ' 00:00:00';
+    }
     
     // Course & payment
     $courses = $data['courses'] ?? [];
@@ -70,8 +92,12 @@ try {
     $stmtExistingCourses->execute([$student_id]);
     $existingCourseIds = array_map('strval', $stmtExistingCourses->fetchAll(PDO::FETCH_COLUMN));
 
-    $stmtEnroll = $conn->prepare("INSERT INTO course_student (student_id, course_id) VALUES (?, ?)");
-    $stmtPayment = $conn->prepare("INSERT INTO student_payments (student_id, course_id, payment_method, amount_all, amount_month1, amount_month2) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmtEnroll = $registrationDateTime
+        ? $conn->prepare("INSERT INTO course_student (student_id, course_id, enrolled_at) VALUES (?, ?, ?)")
+        : $conn->prepare("INSERT INTO course_student (student_id, course_id) VALUES (?, ?)");
+    $stmtPayment = $registrationDateTime
+        ? $conn->prepare("INSERT INTO student_payments (student_id, course_id, payment_method, amount_all, amount_month1, amount_month2, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
+        : $conn->prepare("INSERT INTO student_payments (student_id, course_id, payment_method, amount_all, amount_month1, amount_month2) VALUES (?, ?, ?, ?, ?, ?)");
     $addedCourseIds = [];
     $skippedCourseIds = [];
     $warnings = [];
@@ -106,15 +132,26 @@ try {
         $m1 = $amountMonth1[$i] ?? null;
         $m2 = $amountMonth2[$i] ?? null;
 
-        $stmtEnroll->execute([$student_id, $courseId]);
-        $stmtPayment->execute([
+        if ($registrationDateTime) {
+            $stmtEnroll->execute([$student_id, $courseId, $registrationDateTime]);
+        } else {
+            $stmtEnroll->execute([$student_id, $courseId]);
+        }
+
+        $paymentParams = [
             $student_id,
             $courseId,
             $paymentMethod,
             in_array($paymentMethod, ['Bank', 'All', 'POS', 'Cash'], true) ? $all : null,
             $paymentMethod === 'Divided' ? $m1 : null,
             $paymentMethod === 'Divided' ? $m2 : null,
-        ]);
+        ];
+
+        if ($registrationDateTime) {
+            $paymentParams[] = $registrationDateTime;
+        }
+
+        $stmtPayment->execute($paymentParams);
 
         $addedCourseIds[] = $courseId;
         $existingCourseIds[] = $courseId;

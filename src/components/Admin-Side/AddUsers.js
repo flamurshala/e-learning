@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AdminNav from "./AdminNav";
+import DatePickerDDMMYYYY, {
+  displayDateToIso,
+  todayDisplayDate,
+} from "./DatePickerDDMMYYYY";
 
 const paymentOptions = [
   { value: "Cash", label: "Paid by cash" },
@@ -27,13 +31,15 @@ function getPaidAmount(method, allAmount, month1Amount, month2Amount) {
   return 0;
 }
 
-function AddUsers() {
+function AddUsers({ temporaryRegistration = false }) {
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = "Add Users - Tectigon Academy";
-  }, []);
+    document.title = temporaryRegistration
+      ? "Temporary Add Student - Tectigon Academy"
+      : "Add Users - Tectigon Academy";
+  }, [temporaryRegistration]);
 
   const [waitlistIds, setWaitlistIds] = useState([]);
   const [fromWaitlistFlow, setFromWaitlistFlow] = useState(false);
@@ -42,6 +48,9 @@ function AddUsers() {
   const [studentSurname, setStudentSurname] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
+  const [registrationDate, setRegistrationDate] = useState(() =>
+    todayDisplayDate()
+  );
   const [extraNotes, setExtraNotes] = useState("");
 
   const [courses, setCourses] = useState([]);
@@ -126,6 +135,18 @@ function AddUsers() {
       return;
     }
 
+    const registrationDateIso = temporaryRegistration
+      ? displayDateToIso(registrationDate)
+      : "";
+
+    if (temporaryRegistration && !registrationDateIso) {
+      setMessage({
+        text: "Please enter the registration date in dd/mm/yyyy format.",
+        type: "error",
+      });
+      return;
+    }
+
     const payload = {
       name: studentName,
       surname: studentSurname,
@@ -138,6 +159,10 @@ function AddUsers() {
       notes: extraNotes,
       courses: selectedCourses,
     };
+
+    if (temporaryRegistration) {
+      payload.registrationDate = registrationDateIso;
+    }
 
     const selectedCourseDetails = selectedCourses.map((courseId) =>
       courses.find((course) => String(course.id) === String(courseId))
@@ -167,7 +192,11 @@ function AddUsers() {
       })
       .filter(Boolean);
 
-    fetch(`${process.env.REACT_APP_API_URL}/add_students.php`, {
+    const addStudentEndpoint = temporaryRegistration
+      ? "add_students_temporary.php"
+      : "add_students.php";
+
+    fetch(`${process.env.REACT_APP_API_URL}/${addStudentEndpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -225,6 +254,7 @@ function AddUsers() {
                   prefillPaymentVerification: true,
                   studentId: data.student_id,
                   studentName: [studentName, studentSurname].filter(Boolean).join(" "),
+                  invoiceDate: temporaryRegistration ? registrationDateIso : undefined,
                   items: addedPaidVerificationItems,
                 },
               });
@@ -240,11 +270,12 @@ function AddUsers() {
             setAmountPaidMonth1([""]);
             setAmountPaidMonth2([""]);
             setStudentEmail("");
+            setRegistrationDate(todayDisplayDate());
             setExtraNotes("");
             setSelectedCourses([""]);
             setWaitlistIds([]);
             setFromWaitlistFlow(false);
-            navigate("/AddUsers", { replace: true });
+            navigate(temporaryRegistration ? "/TemporaryAddStudent" : "/AddUsers", { replace: true });
           });
         } else {
           setMessage({
@@ -343,7 +374,9 @@ function AddUsers() {
         <div className="cards mt-6 items-center flex flex-wrap gap-4">
           <div className="card border shadow-xl border-black p-5 w-[45%]">
             <form onSubmit={handleStudentSubmit}>
-              <h3 className="text-2xl mb-8 font-semibold border-b-2 border-[#c2c2c2]">Add a new student</h3>
+              <h3 className="text-2xl mb-8 font-semibold border-b-2 border-[#c2c2c2]">
+                {temporaryRegistration ? "Temporary add student" : "Add a new student"}
+              </h3>
               {message.text && (
                 <p
                   className={
@@ -366,6 +399,16 @@ function AddUsers() {
               <input className="mb-4 w-full border border-black p-2" type="text" placeholder="Phone Number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required />
               
               <input className="mb-4 w-full border border-black p-2" type="email" placeholder="Email" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} required />
+
+              {temporaryRegistration && (
+                <DatePickerDDMMYYYY
+                  id="temporary-registration-date"
+                  label="Registration Date:"
+                  value={registrationDate}
+                  onChange={setRegistrationDate}
+                  required
+                />
+              )}
 
               {selectedCourses.map((selected, index) => (
                 <div key={index} className="mb-6 border p-4 rounded-md border-gray-400 relative">

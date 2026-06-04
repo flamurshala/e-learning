@@ -42,18 +42,19 @@ $stmt = $conn->prepare($sql);
 $stmt->execute();
 $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// For each course, get enrolled students (names)
+// For each course, get enrolled students (full names)
 foreach ($courses as &$course) {
     $courseId = $course['id'];
     $studentSql = "
-      SELECT s.name
+      SELECT TRIM(CONCAT(COALESCE(s.name, ''), ' ', COALESCE(s.surname, ''))) AS student_name
       FROM students s
       JOIN course_student sc ON s.id = sc.student_id
       WHERE sc.course_id = ?
+      ORDER BY s.name ASC, s.surname ASC
     ";
     $studentStmt = $conn->prepare($studentSql);
     $studentStmt->execute([$courseId]);
-    $students = $studentStmt->fetchAll(PDO::FETCH_COLUMN); // fetch student names only
+    $students = $studentStmt->fetchAll(PDO::FETCH_COLUMN);
     $course['students'] = $students;
 
     $mergedCertificateFile = certificate_file_slug($course['title'] ?? '') . '.pdf';

@@ -11,10 +11,12 @@ import {
   FaChartLine,
   FaFileInvoiceDollar,
   FaMoneyCheckAlt,
+  FaUserPlus,
   FaTimes,
   FaUniversity,
   FaUserGraduate,
   FaUsersCog,
+  FaUserTimes,
 } from "react-icons/fa";
 
 function AdminNav() {
@@ -132,6 +134,19 @@ function AdminNav() {
               <FaCertificate className={iconClass} />
               <Link to="/CompletedCourse" onClick={closeMenu}>Completed Courses</Link>
             </li>
+
+            {userRole === "superadmin" && (
+              <>
+                <li className={navItemClass}>
+                  <FaUserPlus className={iconClass} />
+                  <Link to="/TemporaryAddStudent" onClick={closeMenu}>Temporary Add Student</Link>
+                </li>
+                <li className={navItemClass}>
+                  <FaUserTimes className={iconClass} />
+                  <Link to="/TemporaryCanceledStudent" onClick={closeMenu}>Temporary Canceled Student</Link>
+                </li>
+              </>
+            )}
           
           </ul>
         </div>
