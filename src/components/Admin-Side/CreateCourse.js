@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import AdminNav from "./AdminNav";
+import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 function CreateCourse() {
   useEffect(() => {
@@ -42,6 +43,7 @@ function CreateCourse() {
       professor_id: selectedProfessorIds[0],
       professor_ids: selectedProfessorIds,
       training_hours: Number(trainingHours),
+      actor: getCurrentAdminActor(),
     };
 
     fetch(`${process.env.REACT_APP_API_URL}/create_courses.php`, {

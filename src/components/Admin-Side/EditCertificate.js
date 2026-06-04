@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import AdminNav from "./AdminNav";
 import BackButton from "../BackButton";
+import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 
 
@@ -81,6 +82,7 @@ const handleSubmit = async (e) => {
   try {
     const res = await axios.post(`${process.env.REACT_APP_API_URL}/edit_certificate.php`, {
       certificate_id: id,
+      actor: getCurrentAdminActor(),
       ...formData
     });
 

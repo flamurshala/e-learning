@@ -51,6 +51,7 @@ import PaymentVerificationSettings from "./components/Admin-Side/PaymentVerifica
 import InvoiceList from "./components/Admin-Side/InvoiceList";
 import PaymentVerificationList from "./components/Admin-Side/PaymentVerificationList";
 import Reports from "./components/Admin-Side/Reports";
+import ReportsCleanup from "./components/Admin-Side/ReportsCleanup";
 import CompanyFinance from "./components/Admin-Side/CompanyFinance";
 import TemporaryCanceledStudent from "./components/Admin-Side/TemporaryCanceledStudent";
 
@@ -117,6 +118,14 @@ function App() {
             element={
               <ProtectedRoute userType="user" allowedRoles={["superadmin"]}>
                 <Reports />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ReportsCleanup"
+            element={
+              <ProtectedRoute userType="user" allowedRoles={["superadmin"]}>
+                <ReportsCleanup />
               </ProtectedRoute>
             }
           />

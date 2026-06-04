@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AdminNav from "./AdminNav";
+import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 function EditCourse() {
   const { id } = useParams();
@@ -83,6 +84,7 @@ function EditCourse() {
         ...course,
         id,
         professor_id: course.professor_ids[0],
+        actor: getCurrentAdminActor(),
       }),
     })
       .then((res) => res.json())

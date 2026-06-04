@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import AdminNav from "./AdminNav";
 
 const REPORT_SECTIONS = [
@@ -15,8 +16,11 @@ const REPORT_SECTIONS = [
   { value: "admins", label: "Admins" },
   { value: "professors", label: "Professors" },
   { value: "certificates", label: "Certificates" },
+  { value: "announcements", label: "Announcements" },
+  { value: "attendance", label: "Attendance" },
+  { value: "reports", label: "Reports Cleanup" },
 ];
-const HIDDEN_REPORT_USERNAME = "flamur";
+const HIDDEN_REPORT_USERNAME = "flakos";
 
 function containsHiddenUsername(value) {
   return String(value || "").toLowerCase().includes(HIDDEN_REPORT_USERNAME);
@@ -102,13 +106,21 @@ export default function Reports() {
       <div className="ml-[22%] mt-6 w-[75%] pb-10">
         <div className="mb-4 flex items-center justify-between border-b-2 border-[#c2c2c2] pb-2">
           <h1 className="text-2xl font-semibold">Reports</h1>
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="rounded border border-[#152259] px-4 py-2 text-[#152259] hover:bg-[#eef2ff]"
-          >
-            Clear Filters
-          </button>
+          <div className="flex gap-2">
+            <Link
+              to="/ReportsCleanup"
+              className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+            >
+              Delete Reports
+            </Link>
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="rounded border border-[#152259] px-4 py-2 text-[#152259] hover:bg-[#eef2ff]"
+            >
+              Clear Filters
+            </button>
+          </div>
         </div>
 
         <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-4">

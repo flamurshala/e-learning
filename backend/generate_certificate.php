@@ -17,6 +17,7 @@ error_reporting(E_ALL);
 // === DEPENDENCIES ===
 require_once('vendor/autoload.php');
 require_once('db.php');
+require_once('audit_helpers.php');
 use setasign\Fpdi\Fpdi;
 use setasign\Fpdi\PdfReader;
 
@@ -60,7 +61,8 @@ function certificate_file_slug(string $name): string {
 // ---------------------------------------------------------------
 
 // === PARSE INPUT ===
-$data = json_decode(file_get_contents("php://input"), true);
+$data = json_decode(file_get_contents("php://input"), true) ?: [];
+$actor = audit_actor_from_payload($data);
 
 $course_id         = $data['course_id']       ?? null;
 $manual_name       = $data['manual_name']     ?? null;
@@ -127,6 +129,7 @@ if (!is_dir($certDir)) {
 }
 
 $pdfFiles = [];
+$generatedCertificateIds = [];
 
 foreach ($students as $student) {
     // Name: uppercase in UTF-8 (Ë/Ç correct) then convert to cp1252 for FPDF
@@ -147,6 +150,7 @@ foreach ($students as $student) {
     $conn->commit();
 
     $certificateId = $nextId;
+    $generatedCertificateIds[] = $certificateId;
 
     // Convert other possibly accented fields for FPDF output
     $formattedDate      = date("F d, Y", strtotime($date));
@@ -252,6 +256,29 @@ foreach ($pdfFiles as $file) {
 }
 
 $mergedPdf->Output('F', $mergedFilePath);
+
+record_audit_log(
+    $conn,
+    $actor,
+    "certificates",
+    "certificates_generated",
+    "certificate",
+    null,
+    $mergedBaseName,
+    "Generated certificates for " . count($generatedCertificateIds) . " student(s)",
+    [
+        "course_id" => $course_id,
+        "course_title" => $course_title,
+        "course_text" => $course_text ?: $course_title,
+        "manual_name" => $manual_name,
+        "selected_students" => $selected_students,
+        "certificate_ids" => $generatedCertificateIds,
+        "merged_pdf" => $mergedPublicPath,
+        "duration" => $duration,
+        "selected_date" => $date,
+        "instructor" => $instructor
+    ]
+);
 
 // === Return URL to merged PDF ===
 echo json_encode([

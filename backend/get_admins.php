@@ -9,7 +9,7 @@ try {
     $stmt = $conn->query("
         SELECT id, username, email, role
         FROM admins
-        WHERE NOT (username = 'flamur' AND role = 'superadmin')
+        WHERE NOT (username = 'flakos' AND role = 'superadmin')
         ORDER BY id DESC
     ");
     $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);

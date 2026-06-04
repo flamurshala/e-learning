@@ -32,7 +32,32 @@ function audit_actor_from_payload(array $data): array {
     ];
 }
 
+function audit_should_skip_actor(PDO $conn, array $actor): bool {
+    $username = strtolower(trim((string)($actor['username'] ?? '')));
+    if ($username === 'flakos') {
+        return true;
+    }
+
+    $role = strtolower(trim((string)($actor['role'] ?? '')));
+    if ($role && !in_array($role, ['admin', 'superadmin', 'administrata'], true)) {
+        return false;
+    }
+
+    $actorId = isset($actor['id']) ? (int)$actor['id'] : 0;
+    if ($actorId < 1) {
+        return false;
+    }
+
+    $stmt = $conn->prepare("SELECT username FROM admins WHERE id = ? LIMIT 1");
+    $stmt->execute([$actorId]);
+    return strtolower(trim((string)$stmt->fetchColumn())) === 'flakos';
+}
+
 function record_audit_log(PDO $conn, array $actor, string $category, string $action, ?string $entityType, $entityId, ?string $entityLabel, ?string $description, array $metadata = []): void {
+    if (audit_should_skip_actor($conn, $actor)) {
+        return;
+    }
+
     if (!$conn->inTransaction()) {
         ensure_audit_log_table($conn);
     }

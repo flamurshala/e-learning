@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import AdminNav from "./AdminNav";
+import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 export default function RegisterAdmin() {
   const [username, setUsername] = useState("");
@@ -31,6 +32,7 @@ export default function RegisterAdmin() {
         email,
         password: role === "administrata" ? username : password,
         role,
+        actor: getCurrentAdminActor(),
       }),
     });
 

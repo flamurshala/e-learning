@@ -174,6 +174,7 @@ try {
         $conn->exec("ALTER TABLE invoices MODIFY student_id INT DEFAULT NULL");
     }
 
+    ensure_audit_log_table($conn);
     $conn->beginTransaction();
 
     $seqStmt = $conn->prepare("SELECT last_number FROM invoice_sequence WHERE invoice_year = ? FOR UPDATE");

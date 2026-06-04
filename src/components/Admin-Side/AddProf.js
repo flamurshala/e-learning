@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import AdminNav from "./AdminNav";
+import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 function AddUsers() {
   useEffect(() => {
@@ -25,6 +26,7 @@ function AddUsers() {
       username: professorUsername, // NEW
       email: professorEmail,
       password: professorPassword,
+      actor: getCurrentAdminActor(),
     };
 
     fetch(`${process.env.REACT_APP_API_URL}/add_professors.php`, {

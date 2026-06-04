@@ -174,6 +174,7 @@ try {
         $conn->exec("ALTER TABLE payment_verifications MODIFY student_id INT DEFAULT NULL");
     }
 
+    ensure_audit_log_table($conn);
     $conn->beginTransaction();
 
     $seqStmt = $conn->prepare("SELECT last_number FROM payment_verification_sequence WHERE payment_verification_year = ? FOR UPDATE");

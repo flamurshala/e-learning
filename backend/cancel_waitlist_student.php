@@ -40,6 +40,7 @@ if ($id < 1) {
 
 try {
     ensure_student_cancellations_table($conn);
+    ensure_audit_log_table($conn);
     $conn->beginTransaction();
 
     $lookup = $conn->prepare("

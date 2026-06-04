@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import AdminNav from "./AdminNav";
 import BackButton from "../BackButton";
+import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 export default function CertificateGenerator() {
   const [courses, setCourses] = useState([]);
@@ -78,6 +79,7 @@ export default function CertificateGenerator() {
       duration: formData.duration,
       date: formData.date,
       instructor: formData.instructor,
+      actor: getCurrentAdminActor(),
     };
 
     axios

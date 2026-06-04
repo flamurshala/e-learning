@@ -1,6 +1,7 @@
 import AdminNav from "./AdminNav";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 const paymentOptions = [
   { value: "Cash", label: "Paid by Cash" },
@@ -148,6 +149,7 @@ function EditStudent() {
       amountPaidAll,
       amountPaidMonth1,
       amountPaidMonth2,
+      actor: getCurrentAdminActor(),
     };
 
     fetch(`${process.env.REACT_APP_API_URL}/update_student.php`, {

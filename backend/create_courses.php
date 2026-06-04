@@ -4,13 +4,15 @@ header("Content-Type: application/json");
 header("Access-Control-Allow-Headers: *");
 
 include "db.php";
+include "audit_helpers.php";
 
 // ✅ Errors visible during dev
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 // ✅ Decode JSON
-$data = json_decode(file_get_contents("php://input"), true);
+$data = json_decode(file_get_contents("php://input"), true) ?: [];
+$actor = audit_actor_from_payload($data);
 
 // ✅ Required fields
 $title        = $data['title'] ?? '';
@@ -99,6 +101,23 @@ try {
   }
 
   $conn->commit();
+
+  record_audit_log(
+    $conn,
+    $actor,
+    "courses",
+    "course_created",
+    "course",
+    $course_id,
+    $title,
+    "Created course {$title}",
+    [
+      "professor_ids" => $professor_ids,
+      "student_ids" => $student_ids,
+      "total_sessions" => $total_sessions,
+    ]
+  );
+
   echo json_encode([
     'success' => true,
     'course_id' => $course_id,

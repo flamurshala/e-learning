@@ -4,10 +4,12 @@ header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
 require_once("db.php");
+require_once("audit_helpers.php");
 require_once("vendor/autoload.php");
 use setasign\Fpdi\Fpdi;
 
-$data = json_decode(file_get_contents("php://input"), true);
+$data = json_decode(file_get_contents("php://input"), true) ?: [];
+$actor = audit_actor_from_payload($data);
 $certificateId = $data['certificate_id'] ?? null;
 
 if (!$certificateId) {
@@ -112,6 +114,24 @@ $stmt->execute([
 if ($stmt->rowCount() === 0) {
     error_log("DB update failed for certificate ID: $certificateId");
 }
+
+record_audit_log(
+    $conn,
+    $actor,
+    "certificates",
+    "certificate_updated",
+    "certificate",
+    $certificateId,
+    "Certificate #{$certificateId}",
+    "Updated certificate #{$certificateId}",
+    [
+        "manual_name" => $manualName,
+        "course_text" => $courseText,
+        "duration" => $duration,
+        "selected_date" => $date,
+        "instructor" => $instructor
+    ]
+);
 
 
 // At the end of the PHP file

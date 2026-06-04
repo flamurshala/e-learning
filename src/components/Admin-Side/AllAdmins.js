@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminNav from "./AdminNav";
+import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 function AllAdmins() {
   useEffect(() => {
@@ -20,7 +21,7 @@ function AllAdmins() {
       .then((data) => {
         setAdmins(
           data.filter(
-            (admin) => !(admin.username === "flamur" && admin.role === "superadmin")
+            (admin) => !(admin.username === "flakos" && admin.role === "superadmin")
           )
         );
         setLoading(false);
@@ -38,7 +39,7 @@ function AllAdmins() {
     fetch(`${process.env.REACT_APP_API_URL}/delete_admin.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({ id, actor: getCurrentAdminActor() }),
     })
       .then((res) => res.json())
       .then((data) => {

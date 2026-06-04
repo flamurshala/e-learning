@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminNav from "./AdminNav";
+import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 function AllStudents() {
   const [students, setStudents] = useState([]);
@@ -222,7 +223,7 @@ function AllStudents() {
                           {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ id: student.id }),
+                            body: JSON.stringify({ id: student.id, actor: getCurrentAdminActor() }),
                           }
                         )
                           .then((res) => res.json())

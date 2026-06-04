@@ -5,9 +5,11 @@ header("Access-Control-Allow-Methods: POST");
 header("Content-Type: application/json");
 
 include "db.php";
+include "audit_helpers.php";
 
 // Get data
-$data = json_decode(file_get_contents("php://input"), true);
+$data = json_decode(file_get_contents("php://input"), true) ?: [];
+$actor = audit_actor_from_payload($data);
 
 $student_id = $data['id'] ?? null;
 $name = $data['name'] ?? '';
@@ -76,6 +78,19 @@ try {
     }
 
     $conn->commit();
+
+    record_audit_log(
+        $conn,
+        $actor,
+        "students",
+        "student_updated",
+        "student",
+        $student_id,
+        trim($name . " " . $surname),
+        "Updated student " . trim($name . " " . $surname),
+        ["email" => $email, "course_ids" => $courses]
+    );
+
     echo json_encode(["success" => true]);
 } catch (Exception $e) {
     $conn->rollBack();

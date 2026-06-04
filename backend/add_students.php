@@ -8,10 +8,12 @@ header("Access-Control-Allow-Methods: POST");
 header("Content-Type: application/json");
 
 include "db.php";
+include "audit_helpers.php";
 
 try {
     $isTemporaryStudentRegistration = !empty($temporaryStudentRegistration);
-    $data = json_decode(file_get_contents("php://input"), true);
+    $data = json_decode(file_get_contents("php://input"), true) ?: [];
+    $actor = audit_actor_from_payload($data);
 
     // Student info
     $name = trim($data['name'] ?? '');
@@ -158,6 +160,25 @@ try {
     }
 
     $conn->commit();
+
+    record_audit_log(
+        $conn,
+        $actor,
+        "students",
+        $mergedExisting ? "student_updated_with_courses" : "student_added",
+        "student",
+        $student_id,
+        trim($name . " " . $surname),
+        ($mergedExisting ? "Updated existing student" : "Added student") . " and registered courses",
+        [
+            "email" => $email,
+            "added_course_ids" => $addedCourseIds,
+            "skipped_course_ids" => $skippedCourseIds,
+            "temporary_registration" => $isTemporaryStudentRegistration,
+            "registration_date" => $registrationDate ?: null,
+        ]
+    );
+
     echo json_encode([
         'success' => true,
         'student_id' => $student_id,

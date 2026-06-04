@@ -5,6 +5,7 @@ import DatePickerDDMMYYYY, {
   displayDateToIso,
   todayDisplayDate,
 } from "./DatePickerDDMMYYYY";
+import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 const paymentOptions = [
   { value: "Cash", label: "Paid by cash" },
@@ -158,6 +159,7 @@ function AddUsers({ temporaryRegistration = false }) {
       email: studentEmail,
       notes: extraNotes,
       courses: selectedCourses,
+      actor: getCurrentAdminActor(),
     };
 
     if (temporaryRegistration) {

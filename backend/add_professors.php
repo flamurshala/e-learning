@@ -4,8 +4,10 @@ header('Content-Type: application/json');
 header("Access-Control-Allow-Headers: *");
 
 include "db.php";
+include "audit_helpers.php";
 
-$data = json_decode(file_get_contents('php://input'), true);
+$data = json_decode(file_get_contents('php://input'), true) ?: [];
+$actor = audit_actor_from_payload($data);
 
 $professor_name = isset($data['name']) ? trim($data['name']) : '';
 $professor_username = isset($data['username']) ? trim($data['username']) : ''; // NEW
@@ -21,6 +23,18 @@ try {
     $stmt = $conn->prepare("INSERT INTO professors (name, username, email, password) VALUES (?, ?, ?, ?)");
     $stmt->execute([$professor_name, $professor_username, $professor_email, $professor_password]);
     $professor_id = $conn->lastInsertId();
+
+    record_audit_log(
+        $conn,
+        $actor,
+        "professors",
+        "professor_added",
+        "professor",
+        $professor_id,
+        $professor_name,
+        "Added professor {$professor_name}",
+        ["username" => $professor_username, "email" => $professor_email]
+    );
 
     echo json_encode(['success' => true, 'message' => 'Professor added successfully', 'professor_id' => $professor_id]);
 } catch (PDOException $e) {

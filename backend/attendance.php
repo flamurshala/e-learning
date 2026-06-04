@@ -4,12 +4,14 @@ header("Content-Type: application/json");
 header("Access-Control-Allow-Headers: *");
 
 include 'db.php';
+include 'audit_helpers.php';
 
 // --- Keep everything in UTC for consistency ---
 date_default_timezone_set('UTC');
 try { $conn->exec("SET time_zone = '+00:00'"); } catch (Throwable $e) { /* ignore if not MySQL */ }
 
-$data = json_decode(file_get_contents('php://input'), true);
+$data = json_decode(file_get_contents('php://input'), true) ?: [];
+$actor = audit_actor_from_payload($data);
 
 $session_id = isset($data['session_id']) ? (int)$data['session_id'] : 0;
 $professor_id = isset($data['professor_id']) ? (int)$data['professor_id'] : 0;
@@ -22,6 +24,7 @@ if (!$session_id || !$professor_id || !is_array($attendance_records)) {
 }
 
 try {
+    ensure_audit_log_table($conn);
     $conn->beginTransaction();
 
     // Remove old marks for this session
@@ -112,6 +115,23 @@ try {
     );
     $stmtTs->execute([$session_id]);
     $ts = $stmtTs->fetch(PDO::FETCH_ASSOC) ?: [];
+
+    record_audit_log(
+        $conn,
+        $actor,
+        "attendance",
+        "attendance_submitted",
+        "training_session",
+        $session_id,
+        "Session #{$session_id}",
+        "Submitted attendance for session #{$session_id}",
+        [
+            "course_id" => $course_id,
+            "professor_id" => $professor_id,
+            "attendance_count" => count($attendance_records),
+            "submitted_after_seconds" => $submitted_after_seconds
+        ]
+    );
 
     $conn->commit();
     echo json_encode([

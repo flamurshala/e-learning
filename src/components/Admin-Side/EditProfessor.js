@@ -1,6 +1,7 @@
 import AdminNav from "./AdminNav";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 function EditProfessor() {
   useEffect(() => {
@@ -41,7 +42,7 @@ function EditProfessor() {
     fetch(`${process.env.REACT_APP_API_URL}/update_professor.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, ...professor }),
+      body: JSON.stringify({ id, ...professor, actor: getCurrentAdminActor() }),
     })
       .then((res) => res.json())
       .then((data) => {

@@ -4,12 +4,14 @@ header('Content-Type: application/json');
 header("Access-Control-Allow-Headers: *");
 
 include "db.php";
+include "audit_helpers.php";
 
 function ensure_admin_role_enum(PDO $conn): void {
     $conn->exec("ALTER TABLE admins MODIFY role ENUM('admin','superadmin','administrata') NOT NULL DEFAULT 'admin'");
 }
 
-$data = json_decode(file_get_contents('php://input'), true);
+$data = json_decode(file_get_contents('php://input'), true) ?: [];
+$actor = audit_actor_from_payload($data);
 
 $admin_name = isset($data['username']) ? trim($data['username']) : '';
 $admin_email = isset($data['email']) ? trim($data['email']) : '';
@@ -46,6 +48,18 @@ try {
     $stmt = $conn->prepare("INSERT INTO admins (username, email, password, role) VALUES (?, ?, ?, ?)");
     $stmt->execute([$admin_name, $admin_email, $hashed_password, $admin_role]);
     $admin_id = $conn->lastInsertId();
+
+    record_audit_log(
+        $conn,
+        $actor,
+        "admins",
+        "admin_created",
+        "admin",
+        $admin_id,
+        $admin_name,
+        "Created admin user {$admin_name}",
+        ["email" => $admin_email, "role" => $admin_role]
+    );
 
     echo json_encode(['success' => true, 'message' => 'Admin user added successfully', 'admin_id' => $admin_id]);
 } catch (PDOException $e) {

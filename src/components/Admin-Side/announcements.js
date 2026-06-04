@@ -1,6 +1,7 @@
 import { useState } from "react";
 import AdminNav from "./AdminNav";
 import { useEffect } from "react";
+import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 function Announcements() {
   useEffect(() => {
@@ -17,7 +18,7 @@ function Announcements() {
     fetch(`${process.env.REACT_APP_API_URL}/create_announcement.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, content, audience }),
+      body: JSON.stringify({ title, content, audience, actor: getCurrentAdminActor() }),
     })
       .then((res) => res.json())
       .then((data) => {

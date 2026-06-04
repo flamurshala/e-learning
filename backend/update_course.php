@@ -4,6 +4,7 @@ header("Content-Type: application/json");
 header("Access-Control-Allow-Headers: *");
 
 include "db.php";
+include "audit_helpers.php";
 
 // Show errors in dev
 ini_set('display_errors', 1);
@@ -13,7 +14,8 @@ error_reporting(E_ALL);
 date_default_timezone_set('UTC');
 try { $conn->exec("SET time_zone = '+00:00'"); } catch (Throwable $e) {}
 
-$data = json_decode(file_get_contents("php://input"), true);
+$data = json_decode(file_get_contents("php://input"), true) ?: [];
+$actor = audit_actor_from_payload($data);
 
 // -------- Inputs --------
 $course_id    = isset($data['id']) ? (int)$data['id'] : 0;
@@ -165,6 +167,24 @@ try {
   ")->execute([$course_id]);
 
   $conn->commit();
+
+  record_audit_log(
+    $conn,
+    $actor,
+    "courses",
+    "course_updated",
+    "course",
+    $course_id,
+    $title,
+    "Updated course {$title}",
+    [
+      "professor_ids" => $professor_ids,
+      "student_ids_synced" => $should_sync_students,
+      "student_ids" => $student_ids,
+      "total_sessions" => $total_sessions,
+    ]
+  );
+
   echo json_encode([
     "success" => true,
     "course_id" => $course_id,

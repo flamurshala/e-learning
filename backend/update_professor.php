@@ -5,8 +5,10 @@ header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Content-Type: application/json");
 
 include "db.php";
+include "audit_helpers.php";
 
-$data = json_decode(file_get_contents("php://input"), true);
+$data = json_decode(file_get_contents("php://input"), true) ?: [];
+$actor = audit_actor_from_payload($data);
 
 $professor_id = isset($data['id']) ? (int)$data['id'] : 0;
 $name     = trim($data['name'] ?? '');
@@ -29,6 +31,18 @@ try {
          WHERE id = ?
     ");
     $stmt->execute([$name, $username, $email, $password, $professor_id]);
+
+    record_audit_log(
+        $conn,
+        $actor,
+        "professors",
+        "professor_updated",
+        "professor",
+        $professor_id,
+        $name,
+        "Updated professor {$name}",
+        ["username" => $username, "email" => $email]
+    );
 
     echo json_encode(["success" => true]);
 } catch (PDOException $e) {

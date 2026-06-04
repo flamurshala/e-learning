@@ -100,7 +100,7 @@ function AllCourses() {
     fetch(`${process.env.REACT_APP_API_URL}/delete_course.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({ id, actor: currentAdmin }),
     })
       .then((res) => res.json())
       .then((data) => {
