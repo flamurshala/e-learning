@@ -25,7 +25,13 @@ export default function TemporaryCanceledStudent() {
 
     fetch(`${process.env.REACT_APP_API_URL}/get_course.php`)
       .then((res) => res.json())
-      .then((data) => setCourses(Array.isArray(data) ? data : []))
+      .then((data) =>
+        setCourses(
+          Array.isArray(data)
+            ? [...data].sort((a, b) => Number(b.id) - Number(a.id))
+            : []
+        )
+      )
       .catch(() => setCourses([]));
   }, []);
 

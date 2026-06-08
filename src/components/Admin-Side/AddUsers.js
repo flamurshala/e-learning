@@ -69,7 +69,9 @@ function AddUsers({ temporaryRegistration = false }) {
     fetch(`${process.env.REACT_APP_API_URL}/get_course.php`)
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) setCourses(data);
+        if (Array.isArray(data)) {
+          setCourses([...data].sort((a, b) => Number(b.id) - Number(a.id)));
+        }
         else setCourses([]);
       })
       .catch(() => setCourses([]));
@@ -214,7 +216,13 @@ function AddUsers({ temporaryRegistration = false }) {
             : 0;
           const warnings = Array.isArray(data.warnings) ? data.warnings : [];
           const successLines = [
-            data.merged_existing
+            temporaryRegistration
+              ? data.merged_existing
+                ? addedCount > 0
+                  ? `Temporary student registration completed. ${addedCount} new course${addedCount === 1 ? "" : "s"} registered.`
+                  : "Temporary student registration completed. No new courses were added."
+                : "Student registered successfully!"
+              : data.merged_existing
               ? addedCount > 0
                 ? `Existing student found. ${addedCount} new course${addedCount === 1 ? "" : "s"} added.`
                 : "Existing student found. No new courses were added."
@@ -250,7 +258,7 @@ function AddUsers({ temporaryRegistration = false }) {
           };
 
           removeFromWaitlist().finally(() => {
-            if (addedPaidVerificationItems.length > 0) {
+            if (!temporaryRegistration && addedPaidVerificationItems.length > 0) {
               navigate("/PaymentVerificationForm", {
                 state: {
                   prefillPaymentVerification: true,
