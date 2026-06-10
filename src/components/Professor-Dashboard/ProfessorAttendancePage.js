@@ -46,7 +46,7 @@ function ProfessorAttendancePage() {
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-800 mb-1">
             Tectigon Academy

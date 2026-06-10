@@ -306,7 +306,7 @@ export default function InvoiceForm({ variant = "invoice" }) {
 
             <div>
               <label className="mb-2 block font-medium">Bill to</label>
-              <div className="mb-3 flex gap-2">
+              <div className="mb-3 flex flex-col gap-2 sm:flex-row">
                 <button
                   type="button"
                   onClick={() => handleStudentModeChange("select")}

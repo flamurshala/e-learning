@@ -95,7 +95,7 @@ function AdminNotifications() {
         )}
 
         {notifications.length > 0 && (
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <label className="flex items-center text-sm font-medium text-gray-700">
               <input
                 type="checkbox"
@@ -118,7 +118,7 @@ function AdminNotifications() {
           {notifications.map((note) => (
             <li
               key={note.id}
-              className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex items-start justify-between hover:shadow-md transition-shadow"
+              className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md sm:flex-row sm:items-start sm:justify-between"
             >
               <div className="flex items-start gap-3">
                 <input

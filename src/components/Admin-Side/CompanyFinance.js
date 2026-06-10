@@ -642,7 +642,7 @@ export default function CompanyFinance() {
               <input type="date" value={expenseForm.expense_date} onChange={(e) => updateExpenseForm("expense_date", e.target.value)} className="rounded border px-3 py-2" required />
               <div className="rounded border px-3 py-2">
                 <span className="mb-2 block text-sm font-medium text-gray-700">Payment method</span>
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   {expensePaymentMethods.map((method) => (
                     <button
                       key={method}
@@ -660,7 +660,7 @@ export default function CompanyFinance() {
                 </div>
               </div>
               <textarea placeholder="Description / notes" value={expenseForm.description} onChange={(e) => updateExpenseForm("description", e.target.value)} className="rounded border px-3 py-2 md:col-span-2" />
-              <div className="flex gap-2 md:col-span-2">
+              <div className="flex flex-col gap-2 sm:flex-row md:col-span-2">
                 <button className="rounded bg-[#152259] px-4 py-2 text-white">{expenseForm.id ? "Update expense" : "Create expense"}</button>
                 {expenseForm.id && <button type="button" onClick={() => setExpenseForm(emptyExpense)} className="rounded border px-4 py-2">Cancel edit</button>}
               </div>
@@ -719,7 +719,7 @@ export default function CompanyFinance() {
               <input type="number" min="0" step="0.01" placeholder="Paid amount" value={salaryForm.paid_amount} onChange={(e) => updateSalaryForm("paid_amount", e.target.value)} className="rounded border px-3 py-2" required />
               <input type="date" value={salaryForm.payment_date} onChange={(e) => updateSalaryForm("payment_date", e.target.value)} className="rounded border px-3 py-2" required />
               <textarea placeholder="Notes" value={salaryForm.notes} onChange={(e) => updateSalaryForm("notes", e.target.value)} className="rounded border px-3 py-2 md:col-span-2" />
-              <div className="flex gap-2 md:col-span-2">
+              <div className="flex flex-col gap-2 sm:flex-row md:col-span-2">
                 <button className="w-fit rounded bg-[#152259] px-4 py-2 text-white">
                   {salaryForm.id ? "Update salary payment" : "Register salary payment"}
                 </button>

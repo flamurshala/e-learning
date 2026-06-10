@@ -99,7 +99,7 @@ function AllStudents() {
       <div className="mt-4 ml-[22%] w-[75%]">
         <div className="flex items-center justify-between border-b-2 border-[#c2c2c2] pb-2 w-[95%]">
           <h1 className="text-2xl font-semibold">All Students</h1>
-          <div className="flex gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
             {canAccessWaitlist && (
               <>
                 <Link to="/Waitlist">
@@ -122,9 +122,9 @@ function AllStudents() {
           </div>
         </div>
 
-        <div className="my-4 flex justify-between">
-          <div>
-            <label className="mr-2 font-medium">Filter by Course:</label>
+        <div className="my-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-1">
+            <label className="font-medium">Filter by Course:</label>
             <select
               value={selectedCourse}
               onChange={handleFilterChange}
@@ -143,7 +143,7 @@ function AllStudents() {
             placeholder="Search by name or surname"
             value={searchQuery}
             onChange={handleSearchChange}
-            className="border px-3 py-1 rounded w-1/3"
+            className="w-full rounded border px-3 py-2 sm:w-1/3"
           />
         </div>
 

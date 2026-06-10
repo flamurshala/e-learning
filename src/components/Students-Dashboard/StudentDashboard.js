@@ -78,17 +78,17 @@ function StudentDashboard() {
     <div className="min-h-screen bg-gray-100">
       <StudentNav />
 
-      <div className="ml-[18%] p-8">
+      <div className="ml-[18%] p-4 sm:p-8">
         <div className="w-full">
           <h1 className="text-4xl font-medium border-b border-black ">
             Student Dashboard
           </h1>
 
-          <div className="p-[15px] flex flex-wrap gap-2">
+          <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 xl:grid-cols-3">
             {courses.map((course) => (
-              <div className="">
-                <div key={course.id} className="flex flex-wrap gap-4">
-                  <div className="w-[320px] h-[180px] rounded-tr-2xl rounded-tl-2xl overflow-hidden relative">
+              <div key={course.id} className="min-w-0">
+                <div>
+                  <div className="relative h-[180px] w-full overflow-hidden rounded-t-2xl">
                     <img
                       src={FirstClass}
                       alt="Course"
@@ -116,7 +116,7 @@ function StudentDashboard() {
                 </div>
 
                 {showAssignments[course.id] && assignments[course.id] && (
-                  <div className="bg-white w-[320px] p-4 rounded-br-2xl rounded-bl-2xl shadow ">
+                  <div className="w-full rounded-b-2xl bg-white p-4 shadow">
                     <h3 className="text-lg font-semibold mb-2">Assignments</h3>
 
                     {assignments[course.id].length > 0 ? (
@@ -140,7 +140,7 @@ function StudentDashboard() {
             ))}
           </div>
         </div>
-        <div className="mt-[30%]">
+        <div className="mt-12">
           <Footer />
         </div>
       </div>

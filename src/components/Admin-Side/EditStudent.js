@@ -236,7 +236,7 @@ function EditStudent() {
               )}
 
               {payments[index] === "Divided" && (
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <div className="w-1/2">
                     <label className="block font-semibold">Month 1</label>
                     <input type="number" placeholder="Month 1 Paid" className="w-full border p-2" value={amountPaidMonth1[index]} onChange={(e) => handleAmountPaidMonth1Change(index, e.target.value)} />

@@ -158,7 +158,7 @@ export default function InvoiceSettings({ variant = "invoice" }) {
 
           <form onSubmit={saveInvoiceNumber} className="mb-8 rounded border border-gray-200 p-4">
             <label className="mb-2 block font-medium">{config.numberLabel}</label>
-            <div className="flex gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <input
                 type="text"
                 value={nextInvoiceNumber}
@@ -177,7 +177,7 @@ export default function InvoiceSettings({ variant = "invoice" }) {
           </form>
 
           <h2 className="mb-3 text-lg font-semibold">Description Options</h2>
-          <form onSubmit={addOption} className="mb-6 flex gap-3">
+          <form onSubmit={addOption} className="mb-6 flex flex-col gap-3 sm:flex-row">
             <input
               type="text"
               value={newOption}

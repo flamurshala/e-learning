@@ -81,7 +81,7 @@ function SessionTimer({ sessionId, onFifteenMinutes, onTick }) {
         {stopped && <span className="ml-2 text-red-600">(stopped)</span>}
       </p>
 
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
         <div className={`p-3 rounded shadow text-center w-24 ${getCardClass(WARN1)}`}>
           <p className="text-sm font-medium">5 min</p>
         </div>

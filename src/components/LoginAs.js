@@ -10,35 +10,35 @@ function LoginAs() {
   }, []);
 
   return (
-    <div className="flex h-screen w-screen">
+    <div className="flex min-h-screen w-full flex-col lg:flex-row">
       {/* Left Side - Logo */}
-      <div className="w-1/2 bg-white flex items-center justify-center">
-        <img src={img} alt="logo" className="w-[65%] max-w-[450px]" />
+      <div className="flex w-full items-center justify-center bg-white px-6 py-8 lg:w-1/2 lg:py-0">
+        <img src={img} alt="logo" className="w-48 max-w-[450px] sm:w-[45%] lg:w-[65%]" />
       </div>
 
       {/* Right Side - Form Section */}
-      <div className="w-1/2 bg-[#152259] flex items-center justify-center">
-        <div className="bg-white w-[80%] max-w-[400px] rounded-2xl shadow-xl p-8 text-center">
-          <h1 className="text-[30px] mb-6">Login As</h1>
+      <div className="flex flex-1 items-center justify-center bg-[#152259] px-4 py-8 lg:w-1/2">
+        <div className="w-full max-w-[400px] rounded-2xl bg-white p-5 text-center shadow-xl sm:p-8">
+          <h1 className="mb-6 text-2xl sm:text-[30px]">Login As</h1>
 
-          <div className="flex justify-between mb-6">
+          <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Teacher */}
-            <div className="w-[48%] bg-[#152259] p-4 relative group rounded-md overflow-hidden">
+            <div className="group relative overflow-hidden rounded-md bg-[#152259] p-4">
               <img src={teacher} className="w-full" alt="teacher" />
               <Link
                 to={"/ProfessorLogin"}
-                className="absolute inset-0 flex items-center justify-center text-black text-lg font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/40"
+                className="absolute inset-0 flex items-center justify-center bg-white/40 text-lg font-semibold text-black opacity-0 transition-opacity duration-300 group-hover:opacity-100 focus:opacity-100"
               >
                 Teacher
               </Link>
             </div>
 
             {/* Admin */}
-            <div className="w-[48%] bg-[#152259] p-4 relative group rounded-md overflow-hidden">
+            <div className="group relative overflow-hidden rounded-md bg-[#152259] p-4">
               <img src={admin} className="w-full" alt="admin" />
               <Link
                 to={"/AdminLogin"}
-                className="absolute inset-0 flex items-center justify-center text-black text-lg font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/40"
+                className="absolute inset-0 flex items-center justify-center bg-white/40 text-lg font-semibold text-black opacity-0 transition-opacity duration-300 group-hover:opacity-100 focus:opacity-100"
               >
                 Admin
               </Link>

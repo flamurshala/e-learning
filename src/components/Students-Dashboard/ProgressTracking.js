@@ -40,7 +40,7 @@ function ProgressTracking() {
     <div className="h-[100%] bg-gray-100">
       <div className="flex">
         <StudentNav />
-        <div className="flex-1 p-4 ml-[20%]">
+        <div className="ml-[20%] min-w-0 flex-1 p-4">
           <h1 className="text-4xl font-medium border-b border-black mb-8">
             Progress Tracking
           </h1>
@@ -50,7 +50,7 @@ function ProgressTracking() {
           ) : progressData.length === 0 ? (
             <p>No course progress available.</p>
           ) : (
-            <div className="flex flex-wrap gap-6">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {progressData.map((course, idx) => {
                 const percent = animatedPercentages[idx] || 0;
                 const strokeDasharray = 283;
@@ -60,7 +60,7 @@ function ProgressTracking() {
                 return (
                   <div
                     key={course.course_id}
-                    className="bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center w-[300px]"
+                    className="flex w-full flex-col items-center rounded-2xl bg-white p-5 shadow-xl sm:p-8"
                   >
                     <div className="relative w-32 h-32 mb-6">
                       <svg className="w-full h-full">
@@ -130,7 +130,7 @@ function ProgressTracking() {
               })}
             </div>
           )}
-          <div className="mt-[30%]">
+          <div className="mt-12">
             <Footer />
           </div>
         </div>

@@ -47,7 +47,7 @@ function StudentAnnouncements() {
     <div className="flex">
       <ProffesorNav />
       <div className="w-[75%] mt-10 px-4 ml-[20%]">
-        <div className="flex justify-between items-center mb-6">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <FaBullhorn className="text-yellow-400 animate-pulse" />
             Announcements from{" "}

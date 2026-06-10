@@ -116,17 +116,17 @@ function ProfessorDashboard() {
     <div>
       <div className="flex gap-4 min-h-screen bg-gray-100">
         <ProffesorNav />
-        <div className="flex flex-col w-[75%] ml-[21%]">
+        <div className="ml-[21%] flex w-[75%] flex-col px-4 pt-4 sm:px-0">
           <div className="col relative w-[100%]">
             <h1 className="text-4xl font-medium border-b border-black mb-8">
               Professor Dashboard
             </h1>
 
-            <div className="mainPart p-[15px] w-[100%] flex flex-wrap gap-4">
+            <div className="mainPart grid w-full grid-cols-1 gap-4 py-4 sm:grid-cols-2 xl:grid-cols-3">
               {courses.map((course) => (
-                <div key={course.id} className="w-full">
-                  <div className="flex gap-[10px]">
-                    <div className="w-[320px] h-[180px] rounded-2xl shadow-xl bg-white relative overflow-hidden flex items-end mb-4 group transition-transform duration-300 hover:-translate-y-2 cursor-pointer">
+                <div key={course.id} className="min-w-0">
+                  <div>
+                    <div className="group relative mb-4 flex h-[180px] w-full cursor-pointer items-end overflow-hidden rounded-2xl bg-white shadow-xl transition-transform duration-300 hover:-translate-y-2">
                       <img
                         src={FirstClass}
                         alt="Class"
@@ -162,7 +162,7 @@ function ProfessorDashboard() {
                   {showForm[course.id] && (
                     <form
                       onSubmit={(e) => handleAssignmentSubmit(e, course.id)}
-                      className="bg-white p-4 rounded shadow-md mb-8 w-[80%]"
+                      className="mb-8 w-full rounded bg-white p-4 shadow-md"
                     >
                       <h3 className="text-lg font-semibold mb-2">
                         Assign Homework

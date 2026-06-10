@@ -130,7 +130,7 @@ export default function DatePickerDDMMYYYY({ id, label, value, onChange, require
       </button>
 
       {isOpen && (
-        <div className="absolute z-20 mt-2 w-72 rounded border border-gray-300 bg-white p-3 shadow-xl">
+        <div className="absolute right-0 z-20 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded border border-gray-300 bg-white p-3 shadow-xl">
           <div className="mb-3 flex items-center justify-between">
             <button
               type="button"
