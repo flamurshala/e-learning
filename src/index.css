@@ -64,6 +64,7 @@ textarea {
 @media (min-width: 1024px) {
   .app-sidebar {
     box-sizing: content-box;
+    height: calc(100vh - 2.5rem);
     overflow-y: hidden !important;
   }
 }
