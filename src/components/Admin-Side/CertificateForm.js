@@ -102,7 +102,7 @@ export default function CertificateGenerator() {
     <div className="flex gap-4">
       <AdminNav />
       <div className="mt-10 ml-[22%] w-[75%] p-6 bg-white rounded-lg shadow-md">
-        <BackButton text="Go Back" className="mb-4" />
+        <BackButton text="Back to Certificates" to="/AllCertificates" className="mb-4" />
 
         <h2 className="text-2xl font-bold mb-6 text-center">Generate Certificate</h2>
         <form onSubmit={handleSubmit}>

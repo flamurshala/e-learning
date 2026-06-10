@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminNav from "./AdminNav";
+import BackButton from "../BackButton";
 import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 export default function Waitlist() {
@@ -314,6 +315,7 @@ export default function Waitlist() {
     <div className="flex gap-4">
       <AdminNav />
       <div className="mt-4 ml-[22%] w-[75%] pb-10">
+        <BackButton to="/AllStudents" className="mb-4" />
         <h1 className="text-2xl font-semibold border-b-2 border-[#c2c2c2] w-[95%] mb-6">
           Lista e pritjes së studentëve
         </h1>

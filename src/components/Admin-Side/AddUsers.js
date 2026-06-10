@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AdminNav from "./AdminNav";
+import BackButton from "../BackButton";
 import DatePickerDDMMYYYY, {
   displayDateToIso,
   todayDisplayDate,
@@ -380,6 +381,12 @@ function AddUsers({ temporaryRegistration = false }) {
     <div className="flex gap-4">
       <AdminNav />
       <div className="mt-4 ml-[22%] w-[75%]">
+        {!temporaryRegistration && (
+          <BackButton
+            to={fromWaitlistFlow ? "/Waitlist" : "/AllStudents"}
+            className="mb-4"
+          />
+        )}
         {/* <h1 className="text-2xl font-semibold border-b-2 border-[#c2c2c2] w-[95%]">Add a new Student</h1> */}
         <div className="cards mt-6 items-center flex flex-wrap gap-4">
           <div className="card border shadow-xl border-black p-5 w-[45%]">

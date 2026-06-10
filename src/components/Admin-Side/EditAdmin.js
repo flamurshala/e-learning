@@ -78,7 +78,7 @@ function EditAdmin() {
             <h2 className="text-2xl font-semibold">Ndrysho administratorin</h2>
             <button
               type="button"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate("/AllAdmins")}
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-800"
             >
               Kthehu

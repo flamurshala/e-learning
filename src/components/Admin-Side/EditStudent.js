@@ -1,4 +1,5 @@
 import AdminNav from "./AdminNav";
+import BackButton from "../BackButton";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getCurrentAdminActor } from "../../utils/currentAdmin";
@@ -173,6 +174,7 @@ function EditStudent() {
     <div className="flex gap-4">
       <AdminNav />
       <div className="ml-[22%] mt-6 w-[75%]">
+        <BackButton to="/AllStudents" className="mb-4" />
         <h1 className="text-2xl font-semibold border-b-2 border-[#c2c2c2] mb-6">
           Edit Student
         </h1>

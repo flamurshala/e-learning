@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Link, useLocation } from "react-router-dom";
 import AdminNav from "./AdminNav";
+import BackButton from "../BackButton";
 import { getCurrentAdminActor } from "../../utils/currentAdmin";
 import {
   displayDateToIso,
@@ -11,6 +12,7 @@ import {
 
 export default function InvoiceForm({ variant = "invoice" }) {
   const location = useLocation();
+  const userRole = localStorage.getItem("userRole");
   const isVerification = variant === "verification";
   const prefillDate =
     isVerification && location.state?.prefillPaymentVerification
@@ -272,6 +274,13 @@ export default function InvoiceForm({ variant = "invoice" }) {
       <AdminNav />
       <div className="ml-[22%] mt-10 w-[75%]">
         <div className="max-w-2xl rounded border border-gray-300 bg-white p-6 shadow-md">
+          {userRole === "superadmin" && (
+            <BackButton
+              text={isVerification ? "Back to Verifications" : "Back to Invoices"}
+              to={isVerification ? "/PaymentVerificationList" : "/InvoiceList"}
+              className="mb-4"
+            />
+          )}
           <div className="mb-6 flex items-center justify-between">
             <h1 className="text-2xl font-semibold">{config.title}</h1>
             <Link

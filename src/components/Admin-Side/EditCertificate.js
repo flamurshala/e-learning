@@ -104,7 +104,7 @@ const handleSubmit = async (e) => {
     <div className="flex">
       <AdminNav />
       <div className="ml-[22%] w-[75%] mt-6">
-      <BackButton text="Go Back" className="mb-4" />
+      <BackButton text="Back to Certificates" to="/AllCertificates" className="mb-4" />
        
 
         <h1 className="text-2xl font-semibold mb-6">Edit Certificate #{id}</h1>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import AdminNav from "./AdminNav";
+import BackButton from "../BackButton";
 import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 function AddUsers() {
@@ -56,6 +57,7 @@ function AddUsers() {
     <div className="flex gap-4">
       <AdminNav />
       <div className="mt-4 ml-[22%] w-[75%]">
+        <BackButton to="/AllProfessors" className="mb-4" />
         <h1 className="text-2xl font-semibold border-b-2 border-[#c2c2c2] w-[95%]">Add a new User</h1>
         <div className="cards mt-6 items-center flex flex-wrap gap-4">
           <div className="card border shadow-xl border-black p-5 w-[45%]">

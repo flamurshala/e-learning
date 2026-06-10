@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminNav from "./AdminNav";
+import BackButton from "../BackButton";
 
 function formatDisplayDate(value) {
   if (!value) return "-";
@@ -89,6 +90,7 @@ export default function CanceledStudents() {
     <div className="flex gap-4">
       <AdminNav />
       <div className="mt-4 ml-[22%] w-[75%] pb-10">
+        <BackButton to="/AllStudents" className="mb-4" />
         <div className="mb-6 flex items-center justify-between border-b-2 border-[#c2c2c2] pb-2">
           <h1 className="text-2xl font-semibold">Canceled Students</h1>
         </div>

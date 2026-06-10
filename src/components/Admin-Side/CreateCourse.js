@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import AdminNav from "./AdminNav";
+import BackButton from "../BackButton";
 import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 function CreateCourse() {
@@ -74,6 +75,7 @@ function CreateCourse() {
     <div className="flex gap-5 bg-white rounded shadow">
       <AdminNav />
       <div className="w-[75%] ml-[22%] mt-[2rem]">
+        <BackButton to="/AllCourses" className="mb-4" />
         <h1 className="text-3xl font-bold mb-4 border-b border-black">
           Create New Course
         </h1>

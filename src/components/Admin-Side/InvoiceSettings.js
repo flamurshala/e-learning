@@ -137,7 +137,13 @@ export default function InvoiceSettings({ variant = "invoice" }) {
             <h1 className="text-2xl font-semibold">{config.title}</h1>
             <button
               type="button"
-              onClick={() => navigate(-1)}
+              onClick={() =>
+                navigate(
+                  isVerification
+                    ? "/PaymentVerificationForm"
+                    : "/InvoiceForm"
+                )
+              }
               className="rounded bg-[#152259] px-4 py-2 text-white hover:bg-[#152239]"
             >
               Back

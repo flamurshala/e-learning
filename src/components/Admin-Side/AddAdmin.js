@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import AdminNav from "./AdminNav";
+import BackButton from "../BackButton";
 import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 export default function RegisterAdmin() {
@@ -59,6 +60,7 @@ export default function RegisterAdmin() {
       {/* Main Content */}
       <div className="ml-[22%] mt-10 w-[75%] flex justify-start">
         <div className="bg-white shadow-md border border-black rounded p-6 w-[400px]">
+          <BackButton to="/AllAdmins" className="mb-4" />
           <h2 className="text-2xl font-semibold mb-4">Register Admin/Superadmin/Administrata</h2>
           {success && <p className="text-green-600 mb-4">{success}</p>}
           {error && <p className="text-red-600 mb-4">{error}</p>}

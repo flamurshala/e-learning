@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 
 function StudentProgress() {
   const { studentId } = useParams();
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetch(
@@ -49,9 +47,9 @@ function StudentProgress() {
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-md">
-      <Link to="/admin-dashboard">
+      <Link to="/AllStudents">
         <button
-          onClick={() => navigate(-1)}
+          type="button"
           className="mb-6 inline-flex items-center gap-2 bg-gray-800 hover:bg-gray-900 text-white font-semibold px-5 py-2 rounded-md transition-colors duration-300"
         >
           Back to Dashboard

@@ -122,7 +122,13 @@ function CourseAttendance() {
         <div className="flex mb-2 border-b-2 border-[#c2c2c2] pb-2 items-center justify-between">
           <h1 className="text-2xl font-semibold w-[95%]">Course Attendance</h1>
           <button
-            onClick={() => navigate(-1)}
+            onClick={() =>
+              navigate(
+                isProfessor
+                  ? `/professor/calendar/${courseId}`
+                  : "/AllCourses"
+              )
+            }
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-800"
           >
             ←

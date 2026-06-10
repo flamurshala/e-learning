@@ -106,7 +106,7 @@ function EditCourse() {
         <div className="flex justify-between w-full mb-4">
           <h1 className="text-2xl font-bold">Edit Course</h1>
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/AllCourses")}
             className="bg-[#152259] text-white px-4 py-2 rounded hover:bg-[#152239]"
           >
             ← Back

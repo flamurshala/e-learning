@@ -1,5 +1,6 @@
 import { useState } from "react";
 import AdminNav from "./AdminNav";
+import BackButton from "../BackButton";
 import { useEffect } from "react";
 import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
@@ -37,6 +38,7 @@ function Announcements() {
     <div className="flex">
       <AdminNav />
       <div className="w-[75%] ml-[22%] p-6 bg-white">
+        <BackButton to="/admin/notifications" className="mb-4" />
         <h2 className="text-2xl font-bold border-b-2 border-[#c2c2c2] mb-4">
           Send Announcement
         </h2>
