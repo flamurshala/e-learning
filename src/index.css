@@ -50,10 +50,25 @@ textarea {
 .app-sidebar {
   position: fixed;
   top: 0;
+  bottom: 0;
   left: 0;
   z-index: 50;
   width: 17%;
   height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  min-height: 0;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.app-sidebar-content {
+  flex: 0 0 auto;
+}
+
+.app-sidebar-footer {
+  flex: 0 0 auto;
+  padding-bottom: max(0.25rem, env(safe-area-inset-bottom));
 }
 
 .app-menu-button,
@@ -65,6 +80,8 @@ textarea {
   .app-sidebar {
     box-sizing: content-box;
     height: calc(100vh - 2.5rem);
+    height: calc(100svh - 2.5rem);
+    height: calc(100dvh - 2.5rem);
     overflow-y: hidden !important;
   }
 }
@@ -91,12 +108,24 @@ textarea {
     z-index: 70;
     width: 18rem;
     max-width: 82vw;
+    height: 100vh;
+    height: 100svh;
+    height: 100dvh;
     box-sizing: border-box;
     overflow-y: auto !important;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     padding-top: 5rem !important;
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom)) !important;
     transform: translateX(-105%);
     transition: transform 220ms ease;
     box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
+  }
+
+  .app-sidebar::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   .app-sidebar.app-sidebar-open {
@@ -183,8 +212,22 @@ textarea {
 
   .app-sidebar {
     width: min(18rem, 88vw);
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    align-content: stretch;
     padding-left: 1rem !important;
     padding-right: 1rem !important;
+  }
+
+  .app-sidebar-content,
+  .app-sidebar-footer {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .app-sidebar-footer {
+    margin-top: auto;
   }
 
   [class~="ml-[18%]"],

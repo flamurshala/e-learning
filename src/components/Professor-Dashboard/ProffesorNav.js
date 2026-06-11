@@ -38,7 +38,7 @@ function ProffesorNav() {
           isOpen ? "app-sidebar-open" : ""
         }`}
       >
-      <div className="flex flex-col items-start h-full">
+      <div className="app-sidebar-content flex flex-col items-start">
         <div className="logo w-[65%] mb-[2rem]">
           <img src={img} alt="logo" className="w-full" />
         </div>
@@ -59,7 +59,7 @@ function ProffesorNav() {
           </li>
         </ul>
       </div>
-      <div className="px-4">
+      <div className="app-sidebar-footer px-4">
         <LogOut />
       </div>
       </div>

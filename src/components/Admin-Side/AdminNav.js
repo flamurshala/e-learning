@@ -64,7 +64,7 @@ function AdminNav() {
           isOpen ? "app-sidebar-open" : ""
         }`}
       >
-      <div className="">
+      <div className="app-sidebar-content">
         <div className="container flex justify-center flex-col">
           <div className="logo w-[65%] mb-[2rem]">
             <img src={img} alt="logo w-[100%]" />
@@ -151,7 +151,7 @@ function AdminNav() {
           </ul>
         </div>
       </div>
-      <div className="text-white text-left">
+      <div className="app-sidebar-footer text-white text-left">
         <LogOut />
       </div>
       </div>

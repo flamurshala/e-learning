@@ -39,7 +39,7 @@ export default function StudentNav() {
           isOpen ? "app-sidebar-open" : ""
         }`}
       >
-      <div>
+      <div className="app-sidebar-content">
         <div className="mb-8">
           <img src={img} alt="Logo" className="w-full object-contain" />
         </div>
@@ -62,7 +62,7 @@ export default function StudentNav() {
           </li>
         </ul>
       </div>
-      <div className="flex flex-col items-start">
+      <div className="app-sidebar-footer flex flex-col items-start">
         <div className="flex items-center font-bold gap-3 cursor-pointer hover:text-gray-200">
           <img src={accountIcon} alt="Account" className="w-6" />
           <Link to="/Account" onClick={closeMenu}>Account</Link>
