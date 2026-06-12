@@ -37,7 +37,10 @@ try {
                 NULLIF(GROUP_CONCAT(DISTINCT cp_prof.name ORDER BY cp_prof.name SEPARATOR ', '), ''),
                 p.name
             ) AS professor_name,
-            GROUP_CONCAT(DISTINCT s.name SEPARATOR ', ') AS students
+            GROUP_CONCAT(
+                DISTINCT TRIM(CONCAT_WS(' ', s.name, NULLIF(s.surname, '')))
+                SEPARATOR ', '
+            ) AS students
         FROM courses c
         LEFT JOIN professors p ON c.professor_id = p.id
         LEFT JOIN course_professor cp ON cp.course_id = c.id

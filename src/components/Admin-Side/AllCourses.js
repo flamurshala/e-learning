@@ -22,6 +22,7 @@ function AllCourses() {
   const canForceCompleteCourse = ["admin", "superadmin", "administrator"].includes(
     currentAdmin.role
   );
+  const canDeleteCourse = ["admin", "superadmin"].includes(currentAdmin.role);
 
   useEffect(() => {
     setLoading(true);
@@ -186,7 +187,7 @@ function AllCourses() {
               <th className="p-2 border">Attendance</th>
               <th className="p-2 border">Certificates</th>
               {canForceCompleteCourse && <th className="p-2 border">Complete</th>}
-              <th className="p-2 border">Delete</th>
+              {canDeleteCourse && <th className="p-2 border">Delete</th>}
               <th className="p-2 border">Edit</th>
             </tr>
           </thead>
@@ -260,14 +261,16 @@ function AllCourses() {
                       </button>
                     </td>
                   )}
-                  <td className="p-2">
-                    <button
-                      onClick={() => handleDelete(course.id)}
-                      className="bg-red-600 hover:bg-red-800 text-white px-3 py-1 rounded"
-                    >
-                      Delete
-                    </button>
-                  </td>
+                  {canDeleteCourse && (
+                    <td className="p-2">
+                      <button
+                        onClick={() => handleDelete(course.id)}
+                        className="bg-red-600 hover:bg-red-800 text-white px-3 py-1 rounded"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  )}
                   <td className="p-2">
                     <button
                       onClick={() =>
@@ -283,7 +286,11 @@ function AllCourses() {
             ) : (
               <tr>
                 <td
-                  colSpan={canForceCompleteCourse ? 9 : 8}
+                  colSpan={
+                    7 +
+                    (canForceCompleteCourse ? 1 : 0) +
+                    (canDeleteCourse ? 1 : 0)
+                  }
                   className="text-center p-4 text-gray-500"
                 >
                   No courses found.

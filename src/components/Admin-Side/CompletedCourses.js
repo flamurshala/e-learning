@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminNav from "./AdminNav";
 import { useNavigate } from "react-router-dom";
+import { getCurrentAdminActor } from "../../utils/currentAdmin";
 
 function CompletedCourses() {
   const [courses, setCourses] = useState([]);
@@ -9,7 +10,12 @@ function CompletedCourses() {
   const [selectedProfessor, setSelectedProfessor] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [deletingCourseId, setDeletingCourseId] = useState(null);
   const navigate = useNavigate();
+  const currentAdmin = getCurrentAdminActor();
+  const canDeleteCompletedCourse = ["admin", "superadmin"].includes(
+    currentAdmin.role
+  );
 
   useEffect(() => {
     document.title = "Completed Courses - Tectigon Academy";
@@ -73,6 +79,49 @@ function CompletedCourses() {
     setOpenDropdown((prev) => (prev === courseId ? null : courseId));
   };
 
+  const handleDelete = async (course) => {
+    if (!canDeleteCompletedCourse || deletingCourseId !== null) return;
+
+    const confirmed = window.confirm(
+      `Delete "${course.title}"?\n\nThe course and all payments related to this course will be deleted. This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    setDeletingCourseId(course.id);
+
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/delete_completed_course.php`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            course_id: course.id,
+            actor: currentAdmin,
+          }),
+        }
+      );
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to delete the completed course.");
+      }
+
+      setCourses((currentCourses) =>
+        currentCourses.filter((item) => item.id !== course.id)
+      );
+      setOpenDropdown((currentId) =>
+        currentId === course.id ? null : currentId
+      );
+      alert(data.message || "Course and related payments deleted successfully.");
+    } catch (error) {
+      alert(error.message || "Failed to delete the completed course.");
+    } finally {
+      setDeletingCourseId(null);
+    }
+  };
+
   return (
     <div className="flex gap-4">
       <AdminNav />
@@ -117,6 +166,9 @@ function CompletedCourses() {
               <th className="p-2 border">Students</th>
               <th className="p-2 border">Attendance</th>
               <th className="p-2 border">Certificates</th>
+              {canDeleteCompletedCourse && (
+                <th className="p-2 border">Delete</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -179,11 +231,28 @@ function CompletedCourses() {
                       </button>
                     )}
                   </td>
+                  {canDeleteCompletedCourse && (
+                    <td className="p-2 border text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(course)}
+                        disabled={deletingCourseId !== null}
+                        className="bg-red-600 hover:bg-red-800 disabled:bg-red-300 disabled:cursor-not-allowed text-white px-3 py-1 rounded"
+                      >
+                        {deletingCourseId === course.id
+                          ? "Deleting..."
+                          : "Delete"}
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="text-center p-4 text-gray-500">
+                <td
+                  colSpan={canDeleteCompletedCourse ? 7 : 6}
+                  className="text-center p-4 text-gray-500"
+                >
                   No completed courses found.
                 </td>
               </tr>
